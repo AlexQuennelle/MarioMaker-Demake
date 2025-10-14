@@ -7,15 +7,15 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
-if("${CMAKE_GENERATOR}" STREQUAL "Visual Studio 17 2022")
-    message("Visual Studio Generator")
-else()
-    set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-endif()
+# if("${CMAKE_GENERATOR}" STREQUAL "Visual Studio 17 2022")
+#     message("Visual Studio Generator")
+# else()
+#     set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+# endif()
 add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-O3;-ffast-math>")
 
 # Change this to match the name of the current folder
-project(RaylibKickstart LANGUAGES CXX C VERSION 0.0)
+project(MarioMaker-Demake LANGUAGES CXX C VERSION 0.0)
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
 message("Build type: ${CMAKE_BUILD_TYPE}")
@@ -40,7 +40,7 @@ if (NOT raylib_FOUND)
     endif()
 endif()
 
-set(IMGUI_VERSION 1.92.2)
+set(IMGUI_VERSION 1.92.4)
 find_package(ImGui ${IMGUI_VERSION} QUIET)
 if(NOT ImGui_FOUND)
     include(FetchContent)
