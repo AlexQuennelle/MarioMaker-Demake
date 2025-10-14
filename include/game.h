@@ -5,13 +5,13 @@
 /**
  * Class representing an instance of the program and encapsulating global state.
  */
-class Program
+class Game
 {
 	public:
-	Program();
+	Game();
 
 	/**
-	 * The program's main update loop. Should be called  from a loop in main().
+	 * The game's main update loop. Should be called  from a loop in main().
 	 */
 	void Update();
 

@@ -1,4 +1,4 @@
-#include "program.h"
+#include "game.h"
 
 #include <imgui.h>
 #include <memory>
@@ -8,7 +8,7 @@
 #include <emscripten/emscripten.h>
 #endif
 
-std::unique_ptr<Program> program{nullptr};
+std::unique_ptr<Game> game{nullptr};
 
 void Update();
 
@@ -23,7 +23,7 @@ int main()
 	InitWindow(800, 800, NAME);
 	SetTargetFPS(60);
 	rlImGuiSetup(true);
-	program = std::make_unique<Program>();
+	game = std::make_unique<Game>();
 	while (!WindowShouldClose())
 	{
 		Update();
@@ -36,4 +36,4 @@ int main()
 	return 0;
 }
 
-void Update() { program->Update(); }
+void Update() { game->Update(); }

@@ -1,4 +1,4 @@
-#include "program.h"
+#include "game.h"
 #include "utils.h"
 
 #include <imgui.h>
@@ -6,16 +6,17 @@
 #include <raylib.h>
 #include <rlImGui.h>
 
-Program::Program() : imguiIO(ImGui::GetIO())
+Game::Game() : imguiIO(ImGui::GetIO())
 {
 	SetTextColor(INFO);
-	std::cout << "Initializing program\n";
-	ClearStyles();
+	std::cout << "Initializing...\n";
 
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	std::cout << "Done!\n";
+	ClearStyles();
 }
 
-void Program::Update()
+void Game::Update()
 {
 	BeginDrawing();
 	rlImGuiBegin();
