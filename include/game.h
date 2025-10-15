@@ -1,6 +1,6 @@
 #pragma once
 
-#include "imgui.h"
+#include <imgui.h>
 
 /**
  * Class representing an instance of the program and encapsulating global state.
