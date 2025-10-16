@@ -1,5 +1,7 @@
 #pragma once
 
+#include "level.h"
+
 #include <imgui.h>
 
 /**
@@ -17,4 +19,6 @@ class Game
 
 	private:
 	ImGuiIO& imguiIO;
+
+	Level level;
 };
