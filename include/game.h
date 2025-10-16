@@ -1,4 +1,6 @@
 #pragma once
+#include "player.h"
+#include "playerInputHandler.h"
 
 #include <imgui.h>
 
@@ -16,5 +18,9 @@ class Game
 	void Update();
 
 	private:
+	void Draw();
+
 	ImGuiIO& imguiIO;
+	Player player;
+	PlayerInputHandler inputHandler;
 };
