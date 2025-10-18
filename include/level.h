@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tile.h"
+#include "utils.h"
 
 #include <cstdint>
 #include <vector>
@@ -19,9 +20,11 @@ class Level
 	TileID TileAt(const int x, const int y);
 
 	private:
+	void GenCollisionMap();
+
 	int32_t height;
 	int32_t length;
 	vector<TileID> grid;
+	vector<CollisionRect> colliders;
 	// TODO: Vector of entity
-	// TODO: Collision map
 };

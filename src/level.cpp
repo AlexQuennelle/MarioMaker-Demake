@@ -1,5 +1,6 @@
 #include "level.h"
 #include "tile.h"
+#include <vector>
 
 Level::Level() : height(15), length(100)
 {
@@ -15,6 +16,12 @@ Level::Level() : height(15), length(100)
 				this->SetTileAt(TileID::air, x, y);
 		}
 	}
+}
+
+void Level::GenCollisionMap()
+{
+	std::vector<bool> visited{};
+	visited.resize(this->height * this->length);
 }
 
 void Level::SetTileAt(const TileID tile, const int x, const int y)
