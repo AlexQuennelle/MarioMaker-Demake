@@ -21,6 +21,8 @@ class Level
 
 	private:
 	void GenCollisionMap();
+	CollisionRect GenCollisionRect(const int x, const int y,
+								   vector<bool>& visited);
 
 	int32_t height;
 	int32_t length;
