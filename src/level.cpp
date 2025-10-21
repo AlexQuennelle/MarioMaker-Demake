@@ -3,7 +3,6 @@
 #include "utils.h"
 
 #include <bit>
-#include <cstdint>
 #include <vector>
 
 Level::Level() : height(15), length(100)
@@ -84,28 +83,31 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 }
 void Level::StitchTexture()
 {
-	for (int x{0}; x < this->length; x++)
+	for (int y{0}; y < this->height; y++)
 	{
-		for (int y{0}; y < this->height; y++)
+		for (int x{0}; x < this->length; x++)
 		{
-			MarchSquares(x, y);
+			if (TileAt(x, y) == TileID::ground)
+				MarchSquares(x, y);
 		}
 	}
 }
 byte Level::MarchSquares(const int x, const int y)
 {
 	byte mask{0};
+	int shift{0};
 	for (const int i : {-1, 0, 1})
 	{
 		for (const int j : {-1, 0, 1})
 		{
-			if (i == x && j == y)
+			if (x + i == x && y + j == y)
 				continue;
 
 			auto val{
 				static_cast<byte>(this->TileAt(x + i, y + j) == TileID::ground),
 			};
-			mask |= std::rotl(val, (i * 3) + j);
+			mask |= std::rotl(val, shift);
+			shift++;
 		}
 	}
 
