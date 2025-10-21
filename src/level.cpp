@@ -2,10 +2,14 @@
 #include "tile.h"
 #include "utils.h"
 
+#include <array>
 #include <bit>
+#include <raylib.h>
 #include <vector>
 
-Level::Level() : height(15), length(100)
+Level::Level()
+	: height(15), length(100),
+	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
 {
 	this->grid.resize(this->height * this->length);
 	// HACK: This is temporary to fill in the ground
@@ -20,7 +24,15 @@ Level::Level() : height(15), length(100)
 		}
 	}
 	this->GenCollisionMap();
+
+	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
+	this->tex = LoadTextureFromImage(this->img);
 	this->StitchTexture();
+}
+
+void Level::Draw()
+{
+	DrawTexture(this->tex, 0, 0, WHITE);
 }
 
 void Level::GenCollisionMap()
@@ -83,14 +95,22 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 }
 void Level::StitchTexture()
 {
+	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
 	for (int y{0}; y < this->height; y++)
 	{
 		for (int x{0}; x < this->length; x++)
 		{
 			if (TileAt(x, y) == TileID::ground)
-				MarchSquares(x, y);
+			{
+				byte tileMask{this->MarchSquares(x, y)};
+				std::array<Rectangle, 4> rects{this->GetRects(tileMask)};
+
+				ImageDraw(&this->img, this->sprites, rects[0],
+						  {x * 16.0f, y * 16.0f, 8.0f, 8.0f}, WHITE);
+			}
 		}
 	}
+	UpdateTexture(this->tex, this->img.data);
 }
 byte Level::MarchSquares(const int x, const int y)
 {
@@ -112,6 +132,27 @@ byte Level::MarchSquares(const int x, const int y)
 	}
 
 	return mask;
+}
+const std::array<Rectangle, 4> Level::GetRects(const byte mask)
+{
+	// Top left
+	Rectangle topL;
+	if ((mask & 10) == 0)
+		topL = {.x = 0.0f, .y = 0.0f, .width = 8.0f, .height = 8.0f};
+	else if ((mask & 8) == 0)
+		topL = {.x = 16.0f, .y = 0.0f, .width = 8.0f, .height = 8.0f};
+	else if ((mask & 2) == 0)
+		topL = {.x = 24.0f, .y = 0.0f, .width = 8.0f, .height = 8.0f};
+	else if ((mask & 1) == 0)
+		topL = {.x = 8.0f, .y = 0.0f, .width = 8.0f, .height = 8.0f};
+	else
+		topL = {.x = 32.0f, .y = 0.0f, .width = 8.0f, .height = 8.0f};
+
+	Rectangle topR;
+	Rectangle botL;
+	Rectangle botR;
+
+	return {topL, topR, botL, botR};
 }
 
 void Level::SetTileAt(const TileID tile, const int x, const int y)

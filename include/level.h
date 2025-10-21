@@ -3,7 +3,9 @@
 #include "tile.h"
 #include "utils.h"
 
+#include <array>
 #include <cstdint>
+#include <raylib.h>
 #include <vector>
 
 using std::vector;
@@ -25,10 +27,14 @@ class Level
 								   vector<bool>& visited);
 	void StitchTexture();
 	byte MarchSquares(const int x, const int y);
+	const std::array<Rectangle, 4> GetRects(const byte mask);
 
 	int32_t height;
 	int32_t length;
 	vector<TileID> grid;
 	vector<CollisionRect> colliders;
+	Image img;
+	Image sprites;
+	Texture tex;
 	// TODO: Vector of entity
 };
