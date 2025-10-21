@@ -2,6 +2,8 @@
 #include "player.h"
 #include "playerInputHandler.h"
 
+#include "level.h"
+
 #include <imgui.h>
 
 /**
@@ -23,4 +25,6 @@ class Game
 	ImGuiIO& imguiIO;
 	Player player;
 	PlayerInputHandler inputHandler;
+
+	Level level;
 };
