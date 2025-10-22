@@ -105,7 +105,7 @@ void Level::StitchTexture()
 				byte tileMask{this->MarchSquares(x, y)};
 				array<Rectangle, 4> rects{this->GetRects(tileMask)};
 
-				for (int i{0}; i < 2; i++)
+				for (int i{0}; i < 4; i++)
 				{
 					Rectangle dest{
 						(x * 16.0f) + ((i % 2) * 8.0f),
@@ -221,9 +221,79 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 
 	// Bottom left
 	Rectangle botL;
+	if ((mask & 18) == 0)
+	{
+		botL = {.x = 0.0f, .y = 8.0f, .width = 8.0f, .height = 8.0f};
+	}
+	else if ((mask & 16) == 0)
+	{
+		botL = {
+			.x = 16.0f,
+			.y = static_cast<float>((std::rand() % 2) * 8),
+			.width = 8.0f,
+			.height = 8.0f,
+		};
+	}
+	else if ((mask & 2) == 0)
+	{
+		botL = {
+			.x = 24.0f,
+			.y = static_cast<float>((std::rand() % 2) * 8) + 16.0f,
+			.width = 8.0f,
+			.height = 8.0f,
+		};
+	}
+	else if ((mask & 4) == 0)
+	{
+		botL = {.x = 8.0f, .y = 8.0f, .width = 8.0f, .height = 8.0f};
+	}
+	else
+	{
+		botL = {
+			.x = 32.0f,
+			.y = static_cast<float>((std::rand() % 4) * 8),
+			.width = 8.0f,
+			.height = 8.0f,
+		};
+	}
 
 	// Bottom right
 	Rectangle botR;
+	if ((mask & 80) == 0)
+	{
+		botR = {.x = 0.0f, .y = 8.0f, .width = 8.0f, .height = 8.0f};
+	}
+	else if ((mask & 16) == 0)
+	{
+		botR = {
+			.x = 16.0f,
+			.y = static_cast<float>((std::rand() % 2) * 8),
+			.width = 8.0f,
+			.height = 8.0f,
+		};
+	}
+	else if ((mask & 64) == 0)
+	{
+		botR = {
+			.x = 24.0f,
+			.y = static_cast<float>((std::rand() % 2) * 8) + 16.0f,
+			.width = 8.0f,
+			.height = 8.0f,
+		};
+	}
+	else if ((mask & 128) == 0)
+	{
+		botR = {.x = 8.0f, .y = 8.0f, .width = 8.0f, .height = 8.0f};
+	}
+	else
+	{
+		botR = {
+			.x = 32.0f,
+			.y = static_cast<float>((std::rand() % 4) * 8),
+			.width = 8.0f,
+			.height = 8.0f,
+		};
+	}
 
 	return {topL, topR, botL, botR};
 }
