@@ -8,6 +8,7 @@
 #include <raylib.h>
 #include <vector>
 
+using std::array;
 using std::vector;
 
 class Level
@@ -27,7 +28,7 @@ class Level
 								   vector<bool>& visited);
 	void StitchTexture();
 	byte MarchSquares(const int x, const int y);
-	const std::array<Rectangle, 4> GetRects(const byte mask);
+	static array<Rectangle, 4> GetRects(const byte mask);
 
 	int32_t height;
 	int32_t length;

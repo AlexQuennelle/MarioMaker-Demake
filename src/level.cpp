@@ -4,6 +4,8 @@
 
 #include <array>
 #include <bit>
+#include <cstdlib>
+#include <ctime>
 #include <raylib.h>
 #include <vector>
 
@@ -11,6 +13,7 @@ Level::Level()
 	: height(15), length(100),
 	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
 {
+	std::srand(std::time({}));
 	this->grid.resize(this->height * this->length);
 	// HACK: This is temporary to fill in the ground
 	for (int x{0}; x < this->length; x++)
@@ -30,10 +33,7 @@ Level::Level()
 	this->StitchTexture();
 }
 
-void Level::Draw()
-{
-	DrawTexture(this->tex, 0, 0, WHITE);
-}
+void Level::Draw() { DrawTexture(this->tex, 0, 0, WHITE); }
 
 void Level::GenCollisionMap()
 {
@@ -103,10 +103,18 @@ void Level::StitchTexture()
 			if (TileAt(x, y) == TileID::ground)
 			{
 				byte tileMask{this->MarchSquares(x, y)};
-				std::array<Rectangle, 4> rects{this->GetRects(tileMask)};
+				array<Rectangle, 4> rects{this->GetRects(tileMask)};
 
-				ImageDraw(&this->img, this->sprites, rects[0],
-						  {x * 16.0f, y * 16.0f, 8.0f, 8.0f}, WHITE);
+				for (int i{0}; i < 2; i++)
+				{
+					Rectangle dest{
+						(x * 16.0f) + ((i % 2) * 8.0f),
+						(y * 16.0f) + ((i / 2) * 8.0f),
+						8.0f,
+						8.0f,
+					};
+					ImageDraw(&this->img, this->sprites, rects[i], dest, WHITE);
+				}
 			}
 		}
 	}
@@ -133,23 +141,88 @@ byte Level::MarchSquares(const int x, const int y)
 
 	return mask;
 }
-const std::array<Rectangle, 4> Level::GetRects(const byte mask)
+array<Rectangle, 4> Level::GetRects(const byte mask)
 {
 	// Top left
 	Rectangle topL;
 	if ((mask & 10) == 0)
+	{
 		topL = {.x = 0.0f, .y = 0.0f, .width = 8.0f, .height = 8.0f};
+	}
 	else if ((mask & 8) == 0)
-		topL = {.x = 16.0f, .y = 0.0f, .width = 8.0f, .height = 8.0f};
+	{
+		topL = {
+			.x = 16.0f,
+			.y = static_cast<float>((std::rand() % 2) * 8),
+			.width = 8.0f,
+			.height = 8.0f,
+		};
+	}
 	else if ((mask & 2) == 0)
-		topL = {.x = 24.0f, .y = 0.0f, .width = 8.0f, .height = 8.0f};
+	{
+		topL = {
+			.x = 24.0f,
+			.y = static_cast<float>((std::rand() % 2) * 8),
+			.width = 8.0f,
+			.height = 8.0f,
+		};
+	}
 	else if ((mask & 1) == 0)
+	{
 		topL = {.x = 8.0f, .y = 0.0f, .width = 8.0f, .height = 8.0f};
+	}
 	else
-		topL = {.x = 32.0f, .y = 0.0f, .width = 8.0f, .height = 8.0f};
+	{
+		topL = {
+			.x = 32.0f,
+			.y = static_cast<float>((std::rand() % 4) * 8),
+			.width = 8.0f,
+			.height = 8.0f,
+		};
+	}
 
+	// Top right
 	Rectangle topR;
+	if ((mask & 72) == 0)
+	{
+		topR = {.x = 0.0f, .y = 8.0f, .width = 8.0f, .height = 8.0f};
+	}
+	else if ((mask & 8) == 0)
+	{
+		topR = {
+			.x = 16.0f,
+			.y = static_cast<float>((std::rand() % 2) * 8),
+			.width = 8.0f,
+			.height = 8.0f,
+		};
+	}
+	else if ((mask & 64) == 0)
+	{
+		topR = {
+			.x = 24.0f,
+			.y = static_cast<float>((std::rand() % 2) * 8) + 16.0f,
+			.width = 8.0f,
+			.height = 8.0f,
+		};
+	}
+	else if ((mask & 32) == 0)
+	{
+		topR = {.x = 8.0f, .y = 8.0f, .width = 8.0f, .height = 8.0f};
+	}
+	else
+	{
+		topR = {
+			.x = 32.0f,
+			.y = static_cast<float>((std::rand() % 4) * 8),
+			.width = 8.0f,
+			.height = 8.0f,
+		};
+	}
+
+	// Bottom left
 	Rectangle botL;
+
+	// Bottom right
 	Rectangle botR;
 
 	return {topL, topR, botL, botR};
