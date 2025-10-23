@@ -29,6 +29,7 @@ class Player
 	bool running;
 	bool jumpPressed;
 	bool cancelJump;
+	bool canJump;
 	Vector2 lastInput;
 	Level& level;
 

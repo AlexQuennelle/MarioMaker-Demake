@@ -1,14 +1,15 @@
 #include "player.h"
 #include "utils.h"
 
-Player::Player(Level& level) :
-	// physics/movement parameters
+Player::Player(Level& level)
+	: // physics/movement parameters
 	  position({0, 0}), acceleration({0, 0}), velocity({0, 0}),
 	  maxWalkSpeed(0.1f), maxRunSpeed(0.2f), baseAcceleration(0.5f),
 	  runAccelerationMult(2.5f), groundFrictionFactor(0.9f), jumpForce(0.3f),
-	  maxTimeJumping(0.15f),
-	// input
+	  maxTimeJumping(0.15f), timeJumping(0),
+	  // input
 	  running(false), lastInput({0, 0}), jumpPressed(false), cancelJump(false),
+	  canJump(true),
 	// references
 	  level(level)
 {
@@ -35,7 +36,7 @@ void Player::Update()
 		velocity.x = Clamp(velocity.x, -maxWalkSpeed, maxWalkSpeed);
 	}
 
-	if (jumpPressed)
+	if (jumpPressed && canJump)
 	{
 		if (Grounded())
 		{
@@ -48,6 +49,18 @@ void Player::Update()
 			velocity.y = -jumpForce;
 			timeJumping += GetFrameTime();
 		}
+		else
+		{
+			canJump = false;
+		}
+	}
+	else if (!Grounded())
+	{
+		canJump = false;
+	}
+	else if (!jumpPressed)
+	{
+		canJump = true;
 	}
 
 	position = Vector2Add(position, velocity);
