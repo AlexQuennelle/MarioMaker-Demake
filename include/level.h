@@ -95,7 +95,6 @@ class Level
 
 	int32_t height;
 	int32_t length;
-	Vector2 playerStart;
 	vector<TileID> grid;
 	vector<CollisionRect> colliders;
 	Image img;
