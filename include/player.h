@@ -8,7 +8,7 @@ class Player
 	public:
 	Player(Level&);
 	void HandleMovement(const bool, const Vector2);
-	void HandleJump();
+	void HandleJump(const bool);
 	void Update();
 	void Draw();
 	void Reset(const Vector2 startPosition);
@@ -23,7 +23,12 @@ class Player
 	float baseAcceleration;
 	float runAccelerationMult;
 	float groundFrictionFactor;
+	float jumpForce;
+	float maxTimeJumping;
+	float timeJumping;
 	bool running;
+	bool jumpPressed;
+	bool cancelJump;
 	Vector2 lastInput;
 	Level& level;
 

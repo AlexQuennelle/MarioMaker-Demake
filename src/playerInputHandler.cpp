@@ -30,4 +30,8 @@ void PlayerInputHandler::Update()
 	}
 
 	player.HandleMovement(running, input);
+
+	bool jump{IsKeyDown(KEY_SPACE)};
+
+	player.HandleJump(jump);
 }

@@ -2,12 +2,13 @@
 #include "utils.h"
 
 Player::Player(Level& level) :
-	// physics
+	// physics/movement parameters
 	  position({0, 0}), acceleration({0, 0}), velocity({0, 0}),
-	  maxWalkSpeed(0.4f), maxRunSpeed(1.2f),
-	  baseAcceleration(0.5f), runAccelerationMult(2.5f), groundFrictionFactor(0.9f),
+	  maxWalkSpeed(0.1f), maxRunSpeed(0.2f), baseAcceleration(0.5f),
+	  runAccelerationMult(2.5f), groundFrictionFactor(0.9f), jumpForce(0.3f),
+	  maxTimeJumping(0.15f),
 	// input
-	  running(false), lastInput({0,0}),
+	  running(false), lastInput({0, 0}), jumpPressed(false), cancelJump(false),
 	// references
 	  level(level)
 {
@@ -34,6 +35,21 @@ void Player::Update()
 		velocity.x = Clamp(velocity.x, -maxWalkSpeed, maxWalkSpeed);
 	}
 
+	if (jumpPressed)
+	{
+		if (Grounded())
+		{
+			velocity.y = -jumpForce;
+			timeJumping = 0;
+			cancelJump = false;
+		}
+		else if (timeJumping < maxTimeJumping && !cancelJump)
+		{
+			velocity.y = -jumpForce;
+			timeJumping += GetFrameTime();
+		}
+	}
+
 	position = Vector2Add(position, velocity);
 
 	if (Grounded())
@@ -51,6 +67,7 @@ void Player::CheckCollisions() {
 	{
 		Rectangle playerCol{GetCollisionRect()};
 
+		// remove after refactor
 		Rectangle levelRect { 
 			.x = col.position.x,
 			.y = col.position.y,
@@ -83,10 +100,13 @@ void Player::CheckCollisions() {
 			if (minDistX < minDistY)
 			{
 				this->position.x += copysignf(minDistX, delta.x);
+				this->velocity.x = 0;
 			}
 			else
 			{
+				this->cancelJump = (delta.y < 0);
 				this->position.y += copysignf(minDistY, delta.y);
+				this->velocity.y = 0;
 			}
 		}
 	}
@@ -113,15 +133,37 @@ void Player::HandleMovement(const bool running, const Vector2 input) {
 	this->lastInput = input;
 }
 
-void Player::HandleJump() {
-
-}
+void Player::HandleJump(const bool jump) { this->jumpPressed = jump; }
 
 void Player::Reset(const Vector2 startPosition) {
 	this->position = startPosition;
 }
 
-bool Player::Grounded() { return true; }
+bool Player::Grounded() 
+{ 
+	Rectangle groundedBox
+	{
+		.x = this->position.x - 0.5f, 
+		.y = this->position.y, 
+		.width = 1.0f,
+		.height = 0.1f
+	};
+
+	for (const CollisionRect col : level.GetColliders())
+	{
+		// remove after refactor
+		Rectangle levelRect{.x = col.position.x,
+							.y = col.position.y,
+							.width = col.size.x,
+							.height = col.size.y};
+
+		if (CheckCollisionRecs(levelRect, groundedBox))
+		{
+			return true;
+		}	
+	}
+	return false;
+}
 
 void Player::AddForce(const Vector2 force)
 {
