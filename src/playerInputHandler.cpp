@@ -10,12 +10,24 @@ void PlayerInputHandler::Update()
 { 
 	bool running{IsKeyDown(KEY_LEFT_SHIFT)};
 
-	if (IsKeyDown(KEY_RIGHT || KEY_D))
+	Vector2 input{0, 0};
+
+	if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D))
 	{
-		player.HandleMovement(running, 1.0f);
+		input.x += 1.0f;
 	}
-	if (IsKeyDown(KEY_LEFT || KEY_A))
+	if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A))
 	{
-		player.HandleMovement(running, -1.0f);
+		input.x -= 1.0f;
 	}
+	if (IsKeyDown(KEY_UP) || IsKeyDown(KEY_W))
+	{
+		input.y += 1.0f;
+	}
+	if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S))
+	{
+		input.y -= 1.0f;
+	}
+
+	player.HandleMovement(running, input);
 }

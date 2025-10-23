@@ -43,7 +43,7 @@ class Level
 	TileID TileAt(const int x, const int y);
 
 	// read only public version of player start pos (is this the correct way to do something like this?)
-	const Vector2& PlayerStartPos() const { return playerStartPos; }
+	const Vector2 PlayerStartPos() const { return playerStartPos; }
 
 	private:
 	/**
