@@ -8,7 +8,7 @@
 
 Game::Game()
 	: imguiIO(ImGui::GetIO()), level(), player(level), inputHandler(player),
-	  gravity(0.9f), renderTex(LoadRenderTexture(384, 224))
+	  gravity(1.5f), renderTex(LoadRenderTexture(384, 224))
 {
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
