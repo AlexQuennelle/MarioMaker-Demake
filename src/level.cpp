@@ -2,15 +2,16 @@
 #include "tile.h"
 #include "utils.h"
 
-#include <array>
 #include <bit>
 #include <cstdlib>
 #include <ctime>
+#include <iostream>
 #include <raylib.h>
 #include <vector>
 
 Level::Level()
 	: height(15), length(100),
+	  // FIX: This should be moved to a resource manager
 	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
 {
 	std::srand(std::time({}));
@@ -124,6 +125,15 @@ byte Level::MarchSquares(const int x, const int y)
 {
 	byte mask{0};
 	int shift{0};
+	/* Bit encoding pattern:
+	 * 1 4 6
+	 * 2 x 7
+	 * 3 5 8
+	 *
+	 * ==
+	 *
+	 * 87654321
+	 */
 	for (const int i : {-1, 0, 1})
 	{
 		for (const int j : {-1, 0, 1})
@@ -300,7 +310,16 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 
 void Level::SetTileAt(const TileID tile, const int x, const int y)
 {
-	grid[(x * this->height) + y] = tile;
+	if (x >= 0 && x <= this->length - 1 && y >= 0 && y <= this->height - 1)
+		grid[(x * this->height) + y] = tile;
+#ifndef NDEBUG
+	else
+	{
+		SetTextColor(WARNING);
+		std::cout << "WARNING: Attempted to set tile out of bounds";
+		ClearStyles();
+	}
+#endif // !NDEBUG
 }
 TileID Level::TileAt(const int x, const int y)
 {

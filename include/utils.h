@@ -6,6 +6,7 @@
 #include <string>
 
 static constexpr Color ERROR{220, 0, 0, 0};
+static constexpr Color WARNING{230, 150, 0, 0};
 static constexpr Color SUCCESS{0, 220, 0, 0};
 static constexpr Color INFO{200, 200, 100, 0};
 
