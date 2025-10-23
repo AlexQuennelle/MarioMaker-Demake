@@ -71,15 +71,6 @@ void Game::Draw()
 	EndDrawing();
 }
 
-void Game::Draw() {
-	// Draw loop start
-	ClearBackground({100, 149, 237, 255});
-
-	level.Draw();
-
-	player.Draw();
-}
-
 void Game::Reset()
 {
 	level.Reset();
