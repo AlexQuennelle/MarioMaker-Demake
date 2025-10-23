@@ -22,6 +22,8 @@ class Game
 	private:
 	void Draw();
 
+	void Reset();
+
 	ImGuiIO& imguiIO;
 	Player player;
 	PlayerInputHandler inputHandler;

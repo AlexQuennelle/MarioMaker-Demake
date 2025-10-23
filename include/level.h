@@ -42,6 +42,9 @@ class Level
 	 */
 	TileID TileAt(const int x, const int y);
 
+	// read only public version of player start pos (is this the correct way to do something like this?)
+	const Vector2& PlayerStartPos() const { return playerStartPos; }
+
 	private:
 	/**
 	 * @brief Populates the colliders vector with collision rectangles. These
@@ -100,4 +103,7 @@ class Level
 	Image sprites;
 	Texture tex;
 	// TODO: Vector of entity
+
+	// location to spawn player and reset them to
+	Vector2 playerStartPos;
 };

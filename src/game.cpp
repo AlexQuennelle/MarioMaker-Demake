@@ -6,7 +6,7 @@
 #include <raylib.h>
 #include <rlImGui.h>
 
-Game::Game() : imguiIO(ImGui::GetIO()), player(), inputHandler(player)
+Game::Game() : imguiIO(ImGui::GetIO()), level(), player(), inputHandler(player)
 {
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
@@ -14,6 +14,8 @@ Game::Game() : imguiIO(ImGui::GetIO()), player(), inputHandler(player)
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";
 	ClearStyles();
+
+	player.Reset(level.PlayerStartPos());
 }
 
 void Game::Update()
@@ -37,19 +39,13 @@ void Game::Draw() {
 	// Draw loop start
 	ClearBackground({100, 149, 237, 255});
 
+	level.Draw();
+
 	player.Draw();
+}
 
-	// :glorpgetswhatitdeserves:
-	// The internal draw loops for Raylib and ImGui starts before the user
-	// defined draw loop to allow for debug visualizations.
-
-	// ImGui demo
-	//bool open = true;
-	//ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings |
-	//					   ImGuiWindowFlags_AlwaysAutoResize};
-	//if (ImGui::Begin("ImGui Window", &open, flags))
-	//{
-	//	ImGui::Text("Text.");
-	//}
-	//ImGui::End();
+void Game::Reset()
+{
+	level.Reset();
+	player.Reset(level.PlayerStartPos());
 }

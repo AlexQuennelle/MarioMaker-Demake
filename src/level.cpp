@@ -10,7 +10,7 @@
 #include <vector>
 
 Level::Level()
-	: height(15), length(100),
+	: height(15), length(100), playerStartPos({5,-10}),
 	  // FIX: This should be moved to a resource manager
 	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
 {
@@ -331,4 +331,8 @@ TileID Level::TileAt(const int x, const int y)
 	{
 		return TileID::ground;
 	}
+}
+
+void Level::Reset() {
+
 }

@@ -10,6 +10,7 @@ class Player
 	void HandleJump();
 	void Update();
 	void Draw();
+	void Reset(const Vector2& startPosition);
 
 	private:
 	Vector2 position;
