@@ -29,4 +29,6 @@ class Game
 	PlayerInputHandler inputHandler;
 
 	Level level;
+
+	float gravity;
 };

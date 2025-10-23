@@ -6,7 +6,9 @@
 #include <raylib.h>
 #include <rlImGui.h>
 
-Game::Game() : imguiIO(ImGui::GetIO()), level(), player(), inputHandler(player)
+Game::Game()
+	: imguiIO(ImGui::GetIO()), level(), player(level), inputHandler(player),
+	  gravity(0.1f)
 {
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
@@ -15,7 +17,7 @@ Game::Game() : imguiIO(ImGui::GetIO()), level(), player(), inputHandler(player)
 	std::cout << "Done!\n";
 	ClearStyles();
 
-	player.Reset(level.PlayerStartPos());
+	player.Reset(level.GetPlayerStartPos());
 }
 
 void Game::Update()
@@ -26,6 +28,8 @@ void Game::Update()
 	// call update on everything
 	// input gets polled first :craigthumb:
 	inputHandler.Update();
+
+	player.AddForce({0, gravity * GetFrameTime()});
 	player.Update();
 
 	// draw everything
@@ -47,5 +51,5 @@ void Game::Draw() {
 void Game::Reset()
 {
 	level.Reset();
-	player.Reset(level.PlayerStartPos());
+	player.Reset(level.GetPlayerStartPos());
 }
