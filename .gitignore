@@ -15,6 +15,9 @@
 *.sln.docstates
 *.env
 
+# Clion files
+.idea/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
