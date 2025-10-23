@@ -10,7 +10,7 @@
 #include <vector>
 
 Level::Level()
-	: height(15), length(100), playerStart(4,8),
+	: height(15), length(100),
 	  // FIX: This should be moved to a resource manager
 	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
 {
