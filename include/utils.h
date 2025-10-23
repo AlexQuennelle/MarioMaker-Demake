@@ -1,12 +1,16 @@
 #pragma once
 
+#include <cstdint>
 #include <iostream>
 #include <raylib.h>
 #include <string>
 
 static constexpr Color ERROR{220, 0, 0, 0};
+static constexpr Color WARNING{230, 150, 0, 0};
 static constexpr Color SUCCESS{0, 220, 0, 0};
 static constexpr Color INFO{200, 200, 100, 0};
+
+using byte = uint8_t;
 
 /** Resets all terminal styles and colours. */
 inline void ClearStyles() { std::cout << "\033[0m"; }
@@ -20,3 +24,9 @@ inline void SetTextColor(Color col)
 	std::cout << "\033[38;2;" << std::to_string(col.r) << ';'
 			  << std::to_string(col.g) << ';' << std::to_string(col.b) << 'm';
 }
+
+struct CollisionRect
+{
+	Vector2 position;
+	Vector2 size;
+};

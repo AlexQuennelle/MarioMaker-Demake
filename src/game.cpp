@@ -27,6 +27,8 @@ void Game::Update()
 	// Draw loop start
 	ClearBackground({100, 149, 237, 255});
 
+	this->level.Draw();
+
 	// ImGui demo
 	bool open = true;
 	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings |
