@@ -18,8 +18,7 @@ class Level
 
 	void Draw();
 	/**
-	 * @brief Rebuilds the level from the tile grid. This respawns all entities
-	 *        and puts the player back at the start.
+	 * @brief Rebuilds the level from the tile grid. This respawns all entities.
 	 */
 	void Reset();
 
@@ -58,6 +57,8 @@ class Level
 	 *        much to the left and down as it can without encountering a cell
 	 *        that has already been visited or that isn't ground.
 	 * @note This is called by @link GenCollisionMap @endlink
+	 *
+	 * @note The visited parameter is mutated to reflect any newly visited cells
 	 *
 	 * @param x Starting x position for the output rectangle.
 	 * @param y Starting y position for the output rectangle.

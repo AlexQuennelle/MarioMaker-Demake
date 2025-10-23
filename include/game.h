@@ -5,6 +5,7 @@
 #include "level.h"
 
 #include <imgui.h>
+#include <raylib.h>
 
 /**
  * Class representing an instance of the program and encapsulating global state.
@@ -27,6 +28,7 @@ class Game
 	ImGuiIO& imguiIO;
 	Player player;
 	PlayerInputHandler inputHandler;
+	RenderTexture2D renderTex;
 
 	Level level;
 

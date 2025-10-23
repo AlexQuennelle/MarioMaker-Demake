@@ -16,11 +16,11 @@ int main()
 {
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
 #if defined(PLATFORM_WEB)
-	InitWindow(400, 400, NAME);
+	InitWindow(800, 450, NAME);
 	rlImGuiSetup(true);
 	emscripten_set_main_loop(Update, 0, 1);
 #else
-	InitWindow(800, 800, NAME);
+	InitWindow(1600, 900, NAME);
 	SetTargetFPS(60);
 	rlImGuiSetup(true);
 	game = std::make_unique<Game>();

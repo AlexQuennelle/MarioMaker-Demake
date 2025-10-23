@@ -8,7 +8,7 @@
 
 Game::Game()
 	: imguiIO(ImGui::GetIO()), level(), player(level), inputHandler(player),
-	  gravity(0.9f)
+	  gravity(0.9f), renderTex(LoadRenderTexture(384, 224))
 {
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
@@ -22,9 +22,8 @@ Game::Game()
 
 void Game::Update()
 {
-	BeginDrawing();
-	rlImGuiBegin();
-
+	BeginTextureMode(this->renderTex);
+	this->Draw();
 	// call update on everything
 	// input gets polled first :craigthumb:
 	inputHandler.Update();
@@ -34,6 +33,39 @@ void Game::Update()
 
 	// draw everything
 	Draw();
+}
+
+void Game::Draw()
+{
+	ClearBackground({100, 149, 237, 255});
+
+	this->level.Draw();
+
+	this->player.Draw();
+
+	EndTextureMode();
+
+	BeginDrawing();
+	rlImGuiBegin();
+
+	// Draw scaled up render texture
+	DrawTexturePro(this->renderTex.texture,
+				   {0.0f, 0.0f,
+					static_cast<float>(this->renderTex.texture.width),
+					-static_cast<float>(this->renderTex.texture.height)},
+				   {0.0f, 0.0f, -static_cast<float>(GetScreenWidth()),
+					static_cast<float>(GetScreenHeight())},
+				   {0.0f}, 0.0f, WHITE);
+
+	// ImGui demo
+	bool open = true;
+	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings |
+						   ImGuiWindowFlags_AlwaysAutoResize};
+	if (ImGui::Begin("ImGui Window", &open, flags))
+	{
+		ImGui::Text("Text.");
+	}
+	ImGui::End();
 
 	rlImGuiEnd();
 	EndDrawing();
