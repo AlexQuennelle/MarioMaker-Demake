@@ -1,17 +1,7 @@
 #include "player.h"
 #include "utils.h"
 
-Player::Player(Level& level)
-	: // physics/movement parameters
-	  position({0, 0}), acceleration({0, 0}), velocity({0, 0}),
-	  maxWalkSpeed(0.1f), maxRunSpeed(0.2f), baseAcceleration(0.5f),
-	  runAccelerationMult(2.5f), groundFrictionFactor(0.9f), jumpForce(0.3f),
-	  maxTimeJumping(0.15f), timeJumping(0),
-	  // input
-	  running(false), lastInput({0, 0}), jumpPressed(false), cancelJump(false),
-	  canJump(true),
-	// references
-	  level(level)
+Player::Player(Level& level) : level(level)
 {
 
 }
