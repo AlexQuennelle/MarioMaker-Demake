@@ -41,6 +41,10 @@ class Level
 	 */
 	TileID TileAt(const int x, const int y);
 
+	// getters
+	const Vector2 GetPlayerStartPos() const { return playerStartPos; }
+	const vector<CollisionRect>& GetColliders() const { return colliders; }
+
 	private:
 	/**
 	 * @brief Populates the colliders vector with collision rectangles. These
@@ -101,4 +105,7 @@ class Level
 	Image sprites;
 	Texture tex;
 	// TODO: Vector of entity
+
+	// location to spawn player and reset them to
+	Vector2 playerStartPos;
 };

@@ -1,4 +1,6 @@
 #pragma once
+#include "player.h"
+#include "playerInputHandler.h"
 
 #include "level.h"
 
@@ -24,7 +26,11 @@ class Game
 	void Reset();
 
 	ImGuiIO& imguiIO;
+	Player player;
+	PlayerInputHandler inputHandler;
 	RenderTexture2D renderTex;
 
 	Level level;
+
+	float gravity;
 };

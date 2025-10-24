@@ -6,7 +6,9 @@
 #include <raylib.h>
 #include <rlImGui.h>
 
-Game::Game() : imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 224))
+Game::Game()
+	: imguiIO(ImGui::GetIO()), level(), player(level), inputHandler(player),
+	  gravity(1.5f), renderTex(LoadRenderTexture(384, 224))
 {
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
@@ -14,12 +16,23 @@ Game::Game() : imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 224))
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";
 	ClearStyles();
+
+	player.Reset(level.GetPlayerStartPos());
 }
 
 void Game::Update()
 {
 	BeginTextureMode(this->renderTex);
 	this->Draw();
+	// call update on everything
+	// input gets polled first :craigthumb:
+	inputHandler.Update();
+
+	player.AddForce({0, gravity * GetFrameTime()});
+	player.Update();
+
+	// draw everything
+	Draw();
 }
 
 void Game::Draw()
@@ -27,6 +40,8 @@ void Game::Draw()
 	ClearBackground({100, 149, 237, 255});
 
 	this->level.Draw();
+
+	this->player.Draw();
 
 	EndTextureMode();
 
@@ -56,4 +71,8 @@ void Game::Draw()
 	EndDrawing();
 }
 
-void Game::Reset() { level.Reset(); }
+void Game::Reset()
+{
+	level.Reset();
+	player.Reset(level.GetPlayerStartPos());
+}
