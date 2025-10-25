@@ -6,6 +6,7 @@
 #include <array>
 #include <cstdint>
 #include <raylib.h>
+#include <string>
 #include <vector>
 
 using std::array;
@@ -15,6 +16,9 @@ class Level
 {
 	public:
 	Level();
+	~Level();
+
+	[[nodiscard]] vector<byte> Serialize() const;
 
 	void Draw();
 	/**
@@ -42,7 +46,7 @@ class Level
 	TileID TileAt(const int x, const int y);
 
 	// getters
-	const Vector2 GetPlayerStartPos() const { return playerStartPos; }
+	Vector2 GetPlayerStartPos() const { return playerStartPos; }
 	const vector<CollisionRect>& GetColliders() const { return colliders; }
 
 	private:
@@ -96,16 +100,17 @@ class Level
 	 *          @link sprites @endlink into @link img @endlink
 	 */
 	static array<Rectangle, 4> GetRects(const byte mask);
+	template <typename T>
+	static inline void InsertAsBytes(vector<byte>& vec, T data);
 
 	int32_t height;
 	int32_t length;
-	vector<TileID> grid;
-	vector<CollisionRect> colliders;
 	Image img;
 	Image sprites;
 	Texture tex;
-	// TODO: Vector of entity
-
-	// location to spawn player and reset them to
+	std::string name;
 	Vector2 playerStartPos;
+	vector<TileID> grid;
+	vector<CollisionRect> colliders;
+	// TODO: Vector of entity
 };

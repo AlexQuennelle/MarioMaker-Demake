@@ -2,15 +2,17 @@
 #include "tile.h"
 #include "utils.h"
 
+#include <array>
 #include <bit>
 #include <cstdlib>
+#include <cstring>
 #include <ctime>
 #include <iostream>
 #include <raylib.h>
 #include <vector>
 
 Level::Level()
-	: height(15), length(100), playerStartPos({5,0}),
+	: height(15), length(100), playerStartPos({.x = 5, .y = 0}),
 	  // FIX: This should be moved to a resource manager
 	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
 {
@@ -32,6 +34,31 @@ Level::Level()
 	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
 	this->tex = LoadTextureFromImage(this->img);
 	this->StitchTexture();
+}
+Level::~Level()
+{
+	UnloadImage(this->img);
+	UnloadImage(this->sprites); // NOTE: Remove when asset manager is merged.
+	UnloadTexture(this->tex);
+}
+
+vector<byte> Level::Serialize() const
+{
+	std::array<byte, 4> intBuffer{};
+	vector<byte> bytes{'L', 'V', 'L'};
+
+	InsertAsBytes(bytes, this->length);
+
+	return bytes;
+}
+template <typename T> void Level::InsertAsBytes(vector<byte>& vec, T data)
+{
+	std::array<byte, sizeof(data)> buffer{};
+	std::memcpy(&buffer, &data, sizeof(data));
+	for (auto byte : buffer)
+	{
+		vec.push_back(byte);
+	}
 }
 
 void Level::Draw() { DrawTexture(this->tex, 0, 0, WHITE); }
@@ -333,6 +360,4 @@ TileID Level::TileAt(const int x, const int y)
 	}
 }
 
-void Level::Reset() {
-
-}
+void Level::Reset() {}
