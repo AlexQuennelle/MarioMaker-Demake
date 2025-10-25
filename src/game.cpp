@@ -89,39 +89,46 @@ void Game::Reset()
 
 void Game::SaveLevel()
 {
-	NFD::Guard nfdGuard;
-	NFD::UniquePath outPath;
-	nfdresult_t result{
-		NFD::SaveDialog(outPath, nullptr, 0, RESOURCES_PATH, "MyLevel.lvl")};
-	if (result == NFD_OKAY)
+	std::ofstream outFile;
+	if (this->level.HasFilepath())
 	{
-		std::cout << outPath.get() << '\n';
-		std::ofstream outFile{
-			outPath.get(),
-			std::ios::out | std::ios::binary,
-		};
-
-		if (outFile.is_open())
+		outFile = std::ofstream(this->level.GetFilepath(),
+								std::ios::out | std::ios::binary);
+	}
+	else
+	{
+		NFD::Guard nfdGuard;
+		NFD::UniquePath outPath;
+		nfdresult_t result{NFD::SaveDialog(outPath, nullptr, 0, RESOURCES_PATH,
+										   "MyLevel.lvl")};
+		if (result == NFD_OKAY)
 		{
-			const vector<byte> data{this->level.Serialize()};
-
-			outFile.write(reinterpret_cast<const char*>(data.data()),
-						  data.size());
-
-			outFile.close();
+			this->level.SetFilepath(outPath.get());
+			outFile =
+				std::ofstream(outPath.get(), std::ios::out | std::ios::binary);
 		}
-		else
+		else if (result == NFD_ERROR)
 		{
-			SetTextColor(ERROR);
-			std::cout << "ERROR: could not open " << outPath.get() << '\n';
+			std::cout << NFD_GetError() << '\n';
+		}
+		else if (result == NFD_CANCEL)
+		{
+			std::cout << "Save cancelled.\n";
 		}
 	}
-	else if (result == NFD_ERROR)
+
+	if (outFile.is_open())
 	{
-		std::cout << NFD_GetError() << '\n';
+		const vector<byte> data{this->level.Serialize()};
+
+		outFile.write(reinterpret_cast<const char*>(data.data()), data.size());
+
+		outFile.close();
 	}
-	else if (result == NFD_CANCEL)
+	else
 	{
-		std::cout << "Save cancelled.\n";
+		SetTextColor(ERROR);
+		std::cout << "ERROR: could not open file." << '\n';
+		ClearStyles();
 	}
 }

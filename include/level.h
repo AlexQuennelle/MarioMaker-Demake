@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <raylib.h>
 #include <string>
+#include <string_view>
 #include <vector>
 
 using std::array;
@@ -48,7 +49,9 @@ class Level
 	// getters
 	Vector2 GetPlayerStartPos() const { return playerStartPos; }
 	const vector<CollisionRect>& GetColliders() const { return colliders; }
-	bool HasFilepath() const { return this->filepath.empty(); }
+	bool HasFilepath() const { return !this->filepath.empty(); }
+	void SetFilepath(const std::string& path) { this->filepath = path; }
+	const std::string& GetFilepath() const { return this->filepath; }
 
 	private:
 	/**
@@ -110,7 +113,7 @@ class Level
 	Image sprites;
 	Texture tex;
 	std::string name;
-	std::string filepath;
+	std::string filepath{""};
 	Vector2 playerStartPos;
 	vector<TileID> grid;
 	vector<CollisionRect> colliders;
