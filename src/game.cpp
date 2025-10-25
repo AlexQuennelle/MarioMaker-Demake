@@ -1,7 +1,9 @@
 #include "game.h"
 #include "utils.h"
 
+#include <fstream>
 #include <imgui.h>
+#include <ios>
 #include <iostream>
 #include <nfd.h>
 #include <nfd.hpp>
@@ -33,25 +35,10 @@ void Game::Update()
 	player.AddForce({0, gravity * GetFrameTime()});
 	player.Update();
 
+	// HACK: Input should be handled more gracefully.
 	if (IsKeyPressed(KEY_ENTER))
 	{
-		NFD::Guard nfdGuard;
-		NFD::UniquePath outPath;
-		//nfdresult_t result = NFD::OpenDialog(outPath);
-		nfdresult_t result =
-			NFD::SaveDialog(outPath, nullptr, 0, RESOURCES_PATH, "MyLevel.lvl");
-		if (result == NFD_OKAY)
-		{
-			std::cout << outPath.get() << '\n';
-		}
-		else if (result == NFD_ERROR)
-		{
-			std::cout << NFD_GetError() << '\n';
-		}
-		else if (result == NFD_CANCEL)
-		{
-			std::cout << "Save cancelled.\n";
-		}
+		this->SaveLevel();
 	}
 
 	// draw everything
@@ -98,4 +85,44 @@ void Game::Reset()
 {
 	level.Reset();
 	player.Reset(level.GetPlayerStartPos());
+}
+
+void Game::SaveLevel()
+{
+	NFD::Guard nfdGuard;
+	NFD::UniquePath outPath;
+	//nfdresult_t result = NFD::OpenDialog(outPath);
+	nfdresult_t result =
+		NFD::SaveDialog(outPath, nullptr, 0, RESOURCES_PATH, "MyLevel.lvl");
+	if (result == NFD_OKAY)
+	{
+		std::cout << outPath.get() << '\n';
+		std::ofstream outFile{
+			outPath.get(),
+			std::ios::out | std::ios::binary,
+		};
+
+		if (outFile.is_open())
+		{
+			const vector<byte> data{this->level.Serialize()};
+
+			outFile.write(reinterpret_cast<const char*>(data.data()),
+						  data.size());
+
+			outFile.close();
+		}
+		else
+		{
+			SetTextColor(ERROR);
+			std::cout << "ERROR: could not open " << outPath.get() << '\n';
+		}
+	}
+	else if (result == NFD_ERROR)
+	{
+		std::cout << NFD_GetError() << '\n';
+	}
+	else if (result == NFD_CANCEL)
+	{
+		std::cout << "Save cancelled.\n";
+	}
 }

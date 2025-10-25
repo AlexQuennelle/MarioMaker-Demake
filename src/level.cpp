@@ -38,16 +38,18 @@ Level::Level()
 Level::~Level()
 {
 	UnloadImage(this->img);
-	UnloadImage(this->sprites); // NOTE: Remove when asset manager is merged.
+	// NOTE: Remove when asset manager is merged.
+	UnloadImage(this->sprites);
 	//UnloadTexture(this->tex);
 }
 
 vector<byte> Level::Serialize() const
 {
 	std::array<byte, 4> intBuffer{};
-	vector<byte> bytes{'L', 'V', 'L'};
+	vector<byte> bytes{'L', 'V', 'L', 0};
 
 	InsertAsBytes(bytes, this->length);
+	InsertAsBytes(bytes, this->height);
 
 	return bytes;
 }

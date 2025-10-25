@@ -24,6 +24,7 @@ class Game
 	void Draw();
 
 	void Reset();
+	void SaveLevel();
 
 	ImGuiIO& imguiIO;
 	Player player;
