@@ -3,11 +3,13 @@
 
 #include <imgui.h>
 #include <iostream>
+#include <nfd.h>
+#include <nfd.hpp>
 #include <raylib.h>
 #include <rlImGui.h>
 
 Game::Game()
-	: imguiIO(ImGui::GetIO()), level(), player(level), inputHandler(player),
+	: imguiIO(ImGui::GetIO()), player(level), inputHandler(player),
 	  gravity(1.5f), renderTex(LoadRenderTexture(384, 224))
 {
 	SetTextColor(INFO);
@@ -30,6 +32,27 @@ void Game::Update()
 
 	player.AddForce({0, gravity * GetFrameTime()});
 	player.Update();
+
+	if (IsKeyPressed(KEY_ENTER))
+	{
+		NFD::Guard nfdGuard;
+		NFD::UniquePath outPath;
+		//nfdresult_t result = NFD::OpenDialog(outPath);
+		nfdresult_t result =
+			NFD::SaveDialog(outPath, nullptr, 0, RESOURCES_PATH, "MyLevel.lvl");
+		if (result == NFD_OKAY)
+		{
+			std::cout << outPath.get() << '\n';
+		}
+		else if (result == NFD_ERROR)
+		{
+			std::cout << NFD_GetError() << '\n';
+		}
+		else if (result == NFD_CANCEL)
+		{
+			std::cout << "Save cancelled.\n";
+		}
+	}
 
 	// draw everything
 	Draw();

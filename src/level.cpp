@@ -39,7 +39,7 @@ Level::~Level()
 {
 	UnloadImage(this->img);
 	UnloadImage(this->sprites); // NOTE: Remove when asset manager is merged.
-	UnloadTexture(this->tex);
+	//UnloadTexture(this->tex);
 }
 
 vector<byte> Level::Serialize() const
