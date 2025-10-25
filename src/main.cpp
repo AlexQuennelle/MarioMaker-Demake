@@ -31,6 +31,8 @@ int main()
 	}
 #endif
 
+	game.reset();
+
 	rlImGuiShutdown();
 	CloseWindow();
 

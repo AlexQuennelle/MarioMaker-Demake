@@ -4,6 +4,7 @@
 
 #include <array>
 #include <bit>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
@@ -13,6 +14,7 @@
 
 Level::Level()
 	: height(15), length(100), playerStartPos({.x = 5, .y = 0}),
+	  name("My Level"),
 	  // FIX: This should be moved to a resource manager
 	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
 {
@@ -40,16 +42,54 @@ Level::~Level()
 	UnloadImage(this->img);
 	// NOTE: Remove when asset manager is merged.
 	UnloadImage(this->sprites);
-	//UnloadTexture(this->tex);
+	UnloadTexture(this->tex);
 }
 
 vector<byte> Level::Serialize() const
 {
 	std::array<byte, 4> intBuffer{};
+	// Metadata/Header
 	vector<byte> bytes{'L', 'V', 'L', 0};
-
 	InsertAsBytes(bytes, this->length);
 	InsertAsBytes(bytes, this->height);
+
+	// Name chunk
+	InsertAsBytes(bytes, static_cast<uint32_t>(this->name.length()));
+	for (auto ch : this->name)
+	{
+		bytes.push_back(ch);
+	}
+	// Pad bytes for alignment
+	int alignment{
+		static_cast<int>((((bytes.size() / 4) + 1) * 4) - bytes.size())};
+	for (int i{0}; i < alignment; i++)
+	{
+		bytes.push_back(0);
+	}
+
+	// Run length encoding
+	TileID currTile{this->grid[0]};
+	uint32_t run{0};
+	for (int i{0}; i < this->grid.size(); i++)
+	{
+		if (currTile != this->grid[i])
+		{
+			InsertAsBytes(bytes, run);
+			InsertAsBytes(bytes, currTile);
+			bytes.push_back(0);
+			bytes.push_back(0);
+			bytes.push_back(0);
+
+			currTile = this->grid[i];
+			run = 0;
+		}
+		run++;
+	}
+	InsertAsBytes(bytes, run);
+	InsertAsBytes(bytes, currTile);
+	bytes.push_back(0);
+	bytes.push_back(0);
+	bytes.push_back(0);
 
 	return bytes;
 }
@@ -74,7 +114,7 @@ void Level::GenCollisionMap()
 	{
 		for (int y{0}; y < this->height; y++)
 		{
-			int i = (x * this->height) + y;
+			int i = (y * this->length) + x;
 			if (TileAt(x, y) == TileID::ground && !visited[i])
 				this->colliders.push_back(GenCollisionRect(x, y, visited));
 		}
@@ -102,14 +142,14 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 		bool canExpand{true};
 		for (int w{x}; w < rWidth; w++)
 		{
-			int i = (w * this->height) + h;
+			int i = (h * this->length) + w;
 			canExpand &= (TileAt(x, y) == TileID::ground && !visited[i]);
 		}
 		if (canExpand)
 		{
 			for (int w{x}; w < rWidth; w++)
 			{
-				int i = (w * this->height) + h;
+				int i = (h * this->length) + w;
 				visited[i] = true;
 			}
 			rHeight++;
@@ -340,7 +380,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 void Level::SetTileAt(const TileID tile, const int x, const int y)
 {
 	if (x >= 0 && x <= this->length - 1 && y >= 0 && y <= this->height - 1)
-		grid[(x * this->height) + y] = tile;
+		grid[(y * this->length) + x] = tile;
 #ifndef NDEBUG
 	else
 	{
@@ -354,7 +394,7 @@ TileID Level::TileAt(const int x, const int y)
 {
 	if (x >= 0 && x <= this->length - 1 && y >= 0 && y <= this->height - 1)
 	{
-		return grid[(x * this->height) + y];
+		return grid[(y * this->length) + x];
 	}
 	else
 	{

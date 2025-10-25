@@ -48,6 +48,7 @@ class Level
 	// getters
 	Vector2 GetPlayerStartPos() const { return playerStartPos; }
 	const vector<CollisionRect>& GetColliders() const { return colliders; }
+	bool HasFilepath() const { return this->filepath.empty(); }
 
 	private:
 	/**
@@ -109,6 +110,7 @@ class Level
 	Image sprites;
 	Texture tex;
 	std::string name;
+	std::string filepath;
 	Vector2 playerStartPos;
 	vector<TileID> grid;
 	vector<CollisionRect> colliders;

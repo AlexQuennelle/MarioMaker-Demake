@@ -91,9 +91,8 @@ void Game::SaveLevel()
 {
 	NFD::Guard nfdGuard;
 	NFD::UniquePath outPath;
-	//nfdresult_t result = NFD::OpenDialog(outPath);
-	nfdresult_t result =
-		NFD::SaveDialog(outPath, nullptr, 0, RESOURCES_PATH, "MyLevel.lvl");
+	nfdresult_t result{
+		NFD::SaveDialog(outPath, nullptr, 0, RESOURCES_PATH, "MyLevel.lvl")};
 	if (result == NFD_OKAY)
 	{
 		std::cout << outPath.get() << '\n';
