@@ -78,7 +78,7 @@ vector<byte> Level::Serialize() const
 	}
 
 	// Run length encoding
-	TileID currTile{this->grid[0]};
+	Tile currTile{this->grid[0]};
 	uint32_t run{0};
 	for (int i{0}; i < this->grid.size(); i++)
 	{
@@ -86,7 +86,6 @@ vector<byte> Level::Serialize() const
 		{
 			InsertAsBytes(bytes, run);
 			InsertAsBytes(bytes, currTile);
-			bytes.push_back(0);
 			bytes.push_back(0);
 			bytes.push_back(0);
 
@@ -97,7 +96,6 @@ vector<byte> Level::Serialize() const
 	}
 	InsertAsBytes(bytes, run);
 	InsertAsBytes(bytes, currTile);
-	bytes.push_back(0);
 	bytes.push_back(0);
 	bytes.push_back(0);
 
@@ -125,7 +123,7 @@ void Level::GenCollisionMap()
 		for (int y{0}; y < this->height; y++)
 		{
 			int i = (y * this->length) + x;
-			if (TileAt(x, y) == TileID::ground && !visited[i])
+			if (TileAt(x, y).ID == TileID::ground && !visited[i])
 				this->colliders.push_back(GenCollisionRect(x, y, visited));
 		}
 	}
@@ -137,7 +135,7 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 	for (int w{x}; w < this->length; w++)
 	{
 		int i = (w * this->height) + y;
-		if (TileAt(x, y) == TileID::ground && !visited[i])
+		if (TileAt(x, y).ID == TileID::ground && !visited[i])
 		{
 			visited[i] = true;
 			rWidth++;
@@ -153,7 +151,7 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 		for (int w{x}; w < rWidth; w++)
 		{
 			int i = (h * this->length) + w;
-			canExpand &= (TileAt(x, y) == TileID::ground && !visited[i]);
+			canExpand &= (TileAt(x, y).ID == TileID::ground && !visited[i]);
 		}
 		if (canExpand)
 		{
@@ -180,7 +178,7 @@ void Level::StitchTexture()
 	{
 		for (int x{0}; x < this->length; x++)
 		{
-			if (TileAt(x, y) == TileID::ground)
+			if (TileAt(x, y).ID == TileID::ground)
 			{
 				byte tileMask{this->MarchSquares(x, y)};
 				array<Rectangle, 4> rects{this->GetRects(tileMask)};
@@ -221,7 +219,8 @@ byte Level::MarchSquares(const int x, const int y)
 				continue;
 
 			auto val{
-				static_cast<byte>(this->TileAt(x + i, y + j) == TileID::ground),
+				static_cast<byte>(this->TileAt(x + i, y + j).ID ==
+								  TileID::ground),
 			};
 			mask |= std::rotl(val, shift);
 			shift++;
@@ -387,10 +386,11 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	return {topL, topR, botL, botR};
 }
 
-void Level::SetTileAt(const TileID tile, const int x, const int y)
+void Level::SetTileAt(const TileID tile, const int x, const int y,
+					  const uint8_t flags)
 {
 	if (x >= 0 && x <= this->length - 1 && y >= 0 && y <= this->height - 1)
-		grid[(y * this->length) + x] = tile;
+		grid[(y * this->length) + x] = Tile{.ID = tile, .flags = flags};
 #ifndef NDEBUG
 	else
 	{
@@ -400,7 +400,7 @@ void Level::SetTileAt(const TileID tile, const int x, const int y)
 	}
 #endif // !NDEBUG
 }
-TileID Level::TileAt(const int x, const int y)
+Tile Level::TileAt(const int x, const int y)
 {
 	if (x >= 0 && x <= this->length - 1 && y >= 0 && y <= this->height - 1)
 	{
@@ -408,7 +408,7 @@ TileID Level::TileAt(const int x, const int y)
 	}
 	else
 	{
-		return TileID::ground;
+		return Tile{.ID = TileID::ground, .flags = 0};
 	}
 }
 

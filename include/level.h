@@ -34,8 +34,10 @@ class Level
 	 * @param tile ID of the tile to be set
 	 * @param x the x position to set the tile
 	 * @param y the y position to set the tile
+	 * @param flags any flags a tile should have
 	 */
-	void SetTileAt(const TileID tile, const int x, const int y);
+	void SetTileAt(const TileID tile, const int x, const int y,
+				   const uint8_t flags = 0);
 	/**
 	 * @param x the x position to query
 	 * @param y the y position to query
@@ -44,7 +46,7 @@ class Level
 	 * @warning if (x, y) is outside the bounds of the level, this method
 	 *          returns a @link TileID::ground @endlink.
 	 */
-	TileID TileAt(const int x, const int y);
+	Tile TileAt(const int x, const int y);
 
 	// getters
 	Vector2 GetPlayerStartPos() const { return playerStartPos; }
@@ -92,7 +94,7 @@ class Level
 	 * @param x the center of the area to check along the x axis
 	 * @param y the center of the area to check along the y axis
 	 *
-	 * @returns @link byte @endlink representing adjacency to
+	 * @returns @link byte @endlink representing adjacency to tiles with the ID
 	 *          @link TileID::ground @endlink tiles encoded as bit flags
 	 */
 	byte MarchSquares(const int x, const int y);
@@ -113,9 +115,9 @@ class Level
 	Image sprites;
 	Texture tex;
 	std::string name;
-	std::string filepath{""};
+	std::string filepath;
 	Vector2 playerStartPos;
-	vector<TileID> grid;
+	vector<Tile> grid;
 	vector<CollisionRect> colliders;
 	// TODO: Vector of entity
 };
