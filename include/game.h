@@ -25,6 +25,8 @@ class Game
 
 	void Reset();
 	void SaveLevel();
+	void SaveLevelAs();
+	void LoadLevel();
 
 	ImGuiIO& imguiIO;
 	Player player;

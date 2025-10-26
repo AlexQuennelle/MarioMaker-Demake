@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <fstream>
 #include <iostream>
 #include <raylib.h>
 #include <vector>
@@ -36,6 +37,11 @@ Level::Level()
 	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
 	this->tex = LoadTextureFromImage(this->img);
 	this->StitchTexture();
+}
+Level::Level(const std::string& filepath)
+{
+	this->filepath = std::string(filepath);
+	std::ofstream file{filepath};
 }
 Level::~Level()
 {

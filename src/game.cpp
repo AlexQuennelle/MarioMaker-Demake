@@ -40,6 +40,10 @@ void Game::Update()
 	{
 		this->SaveLevel();
 	}
+	else if (IsKeyPressed(KEY_L))
+	{
+		this->LoadLevel();
+	}
 
 	// draw everything
 	Draw();
@@ -86,7 +90,6 @@ void Game::Reset()
 	level.Reset();
 	player.Reset(level.GetPlayerStartPos());
 }
-
 void Game::SaveLevel()
 {
 	std::ofstream outFile;
@@ -99,7 +102,8 @@ void Game::SaveLevel()
 	{
 		NFD::Guard nfdGuard;
 		NFD::UniquePath outPath;
-		nfdresult_t result{NFD::SaveDialog(outPath, nullptr, 0, RESOURCES_PATH,
+		nfdfilteritem_t filter{"Level Files", "lvl"};
+		nfdresult_t result{NFD::SaveDialog(outPath, &filter, 1, RESOURCES_PATH,
 										   "MyLevel.lvl")};
 		if (result == NFD_OKAY)
 		{
@@ -110,10 +114,12 @@ void Game::SaveLevel()
 		else if (result == NFD_ERROR)
 		{
 			std::cout << NFD_GetError() << '\n';
+			return;
 		}
 		else if (result == NFD_CANCEL)
 		{
 			std::cout << "Save cancelled.\n";
+			return;
 		}
 	}
 
@@ -130,5 +136,32 @@ void Game::SaveLevel()
 		SetTextColor(ERROR);
 		std::cout << "ERROR: could not open file." << '\n';
 		ClearStyles();
+	}
+}
+void Game::SaveLevelAs()
+{
+	this->level.SetFilepath("");
+	this->SaveLevel();
+}
+void Game::LoadLevel()
+{
+	NFD::Guard nfdGuard;
+	NFD::UniquePath outPath;
+	nfdfilteritem_t filter{"Level Files", "lvl"};
+	nfdresult_t result{NFD::OpenDialog(outPath, &filter, 1, RESOURCES_PATH)};
+	if (result == NFD_OKAY)
+	{
+		std::cout << outPath.get() << '\n';
+		this->level = Level(outPath.get());
+	}
+	else if (result == NFD_ERROR)
+	{
+		std::cout << NFD_GetError() << '\n';
+		return;
+	}
+	else if (result == NFD_CANCEL)
+	{
+		std::cout << "Load cancelled.\n";
+		return;
 	}
 }

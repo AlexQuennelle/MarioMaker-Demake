@@ -7,7 +7,6 @@
 #include <cstdint>
 #include <raylib.h>
 #include <string>
-#include <string_view>
 #include <vector>
 
 using std::array;
@@ -17,6 +16,7 @@ class Level
 {
 	public:
 	Level();
+	Level(const std::string& filepath);
 	~Level();
 
 	[[nodiscard]] vector<byte> Serialize() const;
