@@ -50,10 +50,14 @@ vector<byte> Level::Serialize() const
 	std::array<byte, 4> intBuffer{};
 	// Metadata/Header
 	vector<byte> bytes{'L', 'V', 'L', 0};
+	// Level size
 	InsertAsBytes(bytes, this->length);
 	InsertAsBytes(bytes, this->height);
+	// Player start position
+	InsertAsBytes(bytes, static_cast<uint32_t>(this->playerStartPos.x));
+	InsertAsBytes(bytes, static_cast<uint32_t>(this->playerStartPos.y));
 
-	// Name chunk
+	// Name
 	InsertAsBytes(bytes, static_cast<uint32_t>(this->name.length()));
 	for (auto ch : this->name)
 	{
