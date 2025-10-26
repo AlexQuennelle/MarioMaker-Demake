@@ -1,39 +1,36 @@
 #include "game.h"
+#include "gamemode.h"
 #include "utils.h"
 
 #include <fstream>
 #include <imgui.h>
 #include <ios>
 #include <iostream>
+#include <memory>
 #include <nfd.h>
 #include <nfd.hpp>
 #include <raylib.h>
 #include <rlImGui.h>
 
-Game::Game()
-	: imguiIO(ImGui::GetIO()), player(level), inputHandler(player),
-	  gravity(1.5f), renderTex(LoadRenderTexture(384, 224))
+Game::Game() : imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 224))
 {
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
 
+	this->LoadLevel();
+
+	this->gamemode = std::make_unique<GameplayMode>(this->level);
+
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";
 	ClearStyles();
-
-	player.Reset(level.GetPlayerStartPos());
 }
 
 void Game::Update()
 {
 	BeginTextureMode(this->renderTex);
-	this->Draw();
-	// call update on everything
-	// input gets polled first :craigthumb:
-	inputHandler.Update();
 
-	player.AddForce({0, gravity * GetFrameTime()});
-	player.Update();
+	this->gamemode->Update();
 
 	// HACK: Input should be handled more gracefully.
 	if (IsKeyPressed(KEY_ENTER))
@@ -53,9 +50,7 @@ void Game::Draw()
 {
 	ClearBackground({100, 149, 237, 255});
 
-	this->level.Draw();
-
-	this->player.Draw();
+	this->gamemode->Draw();
 
 	EndTextureMode();
 
@@ -85,11 +80,6 @@ void Game::Draw()
 	EndDrawing();
 }
 
-void Game::Reset()
-{
-	level.Reset();
-	player.Reset(level.GetPlayerStartPos());
-}
 void Game::SaveLevel()
 {
 	std::ofstream outFile;

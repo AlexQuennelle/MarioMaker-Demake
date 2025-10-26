@@ -45,9 +45,9 @@ Level::Level(const std::string& filepath)
 }
 Level::~Level()
 {
-	UnloadImage(this->img);
 	// NOTE: Remove when asset manager is merged.
-	UnloadImage(this->sprites);
+	//UnloadImage(this->img);
+	//UnloadImage(this->sprites);
 	UnloadTexture(this->tex);
 }
 

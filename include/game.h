@@ -1,10 +1,10 @@
 #pragma once
-#include "player.h"
-#include "playerInputHandler.h"
+#include "gamemode.h"
 
 #include "level.h"
 
 #include <imgui.h>
+#include <memory>
 #include <raylib.h>
 
 /**
@@ -28,12 +28,9 @@ class Game
 	void SaveLevelAs();
 	void LoadLevel();
 
-	ImGuiIO& imguiIO;
-	Player player;
-	PlayerInputHandler inputHandler;
-	RenderTexture2D renderTex;
-
+	std::unique_ptr<GamemodeInstance> gamemode;
 	Level level;
 
-	float gravity;
+	ImGuiIO& imguiIO;
+	RenderTexture2D renderTex;
 };
