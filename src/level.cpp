@@ -8,52 +8,100 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <filesystem>
+#include <format>
 #include <fstream>
+#include <iosfwd>
 #include <iostream>
 #include <raylib.h>
+#include <string>
 #include <vector>
 
 Level::Level()
-	: height(15), length(100), playerStartPos({.x = 5, .y = 0}),
-	  name("My Level"),
-	  // FIX: This should be moved to a resource manager
-	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
+//: height(15), length(100), playerStartPos({.x = 5, .y = 0}),
+//  name("My Level"),
+//  // FIX: This should be moved to a resource manager
+//  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
 {
-	std::srand(std::time({}));
-	this->grid.resize(this->height * this->length);
-	// HACK: This is temporary to fill in the ground
-	for (int x{0}; x < this->length; x++)
-	{
-		for (int y{0}; y < this->height; y++)
-		{
-			if (y > 10)
-				this->SetTileAt(TileID::ground, x, y);
-			else
-				this->SetTileAt(TileID::air, x, y);
-		}
-	}
-	this->GenCollisionMap();
+	//std::srand(std::time({}));
+	//this->grid.resize(this->height * this->length);
+	//// HACK: This is temporary to fill in the ground
+	//for (int x{0}; x < this->length; x++)
+	//{
+	//	for (int y{0}; y < this->height; y++)
+	//	{
+	//		if (y > 10)
+	//			this->SetTileAt(TileID::ground, x, y);
+	//		else
+	//			this->SetTileAt(TileID::air, x, y);
+	//	}
+	//}
+	//this->GenCollisionMap();
 
-	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
-	this->tex = LoadTextureFromImage(this->img);
-	this->StitchTexture();
+	//this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
+	//this->tex = LoadTextureFromImage(this->img);
+	//this->StitchTexture();
 }
 Level::Level(const std::string& filepath)
+	: // FIX: This should be moved to a resource manager
+	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
 {
+	namespace fs = std::filesystem;
+	using std::ios;
+
+	std::srand(std::time({}));
+
 	this->filepath = std::string(filepath);
-	std::ofstream file{filepath};
+
+	std::ifstream file{filepath.c_str(), ios::binary | ios::ate};
+
+	if (file.is_open())
+	{
+		std::streampos fSize = fs::file_size(filepath);
+		std::vector<char> data(fSize, 0);
+
+		file.seekg(0, ios::beg);
+		file.read(data.data(), fSize);
+		file.close();
+
+		std::string fileID(3, 0);
+		std::memcpy(fileID.data(), data.data(), 3);
+
+		if (fileID == "LVL")
+		{
+			SetTextColor(SUCCESS);
+			std::cout << "Valid level file found\n";
+			ClearStyles();
+
+			this->ParseData(data);
+
+			this->GenCollisionMap();
+
+			this->img =
+				GenImageColor(this->length * 16, this->height * 16, BLANK);
+			this->tex = LoadTextureFromImage(this->img);
+			this->StitchTexture();
+		}
+	}
+	else
+	{
+		SetTextColor(ERROR);
+		std::cerr << "ERROR: Failed to open file at " << filepath << '\n';
+		ClearStyles();
+	}
 }
 Level::~Level()
 {
 	// NOTE: Remove when asset manager is merged.
 	//UnloadImage(this->img);
 	//UnloadImage(this->sprites);
-	UnloadTexture(this->tex);
+	// BUG: Commenting this line causes a memory leak, but uncommenting it means
+	// texturs no longer load correctly
+	// UnloadTexture(this->tex);
 }
 
 vector<byte> Level::Serialize() const
 {
-	std::array<byte, 4> intBuffer{};
 	// Metadata/Header
 	vector<byte> bytes{'L', 'V', 'L', 0};
 	// Level size
@@ -229,6 +277,53 @@ byte Level::MarchSquares(const int x, const int y)
 
 	return mask;
 }
+void Level::ParseData(const vector<char>& data)
+{
+	std::memcpy(&this->length, &data[4], 4);
+	std::memcpy(&this->height, &data[8], 4);
+	std::cout << std::format("Level size: {} x {}\n", this->length,
+							 this->height);
+
+	uint32_t playStartX{0};
+	uint32_t playStartY{0};
+	std::memcpy(&playStartX, &data[12], 4);
+	std::memcpy(&playStartY, &data[16], 4);
+	this->playerStartPos = {
+		.x = static_cast<float>(playStartX),
+		.y = static_cast<float>(playStartY),
+	};
+
+	std::cout << std::format("Player start: ({}, {})\n", this->playerStartPos.x,
+							 this->playerStartPos.y);
+
+	uint32_t nameLen{0};
+	std::memcpy(&nameLen, &data[20], 4);
+	this->name = std::string(nameLen, 0);
+	std::memcpy(this->name.data(), &data[24], nameLen);
+	std::cout << "Level name: " << this->name << '\n';
+
+	const char* addr{&data[24 + (((nameLen / 4) + 1) * 4)]};
+	const char* endAddr{data.data() + data.size()};
+
+	this->grid.reserve(this->length * this->height);
+	while (addr < endAddr)
+	{
+		uint32_t runLength{0};
+		std::memcpy(&runLength, addr, 4);
+		Tile tile{.ID = TileID::air, .flags = 0};
+		std::memcpy(&tile, addr + 4, 2);
+		std::cout << runLength << '\n';
+		for (int i{0}; i < runLength; i++)
+		{
+			std::cout << (int)tile.ID;
+			if ((i + 1) % this->length == 0)
+				std::cout << '\n';
+			this->grid.push_back(tile);
+		}
+		addr += 8;
+	}
+}
+
 array<Rectangle, 4> Level::GetRects(const byte mask)
 {
 	// Top left

@@ -124,7 +124,7 @@ void Game::SaveLevel()
 	else
 	{
 		SetTextColor(ERROR);
-		std::cout << "ERROR: could not open file." << '\n';
+		std::cerr << "ERROR: could not open file." << '\n';
 		ClearStyles();
 	}
 }
@@ -146,7 +146,7 @@ void Game::LoadLevel()
 	}
 	else if (result == NFD_ERROR)
 	{
-		std::cout << NFD_GetError() << '\n';
+		std::cerr << NFD_GetError() << '\n';
 		return;
 	}
 	else if (result == NFD_CANCEL)

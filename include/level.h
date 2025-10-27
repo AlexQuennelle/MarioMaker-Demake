@@ -98,6 +98,8 @@ class Level
 	 *          @link TileID::ground @endlink tiles encoded as bit flags
 	 */
 	byte MarchSquares(const int x, const int y);
+	void ParseData(const vector<char>& data);
+
 	/**
 	 * @param mask Bit mask representing adjacency.
 	 *        see @link MarchSquares @endlink
