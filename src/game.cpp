@@ -39,6 +39,8 @@ void Game::Draw()
 {
 	ClearBackground({100, 149, 237, 255});
 
+	DrawFPS(100, 100);
+
 	this->level.Draw();
 
 	this->player.Draw();
