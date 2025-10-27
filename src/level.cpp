@@ -159,7 +159,16 @@ template <typename T> void Level::InsertAsBytes(vector<byte>& vec, T data)
 	}
 }
 
-void Level::Draw() { DrawTexture(this->tex, 0, 0, WHITE); }
+void Level::Draw()
+{
+	DrawTexture(this->tex, 0, 0, WHITE);
+	for (auto rec : this->colliders)
+	{
+		DrawRectangleLinesEx({rec.position.x * 16, rec.position.y * 16,
+							  rec.size.x * 16, rec.size.y * 16},
+							 1.0f, GREEN);
+	}
+}
 
 void Level::GenCollisionMap()
 {
@@ -182,8 +191,8 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 	int rWidth{0};
 	for (int w{x}; w < this->length; w++)
 	{
-		int i = (w * this->height) + y;
-		if (TileAt(x, y).ID == TileID::ground && !visited[i])
+		int i = (y * this->height) + w;
+		if ((TileAt(w, y).ID == TileID::ground) && !visited[i])
 		{
 			visited[i] = true;
 			rWidth++;
@@ -192,15 +201,18 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 			break;
 	}
 
-	int rHeight{1};
-	for (int h{y + 1}; h < this->height; h++)
+	std::cout << rWidth << '\n';
+
+	int rHeight{0};
+	for (int h{y + 0}; h < this->height; h++)
 	{
 		bool canExpand{true};
 		for (int w{x}; w < rWidth; w++)
 		{
 			int i = (h * this->length) + w;
-			canExpand &= (TileAt(x, y).ID == TileID::ground && !visited[i]);
+			canExpand &= ((TileAt(w, h).ID == TileID::ground) && !visited[i]);
 		}
+
 		if (canExpand)
 		{
 			for (int w{x}; w < rWidth; w++)
@@ -213,6 +225,9 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 		else
 			break;
 	}
+
+	std::cout << std::format("Rect: [({}, {}) -> {} x {}]\n", x, y, rWidth,
+							 rHeight);
 
 	return {
 		.position = {static_cast<float>(x), static_cast<float>(y)},
@@ -303,7 +318,7 @@ void Level::ParseData(const vector<char>& data)
 	std::cout << "Level name: " << this->name << '\n';
 
 	const char* addr{&data[24 + (((nameLen / 4) + 1) * 4)]};
-	const char* endAddr{data.data() + data.size()};
+	const char* endAddr{data.data() + data.size() - 1};
 
 	this->grid.reserve(this->length * this->height);
 	while (addr < endAddr)
@@ -315,9 +330,9 @@ void Level::ParseData(const vector<char>& data)
 		std::cout << runLength << '\n';
 		for (int i{0}; i < runLength; i++)
 		{
-			std::cout << (int)tile.ID;
-			if ((i + 1) % this->length == 0)
-				std::cout << '\n';
+			//std::cout << (int)tile.ID;
+			//if ((i + 1) % this->length == 0)
+			//	std::cout << '\n';
 			this->grid.push_back(tile);
 		}
 		addr += 8;
