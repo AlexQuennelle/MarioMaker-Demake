@@ -3,11 +3,12 @@
 #include "level.h"
 #include "player.h"
 #include "playerInputHandler.h"
+#include "assetmanager.h"
 
 class GamemodeInstance
 {
 	public:
-	GamemodeInstance(Level& lvl) : level(lvl) {};
+	GamemodeInstance(Level& lvl, AssetManager& am) : level(lvl), assetManager(am) {};
 	virtual ~GamemodeInstance() = default;
 
 	virtual void Update() = 0;
@@ -15,13 +16,14 @@ class GamemodeInstance
 
 	protected:
 	Level& level;
+	AssetManager& assetManager;
 };
 
 class GameplayMode : public GamemodeInstance
 {
 	public:
-	GameplayMode(Level& lvl)
-		: GamemodeInstance(lvl), player(this->level), inputHandler(this->player)
+	GameplayMode(Level& lvl, AssetManager& am)
+		: GamemodeInstance(lvl, am), player(this->level), inputHandler(this->player)
 	{
 		player.Reset(level.GetPlayerStartPos());
 	};
@@ -39,7 +41,7 @@ class GameplayMode : public GamemodeInstance
 class EditMode : public GamemodeInstance
 {
 	public:
-	EditMode(Level& lvl) : GamemodeInstance(lvl) {};
+	EditMode(Level& lvl, AssetManager& am) : GamemodeInstance(lvl, am) {};
 
 	void Update() override;
 	void Draw() override;

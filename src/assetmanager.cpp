@@ -3,8 +3,8 @@
 
 AssetManager::AssetManager()
 {
-	playerSprites = LoadImage(RESOURCES_PATH "sprites/playersprites.png");
+	playerSprites = LoadTexture(RESOURCES_PATH "sprites/playersprites.png");
 }
 
 AssetManager::~AssetManager() 
-{ UnloadImage(playerSprites); }
+{ UnloadTexture(playerSprites); }
