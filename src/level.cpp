@@ -17,6 +17,10 @@
 #include <string>
 #include <vector>
 
+#ifndef NDEBUG
+//#define DRAW_COLS
+#endif // !NDEBUG
+
 Level::Level()
 //: height(15), length(100), playerStartPos({.x = 5, .y = 0}),
 //  name("My Level"),
@@ -162,12 +166,14 @@ template <typename T> void Level::InsertAsBytes(vector<byte>& vec, T data)
 void Level::Draw()
 {
 	DrawTexture(this->tex, 0, 0, WHITE);
+#ifdef DRAW_COLS
 	for (auto rec : this->colliders)
 	{
 		DrawRectangleLinesEx({rec.position.x * 16, rec.position.y * 16,
 							  rec.size.x * 16, rec.size.y * 16},
-							 1.0f, GREEN);
+							 1.0f, {0, 200, 255, 120});
 	}
+#endif // DRAW_COLS
 }
 
 void Level::GenCollisionMap()
@@ -207,7 +213,7 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 	for (int h{y + 0}; h < this->height; h++)
 	{
 		bool canExpand{true};
-		for (int w{x}; w < rWidth; w++)
+		for (int w{x}; w < rWidth + x; w++)
 		{
 			int i = (h * this->length) + w;
 			canExpand &= ((TileAt(w, h).ID == TileID::ground) && !visited[i]);
@@ -215,7 +221,7 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 
 		if (canExpand)
 		{
-			for (int w{x}; w < rWidth; w++)
+			for (int w{x}; w < rWidth + x; w++)
 			{
 				int i = (h * this->length) + w;
 				visited[i] = true;
