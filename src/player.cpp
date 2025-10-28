@@ -25,7 +25,7 @@ void Player::Update()
 			((velocity.x >= 0.15f && lastInput.x > 0) ||
 			(velocity.x <= -0.15f && lastInput.x < 0)))
 		{
-			velocity.x = maxRunSpeed * copysignf(1,lastInput.x);
+			velocity.x = copysignf(maxRunSpeed, lastInput.x);
 		}
 	}
 	acceleration.x += horizAcceleration;
