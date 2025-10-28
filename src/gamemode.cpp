@@ -1,4 +1,5 @@
 #include "gamemode.h"
+
 #include <raylib.h>
 
 GameplayMode::GameplayMode(Level& lvl)
@@ -31,21 +32,3 @@ void GameplayMode::Reset()
 	level.Reset();
 	player.Reset(level.GetPlayerStartPos());
 }
-
-EditMode::EditMode(Level& lvl) : GamemodeInstance(lvl)
-{
-	// Initialize mode
-	this->camera = Camera2D{0};
-	this->camera.target = {.x = 0.0f, .y = 0.0f};
-	this->camera.offset = {.x = 0.0f, .y = 0.0f};
-	this->camera.rotation = 0.0f;
-	this->camera.zoom = 1.0f;
-}
-void EditMode::Update() {}
-void EditMode::Draw()
-{
-	BeginMode2D(this->camera);
-	this->level.Draw();
-	EndMode2D();
-}
-void EditMode::DrawUI() {}

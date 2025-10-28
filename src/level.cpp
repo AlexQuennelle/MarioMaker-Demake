@@ -177,6 +177,19 @@ void Level::Draw()
 	}
 #endif // DRAW_COLS
 }
+void Level::DrawGrid(RenderTexture& tex)
+{
+	BeginTextureMode(tex);
+	for (int x{0}; x < this->length; x++)
+	{
+		for (int y{0}; y < this->height; y++)
+		{
+			DrawRectangleLinesEx({x * 16.0f, y * 16.0f, 16.0f, 16.0f}, 0.5f,
+								 Fade(WHITE, 0.8f));
+		}
+	}
+	EndTextureMode();
+}
 
 void Level::GenCollisionMap()
 {

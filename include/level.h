@@ -22,6 +22,7 @@ class Level
 	[[nodiscard]] vector<byte> Serialize() const;
 
 	void Draw();
+	void DrawGrid(RenderTexture& tex);
 	/**
 	 * @brief Rebuilds the level from the tile grid. This respawns all entities.
 	 */
@@ -54,6 +55,8 @@ class Level
 	bool HasFilepath() const { return !this->filepath.empty(); }
 	void SetFilepath(const std::string& path) { this->filepath = path; }
 	const std::string& GetFilepath() const { return this->filepath; }
+	int GetLength() const { return this->length; }
+	int GetHeight() const { return this->height; }
 
 	private:
 	/**
@@ -77,8 +80,7 @@ class Level
 	 *
 	 * @returns a @link Rectangle @endlink
 	 */
-	Rectangle GenCollisionRect(const int x, const int y,
-								   vector<bool>& visited);
+	Rectangle GenCollisionRect(const int x, const int y, vector<bool>& visited);
 	/**
 	 * @brief Stitches ground tile sprites into an image representing the entire
 	 *        level using the data in @link grid @endlink. This is done using

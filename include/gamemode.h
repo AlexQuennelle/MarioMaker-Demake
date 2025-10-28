@@ -3,6 +3,7 @@
 #include "level.h"
 #include "player.h"
 #include "playerInputHandler.h"
+
 #include <raylib.h>
 
 class GamemodeInstance
@@ -46,4 +47,5 @@ class EditMode : public GamemodeInstance
 	void DrawUI() override;
 
 	private:
+	RenderTexture tex;
 };
