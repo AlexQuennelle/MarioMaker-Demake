@@ -22,29 +22,29 @@
 #endif // !NDEBUG
 
 Level::Level()
-//: height(15), length(100), playerStartPos({.x = 5, .y = 0}),
-//  name("My Level"),
-//  // FIX: This should be moved to a resource manager
-//  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
+	: height(15), length(100), playerStartPos({.x = 5, .y = 0}),
+	  name("My Level"),
+	  // FIX: This should be moved to a resource manager
+	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
 {
-	//std::srand(std::time({}));
-	//this->grid.resize(this->height * this->length);
-	//// HACK: This is temporary to fill in the ground
-	//for (int x{0}; x < this->length; x++)
-	//{
-	//	for (int y{0}; y < this->height; y++)
-	//	{
-	//		if (y > 10)
-	//			this->SetTileAt(TileID::ground, x, y);
-	//		else
-	//			this->SetTileAt(TileID::air, x, y);
-	//	}
-	//}
-	//this->GenCollisionMap();
+	std::srand(std::time({}));
+	this->grid.resize(this->height * this->length);
+	// HACK: This is temporary to fill in the ground
+	for (int x{0}; x < this->length; x++)
+	{
+		for (int y{0}; y < this->height; y++)
+		{
+			if (y > 10)
+				this->SetTileAt(TileID::ground, x, y);
+			else
+				this->SetTileAt(TileID::air, x, y);
+		}
+	}
+	this->GenCollisionMap();
 
-	//this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
-	//this->tex = LoadTextureFromImage(this->img);
-	//this->StitchTexture();
+	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
+	this->tex = LoadTextureFromImage(this->img);
+	this->StitchTexture();
 }
 Level::Level(const std::string& filepath)
 	: // FIX: This should be moved to a resource manager
@@ -73,9 +73,11 @@ Level::Level(const std::string& filepath)
 
 		if (fileID == "LVL")
 		{
+#ifndef NDEBUG
 			SetTextColor(SUCCESS);
 			std::cout << "Valid level file found\n";
 			ClearStyles();
+#endif // !NDEBUG
 
 			this->ParseData(data);
 
@@ -207,8 +209,6 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 			break;
 	}
 
-	std::cout << rWidth << '\n';
-
 	int rHeight{0};
 	for (int h{y + 0}; h < this->height; h++)
 	{
@@ -232,8 +232,10 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 			break;
 	}
 
+#ifndef NDEBUG
 	std::cout << std::format("Rect: [({}, {}) -> {} x {}]\n", x, y, rWidth,
 							 rHeight);
+#endif // !NDEBUG
 
 	return {
 		.position = {static_cast<float>(x), static_cast<float>(y)},
@@ -302,8 +304,10 @@ void Level::ParseData(const vector<char>& data)
 {
 	std::memcpy(&this->length, &data[4], 4);
 	std::memcpy(&this->height, &data[8], 4);
+#ifndef NDEBUG
 	std::cout << std::format("Level size: {} x {}\n", this->length,
 							 this->height);
+#endif // !NDEBUG
 
 	uint32_t playStartX{0};
 	uint32_t playStartY{0};
@@ -314,14 +318,18 @@ void Level::ParseData(const vector<char>& data)
 		.y = static_cast<float>(playStartY),
 	};
 
+#ifndef NDEBUG
 	std::cout << std::format("Player start: ({}, {})\n", this->playerStartPos.x,
 							 this->playerStartPos.y);
+#endif // !NDEBUG
 
 	uint32_t nameLen{0};
 	std::memcpy(&nameLen, &data[20], 4);
 	this->name = std::string(nameLen, 0);
 	std::memcpy(this->name.data(), &data[24], nameLen);
+#ifndef NDEBUG
 	std::cout << "Level name: " << this->name << '\n';
+#endif // !NDEBUG
 
 	const char* addr{&data[24 + (((nameLen / 4) + 1) * 4)]};
 	const char* endAddr{data.data() + data.size() - 1};
@@ -333,12 +341,8 @@ void Level::ParseData(const vector<char>& data)
 		std::memcpy(&runLength, addr, 4);
 		Tile tile{.ID = TileID::air, .flags = 0};
 		std::memcpy(&tile, addr + 4, 2);
-		std::cout << runLength << '\n';
 		for (int i{0}; i < runLength; i++)
 		{
-			//std::cout << (int)tile.ID;
-			//if ((i + 1) % this->length == 0)
-			//	std::cout << '\n';
 			this->grid.push_back(tile);
 		}
 		addr += 8;

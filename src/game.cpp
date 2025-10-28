@@ -1,5 +1,6 @@
 #include "game.h"
 #include "gamemode.h"
+#include "level.h"
 #include "utils.h"
 
 #include <fstream>
@@ -12,12 +13,15 @@
 #include <raylib.h>
 #include <rlImGui.h>
 
-Game::Game() : imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 224))
+Game::Game()
+	: imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 224)),
+	  // HACK: Temporarily hardcode in path to level file
+	  level(RESOURCES_PATH "MyLevel.lvl")
 {
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
 
-	this->LoadLevel();
+	//this->LoadLevel();
 
 	this->gamemode = std::make_unique<GameplayMode>(this->level);
 
@@ -31,16 +35,6 @@ void Game::Update()
 	BeginTextureMode(this->renderTex);
 
 	this->gamemode->Update();
-
-	// HACK: Input should be handled more gracefully.
-	if (IsKeyPressed(KEY_ENTER))
-	{
-		this->SaveLevel();
-	}
-	else if (IsKeyPressed(KEY_L))
-	{
-		this->LoadLevel();
-	}
 
 	// draw everything
 	Draw();
