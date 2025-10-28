@@ -2,15 +2,28 @@
 #include "tile.h"
 #include "utils.h"
 
+#include <array>
 #include <bit>
+#include <cstdint>
 #include <cstdlib>
+#include <cstring>
 #include <ctime>
+#include <filesystem>
+#include <format>
+#include <fstream>
+#include <iosfwd>
 #include <iostream>
 #include <raylib.h>
+#include <string>
 #include <vector>
 
+#ifndef NDEBUG
+//#define DRAW_COLS
+#endif // !NDEBUG
+
 Level::Level()
-	: height(15), length(100), playerStartPos({5,0}),
+	: height(15), length(100), playerStartPos({.x = 5, .y = 0}),
+	  name("My Level"),
 	  // FIX: This should be moved to a resource manager
 	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
 {
@@ -33,8 +46,137 @@ Level::Level()
 	this->tex = LoadTextureFromImage(this->img);
 	this->StitchTexture();
 }
+Level::Level(const std::string& filepath)
+	: // FIX: This should be moved to a resource manager
+	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
+{
+	namespace fs = std::filesystem;
+	using std::ios;
 
-void Level::Draw() { DrawTexture(this->tex, 0, 0, WHITE); }
+	std::srand(std::time({}));
+
+	this->filepath = std::string(filepath);
+
+	std::ifstream file{filepath.c_str(), ios::binary | ios::ate};
+
+	if (file.is_open())
+	{
+		std::streampos fSize = fs::file_size(filepath);
+		std::vector<char> data(fSize, 0);
+
+		file.seekg(0, ios::beg);
+		file.read(data.data(), fSize);
+		file.close();
+
+		std::string fileID(3, 0);
+		std::memcpy(fileID.data(), data.data(), 3);
+
+		if (fileID == "LVL")
+		{
+#ifndef NDEBUG
+			SetTextColor(SUCCESS);
+			std::cout << "Valid level file found\n";
+			ClearStyles();
+#endif // !NDEBUG
+
+			this->ParseData(data);
+
+			this->GenCollisionMap();
+
+			this->img =
+				GenImageColor(this->length * 16, this->height * 16, BLANK);
+			this->tex = LoadTextureFromImage(this->img);
+			this->StitchTexture();
+		}
+	}
+	else
+	{
+		SetTextColor(ERROR);
+		std::cerr << "ERROR: Failed to open file at " << filepath << '\n';
+		ClearStyles();
+	}
+}
+Level::~Level()
+{
+	// NOTE: Remove when asset manager is merged.
+	//UnloadImage(this->img);
+	//UnloadImage(this->sprites);
+	// BUG: Commenting this line causes a memory leak, but uncommenting it means
+	// texturs no longer load correctly
+	// UnloadTexture(this->tex);
+}
+
+vector<byte> Level::Serialize() const
+{
+	// Metadata/Header
+	vector<byte> bytes{'L', 'V', 'L', 0};
+	// Level size
+	InsertAsBytes(bytes, this->length);
+	InsertAsBytes(bytes, this->height);
+	// Player start position
+	InsertAsBytes(bytes, static_cast<uint32_t>(this->playerStartPos.x));
+	InsertAsBytes(bytes, static_cast<uint32_t>(this->playerStartPos.y));
+
+	// Name
+	InsertAsBytes(bytes, static_cast<uint32_t>(this->name.length()));
+	for (auto ch : this->name)
+	{
+		bytes.push_back(ch);
+	}
+	// Pad bytes for alignment
+	int alignment{
+		static_cast<int>((((bytes.size() / 4) + 1) * 4) - bytes.size())};
+	for (int i{0}; i < alignment; i++)
+	{
+		bytes.push_back(0);
+	}
+
+	// Run length encoding
+	Tile currTile{this->grid[0]};
+	uint32_t run{0};
+	for (int i{0}; i < this->grid.size(); i++)
+	{
+		if (currTile != this->grid[i])
+		{
+			InsertAsBytes(bytes, run);
+			InsertAsBytes(bytes, currTile);
+			bytes.push_back(0);
+			bytes.push_back(0);
+
+			currTile = this->grid[i];
+			run = 0;
+		}
+		run++;
+	}
+	InsertAsBytes(bytes, run);
+	InsertAsBytes(bytes, currTile);
+	bytes.push_back(0);
+	bytes.push_back(0);
+
+	return bytes;
+}
+template <typename T> void Level::InsertAsBytes(vector<byte>& vec, T data)
+{
+	std::array<byte, sizeof(data)> buffer{};
+	std::memcpy(&buffer, &data, sizeof(data));
+	for (auto byte : buffer)
+	{
+		vec.push_back(byte);
+	}
+}
+
+void Level::Draw()
+{
+	DrawTexture(this->tex, 0, 0, WHITE);
+#ifdef DRAW_COLS
+	for (auto rec : this->colliders)
+	{
+		DrawRectangleLinesEx({rec.position.x * 16, rec.position.y * 16,
+							  rec.size.x * 16, rec.size.y * 16},
+							 1.0f, {0, 200, 255, 120});
+	}
+#endif // DRAW_COLS
+}
 
 void Level::GenCollisionMap()
 {
@@ -45,20 +187,20 @@ void Level::GenCollisionMap()
 	{
 		for (int y{0}; y < this->height; y++)
 		{
-			int i = (x * this->height) + y;
-			if (TileAt(x, y) == TileID::ground && !visited[i])
+			int i = (y * this->length) + x;
+			if (TileAt(x, y).ID == TileID::ground && !visited[i])
 				this->colliders.push_back(GenCollisionRect(x, y, visited));
 		}
 	}
 }
-CollisionRect Level::GenCollisionRect(const int x, const int y,
-									  vector<bool>& visited)
+Rectangle Level::GenCollisionRect(const int x, const int y,
+								  vector<bool>& visited)
 {
 	int rWidth{0};
 	for (int w{x}; w < this->length; w++)
 	{
-		int i = (w * this->height) + y;
-		if (TileAt(x, y) == TileID::ground && !visited[i])
+		int i = (y * this->height) + w;
+		if ((TileAt(w, y).ID == TileID::ground) && !visited[i])
 		{
 			visited[i] = true;
 			rWidth++;
@@ -67,20 +209,21 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 			break;
 	}
 
-	int rHeight{1};
-	for (int h{y + 1}; h < this->height; h++)
+	int rHeight{0};
+	for (int h{y + 0}; h < this->height; h++)
 	{
 		bool canExpand{true};
-		for (int w{x}; w < rWidth; w++)
+		for (int w{x}; w < rWidth + x; w++)
 		{
-			int i = (w * this->height) + h;
-			canExpand &= (TileAt(x, y) == TileID::ground && !visited[i]);
+			int i = (h * this->length) + w;
+			canExpand &= ((TileAt(w, h).ID == TileID::ground) && !visited[i]);
 		}
+
 		if (canExpand)
 		{
-			for (int w{x}; w < rWidth; w++)
+			for (int w{x}; w < rWidth + x; w++)
 			{
-				int i = (w * this->height) + h;
+				int i = (h * this->length) + w;
 				visited[i] = true;
 			}
 			rHeight++;
@@ -89,9 +232,16 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 			break;
 	}
 
+#ifndef NDEBUG
+	std::cout << std::format("Rect: [({}, {}) -> {} x {}]\n", x, y, rWidth,
+							 rHeight);
+#endif // !NDEBUG
+
 	return {
-		.position = {static_cast<float>(x), static_cast<float>(y)},
-		.size = {static_cast<float>(rWidth), static_cast<float>(rHeight)},
+		static_cast<float>(x),
+		static_cast<float>(y),
+		static_cast<float>(rWidth),
+		static_cast<float>(rHeight),
 	};
 }
 void Level::StitchTexture()
@@ -101,7 +251,7 @@ void Level::StitchTexture()
 	{
 		for (int x{0}; x < this->length; x++)
 		{
-			if (TileAt(x, y) == TileID::ground)
+			if (TileAt(x, y).ID == TileID::ground)
 			{
 				byte tileMask{this->MarchSquares(x, y)};
 				array<Rectangle, 4> rects{this->GetRects(tileMask)};
@@ -142,7 +292,8 @@ byte Level::MarchSquares(const int x, const int y)
 				continue;
 
 			auto val{
-				static_cast<byte>(this->TileAt(x + i, y + j) == TileID::ground),
+				static_cast<byte>(this->TileAt(x + i, y + j).ID ==
+								  TileID::ground),
 			};
 			mask |= std::rotl(val, shift);
 			shift++;
@@ -151,6 +302,55 @@ byte Level::MarchSquares(const int x, const int y)
 
 	return mask;
 }
+void Level::ParseData(const vector<char>& data)
+{
+	std::memcpy(&this->length, &data[4], 4);
+	std::memcpy(&this->height, &data[8], 4);
+#ifndef NDEBUG
+	std::cout << std::format("Level size: {} x {}\n", this->length,
+							 this->height);
+#endif // !NDEBUG
+
+	uint32_t playStartX{0};
+	uint32_t playStartY{0};
+	std::memcpy(&playStartX, &data[12], 4);
+	std::memcpy(&playStartY, &data[16], 4);
+	this->playerStartPos = {
+		.x = static_cast<float>(playStartX),
+		.y = static_cast<float>(playStartY),
+	};
+
+#ifndef NDEBUG
+	std::cout << std::format("Player start: ({}, {})\n", this->playerStartPos.x,
+							 this->playerStartPos.y);
+#endif // !NDEBUG
+
+	uint32_t nameLen{0};
+	std::memcpy(&nameLen, &data[20], 4);
+	this->name = std::string(nameLen, 0);
+	std::memcpy(this->name.data(), &data[24], nameLen);
+#ifndef NDEBUG
+	std::cout << "Level name: " << this->name << '\n';
+#endif // !NDEBUG
+
+	const char* addr{&data[24 + (((nameLen / 4) + 1) * 4)]};
+	const char* endAddr{data.data() + data.size() - 1};
+
+	this->grid.reserve(this->length * this->height);
+	while (addr < endAddr)
+	{
+		uint32_t runLength{0};
+		std::memcpy(&runLength, addr, 4);
+		Tile tile{.ID = TileID::air, .flags = 0};
+		std::memcpy(&tile, addr + 4, 2);
+		for (int i{0}; i < runLength; i++)
+		{
+			this->grid.push_back(tile);
+		}
+		addr += 8;
+	}
+}
+
 array<Rectangle, 4> Level::GetRects(const byte mask)
 {
 	// Top left
@@ -248,7 +448,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		botL = {
 			.x = 24.0f,
-			.y = static_cast<float>((std::rand() % 2) * 8) + 16.0f,
+			.y = static_cast<float>((std::rand() % 2) * 8),
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -308,10 +508,11 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	return {topL, topR, botL, botR};
 }
 
-void Level::SetTileAt(const TileID tile, const int x, const int y)
+void Level::SetTileAt(const TileID tile, const int x, const int y,
+					  const uint8_t flags)
 {
 	if (x >= 0 && x <= this->length - 1 && y >= 0 && y <= this->height - 1)
-		grid[(x * this->height) + y] = tile;
+		grid[(y * this->length) + x] = Tile{.ID = tile, .flags = flags};
 #ifndef NDEBUG
 	else
 	{
@@ -321,18 +522,16 @@ void Level::SetTileAt(const TileID tile, const int x, const int y)
 	}
 #endif // !NDEBUG
 }
-TileID Level::TileAt(const int x, const int y)
+Tile Level::TileAt(const int x, const int y)
 {
 	if (x >= 0 && x <= this->length - 1 && y >= 0 && y <= this->height - 1)
 	{
-		return grid[(x * this->height) + y];
+		return grid[(y * this->length) + x];
 	}
 	else
 	{
-		return TileID::ground;
+		return Tile{.ID = TileID::ground, .flags = 0};
 	}
 }
 
-void Level::Reset() {
-
-}
+void Level::Reset() {}

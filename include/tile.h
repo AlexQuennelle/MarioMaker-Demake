@@ -10,17 +10,13 @@ enum class TileID : uint8_t
 	itemBox,
 };
 
-/**
- * Interface class to denote an object as a tile that can be placed in the level
- */
-class ITile
+struct Tile
 {
-	public:
-	private:
-};
+	TileID ID;
+	uint8_t flags;
 
-class GroundTile : public ITile
-{
-	public:
-	private:
+	bool operator==(const Tile& other)
+	{
+		return (this->ID == other.ID) && (this->flags == other.flags);
+	}
 };

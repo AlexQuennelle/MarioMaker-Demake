@@ -1,6 +1,5 @@
 #pragma once
 
-#include "utils.h"
 #include "level.h"
 
 class Player
