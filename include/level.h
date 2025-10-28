@@ -50,7 +50,7 @@ class Level
 
 	// getters
 	Vector2 GetPlayerStartPos() const { return playerStartPos; }
-	const vector<CollisionRect>& GetColliders() const { return colliders; }
+	const vector<Rectangle>& GetColliders() const { return colliders; }
 	bool HasFilepath() const { return !this->filepath.empty(); }
 	void SetFilepath(const std::string& path) { this->filepath = path; }
 	const std::string& GetFilepath() const { return this->filepath; }
@@ -75,9 +75,9 @@ class Level
 	 * @param visited A vector that mirrors @link grid @endlink storing wich
 	 *        cells have been visited by the greedy meshing.
 	 *
-	 * @returns a @link CollisionRect @endlink
+	 * @returns a @link Rectangle @endlink
 	 */
-	CollisionRect GenCollisionRect(const int x, const int y,
+	Rectangle GenCollisionRect(const int x, const int y,
 								   vector<bool>& visited);
 	/**
 	 * @brief Stitches ground tile sprites into an image representing the entire
@@ -120,6 +120,6 @@ class Level
 	std::string filepath;
 	Vector2 playerStartPos;
 	vector<Tile> grid;
-	vector<CollisionRect> colliders;
+	vector<Rectangle> colliders;
 	// TODO: Vector of entity
 };

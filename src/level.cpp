@@ -193,8 +193,8 @@ void Level::GenCollisionMap()
 		}
 	}
 }
-CollisionRect Level::GenCollisionRect(const int x, const int y,
-									  vector<bool>& visited)
+Rectangle Level::GenCollisionRect(const int x, const int y,
+								  vector<bool>& visited)
 {
 	int rWidth{0};
 	for (int w{x}; w < this->length; w++)
@@ -238,8 +238,10 @@ CollisionRect Level::GenCollisionRect(const int x, const int y,
 #endif // !NDEBUG
 
 	return {
-		.position = {static_cast<float>(x), static_cast<float>(y)},
-		.size = {static_cast<float>(rWidth), static_cast<float>(rHeight)},
+		static_cast<float>(x),
+		static_cast<float>(y),
+		static_cast<float>(rWidth),
+		static_cast<float>(rHeight),
 	};
 }
 void Level::StitchTexture()
