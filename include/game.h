@@ -34,5 +34,5 @@ class Game
 
 	ImGuiIO& imguiIO;
 	RenderTexture2D renderTex;
-	std::unique_ptr<AssetManager> assetManager;
+	asset_ptr assetManager;
 };

@@ -24,7 +24,7 @@ Game::Game()
 
 	//this->LoadLevel();
 
-	this->gamemode = std::make_unique<GameplayMode>(this->level, *this->assetManager);
+	this->gamemode = std::make_unique<GameplayMode>(this->level, this->assetManager);
 
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";

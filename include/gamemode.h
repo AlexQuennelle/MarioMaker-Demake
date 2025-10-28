@@ -8,7 +8,7 @@
 class GamemodeInstance
 {
 	public:
-	GamemodeInstance(Level& lvl, AssetManager& am) : level(lvl), assetManager(am) {};
+	GamemodeInstance(Level& lvl, asset_ptr& am) : level(lvl), assetManager(am) {};
 	virtual ~GamemodeInstance() = default;
 
 	virtual void Update() = 0;
@@ -16,14 +16,14 @@ class GamemodeInstance
 
 	protected:
 	Level& level;
-	AssetManager& assetManager;
+	asset_ptr& assetManager;
 };
 
 class GameplayMode : public GamemodeInstance
 {
 	public:
-	GameplayMode(Level& lvl, AssetManager& am)
-		: GamemodeInstance(lvl, am), player(this->level, {this->assetManager.playerSprites}),
+	GameplayMode(Level& lvl, asset_ptr& am)
+		: GamemodeInstance(lvl, am), player(this->level, {this->assetManager->playerSprites}),
 		  inputHandler(this->player)
 	{
 		player.Reset(level.GetPlayerStartPos());
@@ -42,7 +42,7 @@ class GameplayMode : public GamemodeInstance
 class EditMode : public GamemodeInstance
 {
 	public:
-	EditMode(Level& lvl, AssetManager& am) : GamemodeInstance(lvl, am) {};
+	EditMode(Level& lvl, asset_ptr& am) : GamemodeInstance(lvl, am) {};
 
 	void Update() override;
 	void Draw() override;

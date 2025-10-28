@@ -33,3 +33,5 @@ enum class PlayerAnimState
 	victory,
 	death,
 };
+
+using asset_ptr = std::unique_ptr<AssetManager>;

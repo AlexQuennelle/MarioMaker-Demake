@@ -121,8 +121,10 @@ const Rectangle Player::GetCollisionRect() {
 
 void Player::Draw()
 {
+	float recWidth = lastInput.x > 0 ? -32 : 32;
+
 	DrawRectangle((position.x * 16.0f) - 8.0f, (position.y * 16.0f) - 16.0f, 16, 16, WHITE);
-	DrawTextureRec(assets.sprites, {0, 0, 32, 32},
+	DrawTextureRec(assets.sprites, {0, 0, recWidth, 32},
 				   {(position.x * 16.0f) - 16.0f, (position.y * 16.0f) - 32.0f},
 				   WHITE);
 }
