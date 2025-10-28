@@ -23,7 +23,8 @@ class GameplayMode : public GamemodeInstance
 {
 	public:
 	GameplayMode(Level& lvl, AssetManager& am)
-		: GamemodeInstance(lvl, am), player(this->level), inputHandler(this->player)
+		: GamemodeInstance(lvl, am), player(this->level, {this->assetManager.playerSprites}),
+		  inputHandler(this->player)
 	{
 		player.Reset(level.GetPlayerStartPos());
 	};

@@ -1,11 +1,12 @@
 #pragma once
 
 #include "level.h"
+#include "assetmanager.h"
 
 class Player
 {
 	public:
-	Player(Level&);
+	Player(Level&, PlayerAssets);
 	void HandleMovement(const bool, const Vector2);
 	void HandleJump(const bool);
 	void Update();
@@ -31,6 +32,7 @@ class Player
 	bool canJump{true};
 	Vector2 lastInput{0,0};
 	Level& level;
+	PlayerAssets assets;
 
 	bool Grounded();
 	void CheckCollisions();

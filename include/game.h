@@ -2,6 +2,7 @@
 #include "gamemode.h"
 
 #include "level.h"
+#include "assetmanager.h"
 
 #include <imgui.h>
 #include <memory>
@@ -33,4 +34,5 @@ class Game
 
 	ImGuiIO& imguiIO;
 	RenderTexture2D renderTex;
+	std::unique_ptr<AssetManager> assetManager;
 };

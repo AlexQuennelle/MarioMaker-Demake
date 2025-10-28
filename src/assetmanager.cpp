@@ -8,3 +8,7 @@ AssetManager::AssetManager()
 
 AssetManager::~AssetManager() 
 { UnloadTexture(playerSprites); }
+
+PlayerAssets::PlayerAssets(Texture2D &tex) : sprites(tex) {
+
+}

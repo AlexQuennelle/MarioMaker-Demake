@@ -1,9 +1,9 @@
 #include "player.h"
 #include "utils.h"
+#include "assetmanager.h"
 #include <raylib.h>
 
-Player::Player(Level& level) : level(level)
-{
+Player::Player(Level& level, PlayerAssets assets) : level(level), assets(assets) {
 
 }
 
@@ -122,6 +122,9 @@ const Rectangle Player::GetCollisionRect() {
 void Player::Draw()
 {
 	DrawRectangle((position.x * 16.0f) - 8.0f, (position.y * 16.0f) - 16.0f, 16, 16, WHITE);
+	DrawTextureRec(assets.sprites, {0, 0, 32, 32},
+				   {(position.x * 16.0f) - 16.0f, (position.y * 16.0f) - 32.0f},
+				   WHITE);
 }
 
 void Player::HandleMovement(const bool running, const Vector2 input) {
