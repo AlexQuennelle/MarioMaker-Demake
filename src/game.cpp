@@ -14,7 +14,7 @@
 #include <rlImGui.h>
 
 Game::Game()
-	: imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 224)),
+	: imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 216)),
 	  // HACK: Temporarily hardcode in path to level file
 	  level(RESOURCES_PATH "MyLevel.lvl")
 {
@@ -63,16 +63,6 @@ void Game::Draw()
 				   {0.0f}, 0.0f, WHITE);
 
 	this->gamemode->DrawUI();
-
-	// ImGui demo
-	bool open = true;
-	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings |
-						   ImGuiWindowFlags_AlwaysAutoResize};
-	if (ImGui::Begin("ImGui Window", &open, flags))
-	{
-		ImGui::Text("Text.");
-	}
-	ImGui::End();
 
 	rlImGuiEnd();
 	EndDrawing();
