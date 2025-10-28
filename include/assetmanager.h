@@ -1,6 +1,7 @@
 #pragma once
 
-#include "utils.h"
+#include <raylib.h>
+#include <memory>
 
 class AssetManager
 {
