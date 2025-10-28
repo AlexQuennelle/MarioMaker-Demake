@@ -442,7 +442,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		botL = {
 			.x = 24.0f,
-			.y = static_cast<float>((std::rand() % 2) * 8) + 16.0f,
+			.y = static_cast<float>((std::rand() % 2) * 8),
 			.width = 8.0f,
 			.height = 8.0f,
 		};
