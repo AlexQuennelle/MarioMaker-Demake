@@ -3,6 +3,7 @@
 #include "level.h"
 #include "player.h"
 #include "playerInputHandler.h"
+#include <raylib.h>
 
 class GamemodeInstance
 {
@@ -12,7 +13,9 @@ class GamemodeInstance
 
 	virtual void Update() = 0;
 	virtual void Draw() = 0;
+	virtual void DrawUI() = 0;
 
+	Camera2D camera{0};
 	protected:
 	Level& level;
 };
@@ -20,14 +23,11 @@ class GamemodeInstance
 class GameplayMode : public GamemodeInstance
 {
 	public:
-	GameplayMode(Level& lvl)
-		: GamemodeInstance(lvl), player(this->level), inputHandler(this->player)
-	{
-		player.Reset(level.GetPlayerStartPos());
-	};
+	GameplayMode(Level& lvl);
 
 	void Update() override;
 	void Draw() override;
+	void DrawUI() override;
 	void Reset();
 
 	private:
@@ -39,10 +39,11 @@ class GameplayMode : public GamemodeInstance
 class EditMode : public GamemodeInstance
 {
 	public:
-	EditMode(Level& lvl) : GamemodeInstance(lvl) {};
+	EditMode(Level& lvl);
 
 	void Update() override;
 	void Draw() override;
+	void DrawUI() override;
 
 	private:
 };

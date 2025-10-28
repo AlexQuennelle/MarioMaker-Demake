@@ -23,7 +23,8 @@ Game::Game()
 
 	//this->LoadLevel();
 
-	this->gamemode = std::make_unique<GameplayMode>(this->level);
+	//this->gamemode = std::make_unique<GameplayMode>(this->level);
+	this->gamemode = std::make_unique<EditMode>(this->level);
 
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";
@@ -33,6 +34,8 @@ Game::Game()
 void Game::Update()
 {
 	BeginTextureMode(this->renderTex);
+	ClearBackground({100, 149, 237, 255});
+	BeginMode2D(this->gamemode->camera);
 
 	this->gamemode->Update();
 
@@ -42,10 +45,9 @@ void Game::Update()
 
 void Game::Draw()
 {
-	ClearBackground({100, 149, 237, 255});
-
 	this->gamemode->Draw();
 
+	EndMode2D();
 	EndTextureMode();
 
 	BeginDrawing();
@@ -59,6 +61,8 @@ void Game::Draw()
 				   {0.0f, 0.0f, -static_cast<float>(GetScreenWidth()),
 					static_cast<float>(GetScreenHeight())},
 				   {0.0f}, 0.0f, WHITE);
+
+	this->gamemode->DrawUI();
 
 	// ImGui demo
 	bool open = true;
