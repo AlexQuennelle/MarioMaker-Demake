@@ -13,6 +13,20 @@ void Player::Update()
 	if (running)
 	{
 		horizAcceleration *= runAccelerationMult;
+
+		if (Grounded() && ((velocity.x > 0 && lastInput.x < 0) ||
+			(velocity.x < 0 && lastInput.x > 0)))
+		{
+			horizAcceleration *= 0.5f;
+		}
+
+		// full sprint after charge
+		if (Grounded() && 
+			((velocity.x >= 0.15f && lastInput.x > 0) ||
+			(velocity.x <= -0.15f && lastInput.x < 0)))
+		{
+			velocity.x = maxRunSpeed * copysignf(1,lastInput.x);
+		}
 	}
 	acceleration.x += horizAcceleration;
 
@@ -121,17 +135,81 @@ const Rectangle Player::GetCollisionRect() {
 
 void Player::Draw()
 {
-	float recWidth = lastInput.x > 0 ? -32 : 32;
+	float recWidth = facingRight ? -32 : 32;
 
-	DrawRectangle((position.x * 16.0f) - 8.0f, (position.y * 16.0f) - 16.0f, 16, 16, WHITE);
-	DrawTextureRec(assets.sprites, {0, 0, recWidth, 32},
+	Rectangle frameRec{0, 0, recWidth, 32};
+
+	if (Grounded())
+	{
+		if (lastInput.y > 0 && FloatEquals(lastInput.x, 0))
+		{
+			// look up
+			frameRec = {32, 0, recWidth, 32};
+		}
+		else if ((velocity.x > 0 && lastInput.x < 0) ||
+				 (velocity.x < 0 && lastInput.x > 0))
+		{
+			// skid
+			frameRec = {0, 32, recWidth, 32};
+		}
+		else if (fabsf(velocity.x) > 0.05f)
+		{
+			// anim update
+			if (accumulatedAnimTime >= timeBetweenFrames)
+			{
+				accumulatedAnimTime = 0;
+				curFrame++;
+			}
+			if (curFrame > 2)
+			{
+				curFrame = 0;
+			}
+
+			if (fabsf(velocity.x) > 0.15f)
+			{
+				//running
+				frameRec = {192.0f + (curFrame * 32), 0, recWidth, 32};
+			}
+			else
+			{
+				//walking
+				frameRec = {96.0f + (curFrame * 32), 0, recWidth, 32};
+			}
+		}
+	}
+	else
+	{
+		if (velocity.y < 0)
+		{
+			// jump up
+			frameRec = {32, 32, recWidth, 32};
+		}
+		else
+		{
+			// falling
+			frameRec = {64, 32, recWidth, 32};
+		}
+	}
+	
+	if (luigi)
+	{
+		frameRec.y += assets.luigiOffset;
+	}
+
+	DrawTextureRec(assets.sprites, frameRec,
 				   {(position.x * 16.0f) - 16.0f, (position.y * 16.0f) - 32.0f},
 				   WHITE);
+
+	accumulatedAnimTime += GetFrameTime();
 }
 
 void Player::HandleMovement(const bool running, const Vector2 input) {
 	this->running = running;
 	this->lastInput = input;
+	if (input.x != 0)
+	{
+		this->facingRight = lastInput.x > 0;
+	}
 }
 
 void Player::HandleJump(const bool jump) { this->jumpPressed = jump; }

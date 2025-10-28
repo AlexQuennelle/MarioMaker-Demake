@@ -34,7 +34,7 @@ class GameplayMode : public GamemodeInstance
 	void Reset();
 
 	private:
-	float gravity{1.5f};
+	float gravity{0.9f};
 	Player player;
 	PlayerInputHandler inputHandler;
 };
