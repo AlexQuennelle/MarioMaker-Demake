@@ -6,6 +6,7 @@
 #include <array>
 #include <cstdint>
 #include <raylib.h>
+#include <string>
 #include <vector>
 
 using std::array;
@@ -15,6 +16,10 @@ class Level
 {
 	public:
 	Level();
+	Level(const std::string& filepath);
+	~Level();
+
+	[[nodiscard]] vector<byte> Serialize() const;
 
 	void Draw();
 	/**
@@ -29,8 +34,10 @@ class Level
 	 * @param tile ID of the tile to be set
 	 * @param x the x position to set the tile
 	 * @param y the y position to set the tile
+	 * @param flags any flags a tile should have
 	 */
-	void SetTileAt(const TileID tile, const int x, const int y);
+	void SetTileAt(const TileID tile, const int x, const int y,
+				   const uint8_t flags = 0);
 	/**
 	 * @param x the x position to query
 	 * @param y the y position to query
@@ -39,11 +46,14 @@ class Level
 	 * @warning if (x, y) is outside the bounds of the level, this method
 	 *          returns a @link TileID::ground @endlink.
 	 */
-	TileID TileAt(const int x, const int y);
+	Tile TileAt(const int x, const int y);
 
 	// getters
-	const Vector2 GetPlayerStartPos() const { return playerStartPos; }
-	const vector<CollisionRect>& GetColliders() const { return colliders; }
+	Vector2 GetPlayerStartPos() const { return playerStartPos; }
+	const vector<Rectangle>& GetColliders() const { return colliders; }
+	bool HasFilepath() const { return !this->filepath.empty(); }
+	void SetFilepath(const std::string& path) { this->filepath = path; }
+	const std::string& GetFilepath() const { return this->filepath; }
 
 	private:
 	/**
@@ -65,9 +75,9 @@ class Level
 	 * @param visited A vector that mirrors @link grid @endlink storing wich
 	 *        cells have been visited by the greedy meshing.
 	 *
-	 * @returns a @link CollisionRect @endlink
+	 * @returns a @link Rectangle @endlink
 	 */
-	CollisionRect GenCollisionRect(const int x, const int y,
+	Rectangle GenCollisionRect(const int x, const int y,
 								   vector<bool>& visited);
 	/**
 	 * @brief Stitches ground tile sprites into an image representing the entire
@@ -84,10 +94,12 @@ class Level
 	 * @param x the center of the area to check along the x axis
 	 * @param y the center of the area to check along the y axis
 	 *
-	 * @returns @link byte @endlink representing adjacency to
+	 * @returns @link byte @endlink representing adjacency to tiles with the ID
 	 *          @link TileID::ground @endlink tiles encoded as bit flags
 	 */
 	byte MarchSquares(const int x, const int y);
+	void ParseData(const vector<char>& data);
+
 	/**
 	 * @param mask Bit mask representing adjacency.
 	 *        see @link MarchSquares @endlink
@@ -96,16 +108,18 @@ class Level
 	 *          @link sprites @endlink into @link img @endlink
 	 */
 	static array<Rectangle, 4> GetRects(const byte mask);
+	template <typename T>
+	static inline void InsertAsBytes(vector<byte>& vec, T data);
 
 	int32_t height;
 	int32_t length;
-	vector<TileID> grid;
-	vector<CollisionRect> colliders;
 	Image img;
 	Image sprites;
 	Texture tex;
-	// TODO: Vector of entity
-
-	// location to spawn player and reset them to
+	std::string name;
+	std::string filepath;
 	Vector2 playerStartPos;
+	vector<Tile> grid;
+	vector<Rectangle> colliders;
+	// TODO: Vector of entity
 };

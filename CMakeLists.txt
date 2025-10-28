@@ -70,8 +70,10 @@ FetchContent_MakeAvailable(rlImGui)
 FetchContent_GetProperties(rlImGui SOURCE_DIR RLIMGUI_DIR)
 
 add_library(rlImGui STATIC ${rlimgui_SOURCE_DIR}/rlImGui.cpp)
-target_link_libraries(rlImGui PRIVATE ImGui raylib)
+target_link_libraries(rlImGui PRIVATE ImGui raylib nfd)
 target_include_directories(rlImGui INTERFACE ${rlimgui_SOURCE_DIR})
+
+add_subdirectory(nativefiledialog-extended-1.2.1)
 
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
@@ -130,6 +132,10 @@ target_include_directories(
 )
 target_include_directories(
     "${CMAKE_PROJECT_NAME}" PUBLIC "${PROJECT_BINARY_DIR}"
+)
+target_include_directories(
+    "${CMAKE_PROJECT_NAME}" PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/nativefiledialog-extended-1.2.1/src/include/"
 )
 
 if(NOT EMSCRIPTEN)

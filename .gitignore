@@ -2,6 +2,8 @@
 [Bb]in/
 .cache/
 
+*.bak
+
 CMakeSettings.json
 
 ## Ignore Visual Studio temporary files, build results, and

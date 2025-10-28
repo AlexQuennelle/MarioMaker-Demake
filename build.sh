@@ -16,7 +16,8 @@ elif [ "${buildType^}" != "Debug" ] && [ "${buildType^}" != "Release" ]; then
 fi
 mkdir -p build
 cd build
-cmake -DCMAKE_BUILD_TYPE="${buildType^}" .. -G "Unix Makefiles"
+# cmake -DCMAKE_BUILD_TYPE="${buildType^}" .. -G "Unix Makefiles"
+cmake -DNFD_PORTAL=ON -DCMAKE_BUILD_TYPE="${buildType^}" .. -G "Unix Makefiles"
 make
 cd ..
 if [[ "${buildType^}" = "Debug" ]]; then

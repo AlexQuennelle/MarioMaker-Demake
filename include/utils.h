@@ -25,9 +25,3 @@ inline void SetTextColor(Color col)
 	std::cout << "\033[38;2;" << std::to_string(col.r) << ';'
 			  << std::to_string(col.g) << ';' << std::to_string(col.b) << 'm';
 }
-
-struct CollisionRect
-{
-	Vector2 position;
-	Vector2 size;
-};

@@ -1,5 +1,6 @@
 #include "player.h"
 #include "utils.h"
+#include <raylib.h>
 
 Player::Player(Level& level) : level(level)
 {
@@ -66,25 +67,17 @@ void Player::Update()
 }
 
 void Player::CheckCollisions() {
-	for (const CollisionRect col : level.GetColliders())
+	for (const Rectangle col : level.GetColliders())
 	{
 		Rectangle playerCol{GetCollisionRect()};
 
-		// remove after refactor
-		Rectangle levelRect { 
-			.x = col.position.x,
-			.y = col.position.y,
-			.width = col.size.x,
-			.height = col.size.y
-		};
-
-		if (CheckCollisionRecs(playerCol, levelRect))
+		if (CheckCollisionRecs(playerCol, col))
 		{
 			// Calculation of centers of rectangles
 			const Vector2 center1 = {playerCol.x + playerCol.width / 2,
 									 playerCol.y + playerCol.height / 2};
-			const Vector2 center2 = {levelRect.x + levelRect.width / 2,
-									 levelRect.y + levelRect.height / 2};
+			const Vector2 center2 = {col.x + col.width / 2,
+									 col.y + col.height / 2};
 
 			// Calculation of the distance vector between the centers of the
 			// rectangles
@@ -92,7 +85,7 @@ void Player::CheckCollisions() {
 
 			// Calculation of half-widths and half-heights of rectangles
 			const Vector2 hs1 = {playerCol.width * .5f, playerCol.height * .5f};
-			const Vector2 hs2 = {levelRect.width * .5f, levelRect.height * .5f};
+			const Vector2 hs2 = {col.width * .5f, col.height * .5f};
 
 			// Calculation of the minimum distance at which the two rectangles
 			// can be separated
@@ -152,15 +145,9 @@ bool Player::Grounded()
 		.height = 0.1f
 	};
 
-	for (const CollisionRect col : level.GetColliders())
+	for (const Rectangle col : level.GetColliders())
 	{
-		// remove after refactor
-		Rectangle levelRect{.x = col.position.x,
-							.y = col.position.y,
-							.width = col.size.x,
-							.height = col.size.y};
-
-		if (CheckCollisionRecs(levelRect, groundedBox))
+		if (CheckCollisionRecs(col, groundedBox))
 		{
 			return true;
 		}	
