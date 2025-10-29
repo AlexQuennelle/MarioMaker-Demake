@@ -1,10 +1,6 @@
 #include "playerInputHandler.h"
-#include "utils.h"
 
-PlayerInputHandler::PlayerInputHandler(Player& _player) : player(_player)
-{
-	
-}
+PlayerInputHandler::PlayerInputHandler(Player& _player) : player(_player) {}
 
 void PlayerInputHandler::Update() 
 { 
@@ -45,7 +41,6 @@ void PlayerInputHandler::Update()
 	bool jump{IsKeyDown(KEY_SPACE)};
 
 	player.HandleJump(jump);
-
 	// HACK: remove when death is possible via hazards
 	if (IsKeyDown(KEY_X))
 	{

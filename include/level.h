@@ -1,5 +1,6 @@
 #pragma once
 
+#include "assetmanager.h"
 #include "tile.h"
 #include "utils.h"
 
@@ -12,16 +13,28 @@
 using std::array;
 using std::vector;
 
+struct Vector2Int
+{
+	int x;
+	int y;
+
+	bool operator==(const Vector2Int other)
+	{
+		return (this->x == other.x) && (this->y == other.y);
+	}
+};
+
 class Level
 {
 	public:
-	Level();
-	Level(const std::string& filepath);
+	Level() = default;
+	Level(const std::string& filepath, AssetManager* am);
 	~Level();
 
 	[[nodiscard]] vector<byte> Serialize() const;
 
 	void Draw();
+	void DrawGrid(RenderTexture& tex);
 	/**
 	 * @brief Rebuilds the level from the tile grid. This respawns all entities.
 	 */
@@ -38,6 +51,10 @@ class Level
 	 */
 	void SetTileAt(const TileID tile, const int x, const int y,
 				   const uint8_t flags = 0);
+	void SetTileAt(const TileID tile, const Vector2Int pos,
+				   const uint8_t flags = 0);
+	void SetTileAtEditor(const TileID tile, const Vector2Int pos,
+						 const uint8_t flags = 0);
 	/**
 	 * @param x the x position to query
 	 * @param y the y position to query
@@ -54,6 +71,9 @@ class Level
 	bool HasFilepath() const { return !this->filepath.empty(); }
 	void SetFilepath(const std::string& path) { this->filepath = path; }
 	const std::string& GetFilepath() const { return this->filepath; }
+	int GetLength() const { return this->length; }
+	int GetHeight() const { return this->height; }
+	void SetLevelSize(const int length, const int height);
 
 	private:
 	/**
@@ -77,8 +97,7 @@ class Level
 	 *
 	 * @returns a @link Rectangle @endlink
 	 */
-	Rectangle GenCollisionRect(const int x, const int y,
-								   vector<bool>& visited);
+	Rectangle GenCollisionRect(const int x, const int y, vector<bool>& visited);
 	/**
 	 * @brief Stitches ground tile sprites into an image representing the entire
 	 *        level using the data in @link grid @endlink. This is done using
@@ -116,6 +135,7 @@ class Level
 	Image img;
 	Image sprites;
 	Texture tex;
+	AssetManager* am{nullptr};
 	std::string name;
 	std::string filepath;
 	Vector2 playerStartPos;

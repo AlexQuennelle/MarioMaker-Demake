@@ -1,11 +1,11 @@
 #include "player.h"
-#include "utils.h"
 #include "assetmanager.h"
+
 #include <raylib.h>
+#include <raymath.h>
 
-Player::Player(Level& level, PlayerAssets assets) : level(level), assets(assets) {
-
-}
+Player::Player(Level& level, PlayerAssets assets) : level(level), assets(assets)
+{}
 
 void Player::Update()
 {
@@ -13,7 +13,8 @@ void Player::Update()
 	if (!crouching || !Grounded())
 	{
 		// add base acceleration
-		float horizAcceleration = lastInput.x * baseAcceleration * GetFrameTime();
+		float horizAcceleration =
+			lastInput.x * baseAcceleration * GetFrameTime();
 
 		// apply run speed bonus if not crouching
 		if (running && !crouching)
@@ -95,15 +96,15 @@ void Player::Update()
 
 	// reset acceleration
 	acceleration = {0, 0};
-	
+
 	CheckCollisions();
 }
 
-void Player::CheckCollisions() {
+void Player::CheckCollisions()
+{
 	// no collision needed when falling off screen
 	if (this->dead)
 		return;
-
 	for (const Rectangle col : level.GetColliders())
 	{
 		Rectangle playerCol{GetCollisionRect()};
@@ -111,10 +112,10 @@ void Player::CheckCollisions() {
 		if (CheckCollisionRecs(playerCol, col))
 		{
 			// Calculation of centers of rectangles
-			const Vector2 center1 = {playerCol.x + playerCol.width / 2,
-									 playerCol.y + playerCol.height / 2};
-			const Vector2 center2 = {col.x + col.width / 2,
-									 col.y + col.height / 2};
+			const Vector2 center1 = {playerCol.x + (playerCol.width / 2),
+									 playerCol.y + (playerCol.height / 2)};
+			const Vector2 center2 = {col.x + (col.width / 2),
+									 col.y + (col.height / 2)};
 
 			// Calculation of the distance vector between the centers of the
 			// rectangles
@@ -147,16 +148,14 @@ void Player::CheckCollisions() {
 	}
 }
 
-const Rectangle Player::GetCollisionRect() {
+const Rectangle Player::GetCollisionRect()
+{
 	// THIS ASSUMES SMALL PLAYER
 	float height = crouching ? 0.6f : 1.0f;
-	return
-	{
-		.x = this->position.x - 0.3f, 
-		.y = this->position.y - height,
-		.width = 0.6f,
-		.height = height
-	};
+	return {.x = this->position.x - 0.3f,
+			.y = this->position.y - height,
+			.width = 0.6f,
+			.height = height};
 }
 
 void Player::Draw()
@@ -227,7 +226,7 @@ void Player::Draw()
 			frameRec = {64, 32, recWidth, 32};
 		}
 	}
-	
+
 	if (luigi)
 	{
 		frameRec.y += assets.luigiOffset;
@@ -239,15 +238,16 @@ void Player::Draw()
 
 	accumulatedAnimTime += GetFrameTime();
 
-	#ifdef DRAW_COLS
+#ifdef DRAW_COLS
 	Rectangle rec = this->GetCollisionRect();
-	DrawRectangleLinesEx({rec.x * 16, rec.y * 16,
-							 rec.width * 16, rec.height * 16},
-							 1.0f, {0, 255, 0, 255});
-	#endif // DRAW_COLS
+	DrawRectangleLinesEx(
+		{rec.x * 16, rec.y * 16, rec.width * 16, rec.height * 16}, 1.0f,
+		{0, 255, 0, 255});
+#endif // DRAW_COLS
 }
 
-void Player::HandleMovement(const bool running, const Vector2 input) {
+void Player::HandleMovement(const bool running, const Vector2 input)
+{
 	// block input if dead
 	if (this->dead)
 		return;
@@ -262,28 +262,26 @@ void Player::HandleMovement(const bool running, const Vector2 input) {
 
 void Player::HandleJump(const bool jump) { this->jumpPressed = jump; }
 
-void Player::Reset(const Vector2 startPosition) {
+void Player::Reset(const Vector2 startPosition)
+{
 	this->position = startPosition;
 	this->dead = false;
 }
 
-bool Player::Grounded() 
-{ 
+bool Player::Grounded()
+{
 	// box cast underneath player
-	Rectangle groundedBox
-	{
-		.x = this->position.x - 0.5f, 
-		.y = this->position.y, 
-		.width = 1.0f,
-		.height = 0.1f
-	};
+	Rectangle groundedBox{.x = this->position.x - 0.5f,
+						  .y = this->position.y,
+						  .width = 1.0f,
+						  .height = 0.1f};
 
 	for (const Rectangle col : level.GetColliders())
 	{
 		if (CheckCollisionRecs(col, groundedBox))
 		{
 			return true;
-		}	
+		}
 	}
 	return false;
 }

@@ -1,18 +1,25 @@
 #pragma once
 
+#include "assetmanager.h"
+#include "imgui.h"
 #include "level.h"
 #include "player.h"
 #include "playerInputHandler.h"
-#include "assetmanager.h"
+
+#include <raylib.h>
 
 class GamemodeInstance
 {
 	public:
-	GamemodeInstance(Level& lvl, asset_ptr& am) : level(lvl), assetManager(am) {};
+	GamemodeInstance(Level& lvl, asset_ptr& am)
+		: level(lvl), assetManager(am) {};
 	virtual ~GamemodeInstance() = default;
 
 	virtual void Update() = 0;
 	virtual void Draw() = 0;
+	virtual void DrawUI() = 0;
+
+	Camera2D camera{0};
 
 	protected:
 	Level& level;
@@ -22,15 +29,11 @@ class GamemodeInstance
 class GameplayMode : public GamemodeInstance
 {
 	public:
-	GameplayMode(Level& lvl, asset_ptr& am)
-		: GamemodeInstance(lvl, am), player(this->level, {this->assetManager->playerSprites}),
-		  inputHandler(this->player)
-	{
-		player.Reset(level.GetPlayerStartPos());
-	};
+	GameplayMode(Level& lvl, asset_ptr& am);
 
 	void Update() override;
 	void Draw() override;
+	void DrawUI() override;
 	void Reset();
 
 	private:
@@ -43,10 +46,18 @@ class GameplayMode : public GamemodeInstance
 class EditMode : public GamemodeInstance
 {
 	public:
-	EditMode(Level& lvl, asset_ptr& am) : GamemodeInstance(lvl, am) {};
+	EditMode(Level& lvl, asset_ptr& am, const ImGuiIO& imgui);
 
 	void Update() override;
 	void Draw() override;
+	void DrawUI() override;
 
 	private:
+	void SaveLevel();
+	void SaveLevelAs();
+
+	RenderTexture tex;
+	Vector2Int selectedTile;
+	Vector2 lvlMousePos;
+	const ImGuiIO& imGuiIO;
 };

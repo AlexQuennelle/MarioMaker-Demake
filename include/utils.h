@@ -4,7 +4,6 @@
 #include <iostream>
 #include <raylib.h>
 #include <string>
-#include <raymath.h>
 
 static constexpr Color ERROR{220, 0, 0, 0};
 static constexpr Color WARNING{230, 150, 0, 0};
