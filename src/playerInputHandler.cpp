@@ -2,12 +2,23 @@
 
 PlayerInputHandler::PlayerInputHandler(Player& _player) : player(_player) {}
 
-void PlayerInputHandler::Update()
-{
+void PlayerInputHandler::Update() 
+{ 
+	// pausing
+	if (IsKeyPressed(KEY_P))
+	{
+		paused = !paused;
+	}
+
+	// no need to process player input if paused
+	if (paused)
+		return;
+
 	bool running{IsKeyDown(KEY_LEFT_SHIFT)};
 
 	Vector2 input{0, 0};
 
+	// movement !
 	if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D))
 	{
 		input.x += 1.0f;

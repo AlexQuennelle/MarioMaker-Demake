@@ -18,8 +18,12 @@ GameplayMode::GameplayMode(Level& lvl, asset_ptr& am)
 }
 void GameplayMode::Update()
 {
-	// input gets polled first :craigthumb:
+	// input gets polled first
 	inputHandler.Update();
+
+	// skip all updates if game is paused
+	if (inputHandler.IsPaused())
+		return;
 
 	player.AddForce({0, gravity * GetFrameTime()});
 	player.Update();

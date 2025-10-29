@@ -1,5 +1,6 @@
 #include "player.h"
 #include "assetmanager.h"
+
 #include <raylib.h>
 #include <raymath.h>
 
@@ -8,29 +9,40 @@ Player::Player(Level& level, PlayerAssets assets) : level(level), assets(assets)
 
 void Player::Update()
 {
-	float horizAcceleration = lastInput.x * baseAcceleration * GetFrameTime();
-	if (running)
+	// only move if not crouching unless airborne
+	if (!crouching || !Grounded())
 	{
-		horizAcceleration *= runAccelerationMult;
+		// add base acceleration
+		float horizAcceleration =
+			lastInput.x * baseAcceleration * GetFrameTime();
 
-		if (Grounded() && ((velocity.x > 0 && lastInput.x < 0) ||
-						   (velocity.x < 0 && lastInput.x > 0)))
+		// apply run speed bonus if not crouching
+		if (running && !crouching)
 		{
-			horizAcceleration *= 0.5f;
-		}
+			horizAcceleration *= runAccelerationMult;
 
-		// full sprint after charge
-		if (Grounded() && ((velocity.x >= 0.15f && lastInput.x > 0) ||
-						   (velocity.x <= -0.15f && lastInput.x < 0)))
-		{
-			velocity.x = copysignf(maxRunSpeed, lastInput.x);
+			// less acceleration when turning
+			if (Grounded() && ((velocity.x > 0 && lastInput.x < 0) ||
+							   (velocity.x < 0 && lastInput.x > 0)))
+			{
+				horizAcceleration *= 0.5f;
+			}
+
+			// full sprint after charge
+			if (Grounded() && ((velocity.x >= 0.15f && lastInput.x > 0) ||
+							   (velocity.x <= -0.15f && lastInput.x < 0)))
+			{
+				velocity.x = copysignf(maxRunSpeed, lastInput.x);
+			}
 		}
+		// apply movement force to acceleration
+		acceleration.x += horizAcceleration;
 	}
-	acceleration.x += horizAcceleration;
 
 	velocity = Vector2Add(velocity, acceleration);
 
-	if (running)
+	// constrain horizontal movement speed
+	if (running && !crouching)
 	{
 		velocity.x = Clamp(velocity.x, -maxRunSpeed, maxRunSpeed);
 	}
@@ -39,28 +51,34 @@ void Player::Update()
 		velocity.x = Clamp(velocity.x, -maxWalkSpeed, maxWalkSpeed);
 	}
 
+	// jumping
 	if (jumpPressed && canJump)
 	{
+		// initial launch from ground
 		if (Grounded())
 		{
 			velocity.y = -jumpForce;
 			timeJumping = 0;
 			cancelJump = false;
 		}
+		// jump button held
 		else if (timeJumping < maxTimeJumping && !cancelJump)
 		{
 			velocity.y = -jumpForce;
 			timeJumping += GetFrameTime();
 		}
+		// cancel jump holding
 		else
 		{
 			canJump = false;
 		}
 	}
+	// prevent midair jumps
 	else if (!Grounded())
 	{
 		canJump = false;
 	}
+	// prevent holding to jump multiple times
 	else if (!jumpPressed)
 	{
 		canJump = true;
@@ -70,9 +88,13 @@ void Player::Update()
 
 	if (Grounded())
 	{
+		crouching = lastInput.y < 0;
+
+		// apply ground friction
 		velocity.x *= groundFrictionFactor;
 	}
 
+	// reset acceleration
 	acceleration = {0, 0};
 
 	CheckCollisions();
@@ -90,10 +112,10 @@ void Player::CheckCollisions()
 		if (CheckCollisionRecs(playerCol, col))
 		{
 			// Calculation of centers of rectangles
-			const Vector2 center1 = {playerCol.x + playerCol.width / 2,
-									 playerCol.y + playerCol.height / 2};
-			const Vector2 center2 = {col.x + col.width / 2,
-									 col.y + col.height / 2};
+			const Vector2 center1 = {playerCol.x + (playerCol.width / 2),
+									 playerCol.y + (playerCol.height / 2)};
+			const Vector2 center2 = {col.x + (col.width / 2),
+									 col.y + (col.height / 2)};
 
 			// Calculation of the distance vector between the centers of the
 			// rectangles
@@ -116,7 +138,9 @@ void Player::CheckCollisions()
 			}
 			else
 			{
+				// cancel jump holding if vertical collision
 				this->cancelJump = (delta.y < 0);
+
 				this->position.y += copysignf(minDistY, delta.y);
 				this->velocity.y = 0;
 			}
@@ -127,14 +151,16 @@ void Player::CheckCollisions()
 const Rectangle Player::GetCollisionRect()
 {
 	// THIS ASSUMES SMALL PLAYER
-	return {.x = this->position.x - 0.5f,
-			.y = this->position.y - 1.0f,
-			.width = 1.0f,
-			.height = 1.0f};
+	float height = crouching ? 0.6f : 1.0f;
+	return {.x = this->position.x - 0.3f,
+			.y = this->position.y - height,
+			.width = 0.6f,
+			.height = height};
 }
 
 void Player::Draw()
 {
+	// flip sprite
 	float recWidth = facingRight ? -32 : 32;
 
 	Rectangle frameRec{0, 0, recWidth, 32};
@@ -142,7 +168,12 @@ void Player::Draw()
 	if (dead)
 	{
 		//dead
-		frameRec = {160, 32, 32, 32};
+		frameRec = {160, 32, recWidth, 32};
+	}
+	else if (crouching)
+	{
+		//crouching
+		frameRec = {64, 0, recWidth, 32};
 	}
 	else if (Grounded())
 	{
@@ -206,10 +237,18 @@ void Player::Draw()
 				   WHITE);
 
 	accumulatedAnimTime += GetFrameTime();
+
+#ifdef DRAW_COLS
+	Rectangle rec = this->GetCollisionRect();
+	DrawRectangleLinesEx(
+		{rec.x * 16, rec.y * 16, rec.width * 16, rec.height * 16}, 1.0f,
+		{0, 255, 0, 255});
+#endif // DRAW_COLS
 }
 
 void Player::HandleMovement(const bool running, const Vector2 input)
 {
+	// block input if dead
 	if (this->dead)
 		return;
 
@@ -231,6 +270,7 @@ void Player::Reset(const Vector2 startPosition)
 
 bool Player::Grounded()
 {
+	// box cast underneath player
 	Rectangle groundedBox{.x = this->position.x - 0.5f,
 						  .y = this->position.y,
 						  .width = 1.0f,
@@ -246,6 +286,7 @@ bool Player::Grounded()
 	return false;
 }
 
+// Public method for applying forces to the player
 void Player::AddForce(const Vector2 force)
 {
 	acceleration = Vector2Add(acceleration, force);
