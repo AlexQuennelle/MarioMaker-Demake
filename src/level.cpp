@@ -535,6 +535,17 @@ void Level::SetTileAt(const TileID tile, const int x, const int y,
 	}
 #endif // !NDEBUG
 }
+void Level::SetTileAt(const TileID tile, const Vector2Int pos,
+					  const uint8_t flags)
+{
+	this->SetTileAt(tile, pos.x, pos.y, flags);
+}
+void Level::SetTileAtEditor(const TileID tile, const Vector2Int pos,
+							const uint8_t flags)
+{
+	this->SetTileAt(tile, pos, flags);
+	this->StitchTexture();
+}
 Tile Level::TileAt(const int x, const int y)
 {
 	if (x >= 0 && x <= this->length - 1 && y >= 0 && y <= this->height - 1)

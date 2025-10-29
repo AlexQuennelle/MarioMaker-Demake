@@ -45,6 +45,10 @@ class Level
 	 */
 	void SetTileAt(const TileID tile, const int x, const int y,
 				   const uint8_t flags = 0);
+	void SetTileAt(const TileID tile, const Vector2Int pos,
+				   const uint8_t flags = 0);
+	void SetTileAtEditor(const TileID tile, const Vector2Int pos,
+						 const uint8_t flags = 0);
 	/**
 	 * @param x the x position to query
 	 * @param y the y position to query

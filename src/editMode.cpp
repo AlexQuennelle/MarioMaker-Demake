@@ -1,5 +1,6 @@
 #include "assetmanager.h"
 #include "gamemode.h"
+#include "tile.h"
 
 #include <imgui.h>
 #include <raylib.h>
@@ -24,13 +25,20 @@ void EditMode::Update()
 	this->lvlMousePos = {(GetMousePosition() / cellSize) -
 						 this->camera.offset / 16.0f};
 
+	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+	{
+		this->level.SetTileAtEditor(TileID::ground, this->selectedTile);
+	}
+
 	if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))
 	{
-		this->camera.offset.x += 1.0f;
+		if (this->camera.offset.x < 0.0f)
+			this->camera.offset.x += 1.0f;
 	}
 	else if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))
 	{
-		this->camera.offset.x -= 1.0f;
+		if (this->camera.offset.x > -((this->level.GetLength() * 16.0f) - 384))
+			this->camera.offset.x -= 1.0f;
 	}
 
 	this->selectedTile = {
@@ -52,15 +60,21 @@ void EditMode::DrawUI()
 		(this->selectedTile.x + (this->camera.offset.x / 16.0f)) * cellSize,
 		(this->selectedTile.y + (this->camera.offset.y / 16.0f)) * cellSize,
 		cellSize, cellSize, GREEN);
-	// ImGui demo
+
+	Vector2 camOffset = {
+		.x = -this->camera.offset.x,
+		.y = this->camera.offset.y,
+	};
+
 	bool open = true;
 	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings |
 						   ImGuiWindowFlags_AlwaysAutoResize};
 	if (ImGui::Begin("Debug Info", &open, flags))
 	{
-		ImGui::InputFloat2("Camera offset", &this->camera.offset.x);
+		ImGui::InputFloat2("Camera offset", &camOffset.x);
 		ImGui::InputFloat2("Mouse position in level", &lvlMousePos.x);
 		ImGui::InputInt2("Hovered cell", &this->selectedTile.x);
 	}
 	ImGui::End();
+	this->camera.offset = {.x = -camOffset.x, .y = camOffset.y};
 }
