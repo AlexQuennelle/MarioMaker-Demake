@@ -21,7 +21,7 @@
 #include <vector>
 
 #ifndef NDEBUG
-#define DRAW_COLS
+//#define DRAW_COLS
 #endif // !NDEBUG
 
 //Level::Level()

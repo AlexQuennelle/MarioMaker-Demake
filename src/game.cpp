@@ -23,10 +23,10 @@ Game::Game()
 	this->level = Level(RESOURCES_PATH "MyLevel.lvl", assetManager.get());
 	//this->LoadLevel();
 
-	this->gamemode = std::make_unique<EditMode>(this->level, this->assetManager,
-												this->imguiIO);
-	//this->gamemode =
-	//	std::make_unique<GameplayMode>(this->level, this->assetManager);
+	//this->gamemode = std::make_unique<EditMode>(this->level, this->assetManager,
+	//											this->imguiIO);
+	this->gamemode =
+		std::make_unique<GameplayMode>(this->level, this->assetManager);
 
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";
