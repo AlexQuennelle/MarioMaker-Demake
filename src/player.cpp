@@ -130,9 +130,9 @@ const Rectangle Player::GetCollisionRect() {
 	// THIS ASSUMES SMALL PLAYER
 	return
 	{
-		.x = this->position.x - 0.5f, 
+		.x = this->position.x - 0.3f, 
 		.y = this->position.y - 1.0f,
-		.width = 1.0f,
+		.width = 0.6f,
 		.height = 1.0f
 	};
 }
@@ -210,6 +210,13 @@ void Player::Draw()
 				   WHITE);
 
 	accumulatedAnimTime += GetFrameTime();
+
+	#ifdef DRAW_COLS
+	Rectangle rec = this->GetCollisionRect();
+	DrawRectangleLinesEx({rec.x * 16, rec.y * 16,
+							 rec.width * 16, rec.height * 16},
+							 1.0f, {0, 255, 0, 255});
+	#endif // DRAW_COLS
 }
 
 void Player::HandleMovement(const bool running, const Vector2 input) {
