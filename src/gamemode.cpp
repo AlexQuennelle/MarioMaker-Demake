@@ -1,9 +1,10 @@
 #include "gamemode.h"
+#include "assetmanager.h"
 
 #include <raylib.h>
 
-GameplayMode::GameplayMode(Level& lvl)
-	: GamemodeInstance(lvl), player(lvl), inputHandler(this->player)
+GameplayMode::GameplayMode(Level& lvl, asset_ptr& am)
+	: GamemodeInstance(lvl, am), player(lvl,{this->assetManager->playerSprites}), inputHandler(this->player)
 {
 	this->camera = Camera2D{0};
 	this->camera.target = {.x = 0.0f, .y = 0.0f};

@@ -1,13 +1,9 @@
 #include "playerInputHandler.h"
-#include "utils.h"
 
-PlayerInputHandler::PlayerInputHandler(Player& _player) : player(_player)
+PlayerInputHandler::PlayerInputHandler(Player& _player) : player(_player) {}
+
+void PlayerInputHandler::Update()
 {
-	
-}
-
-void PlayerInputHandler::Update() 
-{ 
 	bool running{IsKeyDown(KEY_LEFT_SHIFT)};
 
 	Vector2 input{0, 0};

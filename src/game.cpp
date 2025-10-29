@@ -15,6 +15,7 @@
 
 Game::Game()
 	: imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 216)),
+	  assetManager(std::make_unique<AssetManager>()),
 	  // HACK: Temporarily hardcode in path to level file
 	  level(RESOURCES_PATH "MyLevel.lvl")
 {
@@ -23,8 +24,10 @@ Game::Game()
 
 	//this->LoadLevel();
 
-	//this->gamemode = std::make_unique<GameplayMode>(this->level);
-	this->gamemode = std::make_unique<EditMode>(this->level);
+	//this->gamemode =
+	//	std::make_unique<EditMode>(this->level, this->assetManager);
+	this->gamemode =
+		std::make_unique<GameplayMode>(this->level, this->assetManager);
 
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";

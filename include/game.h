@@ -1,6 +1,6 @@
 #pragma once
 #include "gamemode.h"
-
+#include "assetmanager.h"
 #include "level.h"
 
 #include <imgui.h>
@@ -33,4 +33,5 @@ class Game
 
 	ImGuiIO& imguiIO;
 	RenderTexture2D renderTex;
+	asset_ptr assetManager;
 };

@@ -1,11 +1,11 @@
+#include "assetmanager.h"
 #include "gamemode.h"
 
-#include <array>
-#include <cstdint>
 #include <imgui.h>
 #include <raylib.h>
+#include <raymath.h>
 
-EditMode::EditMode(Level& lvl) : GamemodeInstance(lvl)
+EditMode::EditMode(Level& lvl, asset_ptr& am) : GamemodeInstance(lvl, am)
 {
 	// Initialize mode
 	this->camera = Camera2D{0};
