@@ -67,6 +67,7 @@ class Level
 	const std::string& GetFilepath() const { return this->filepath; }
 	int GetLength() const { return this->length; }
 	int GetHeight() const { return this->height; }
+	void SetLevelSize(const int length, const int height);
 
 	private:
 	/**

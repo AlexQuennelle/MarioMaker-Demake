@@ -11,7 +11,10 @@ EditMode::EditMode(Level& lvl, asset_ptr& am) : GamemodeInstance(lvl, am)
 	// Initialize mode
 	this->camera = Camera2D{0};
 	this->camera.target = {.x = 0.0f, .y = 0.0f};
-	this->camera.offset = {.x = 0.0f, .y = 0.0f};
+	this->camera.offset = {
+		.x = 0.0f,
+		.y = 216 - (this->level.GetHeight() * 16.0f),
+	};
 	this->camera.rotation = 0.0f;
 	this->camera.zoom = 1.0f;
 
@@ -66,6 +69,11 @@ void EditMode::DrawUI()
 		.y = this->camera.offset.y,
 	};
 
+	Vector2Int lvlDims{
+		.x = this->level.GetLength(),
+		.y = this->level.GetHeight(),
+	};
+
 	bool open = true;
 	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings |
 						   ImGuiWindowFlags_AlwaysAutoResize};
@@ -74,7 +82,33 @@ void EditMode::DrawUI()
 		ImGui::InputFloat2("Camera offset", &camOffset.x);
 		ImGui::InputFloat2("Mouse position in level", &lvlMousePos.x);
 		ImGui::InputInt2("Hovered cell", &this->selectedTile.x);
+		ImGui::Text(" ");
+		//
+		//ImGui::InputInt2("Level Size", &lvlDims.x);
+		if (ImGui::BeginTable("Level size", 2,
+							  ImGuiTableFlags_SizingStretchSame))
+		{
+			ImGui::TableSetupColumn("Width");
+			ImGui::TableSetupColumn("Height");
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::SliderInt(" ", &lvlDims.x, 24, 500);
+			//ImGui::SliderInt2(" ", &lvlDims.x, 24, 500);
+			ImGui::TableSetColumnIndex(1);
+			ImGui::SliderInt("#01", &lvlDims.y, 14, 32);
+		}
+		ImGui::EndTable();
 	}
 	ImGui::End();
+
+	//if (IsKeyPressed(KEY_ENTER))
+	if ((this->level.GetLength() != lvlDims.x) ||
+		(this->level.GetHeight() != lvlDims.y))
+	{
+		this->level.SetLevelSize(lvlDims.x, lvlDims.y);
+		this->level.DrawGrid(this->tex);
+	}
+
 	this->camera.offset = {.x = -camOffset.x, .y = camOffset.y};
 }

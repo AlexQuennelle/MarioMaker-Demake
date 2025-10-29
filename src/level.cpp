@@ -2,6 +2,7 @@
 #include "tile.h"
 #include "utils.h"
 
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <cstdint>
@@ -180,6 +181,7 @@ void Level::Draw()
 void Level::DrawGrid(RenderTexture& tex)
 {
 	BeginTextureMode(tex);
+	ClearBackground(BLANK);
 	for (int x{0}; x < this->length; x++)
 	{
 		for (int y{0}; y < this->height; y++)
@@ -556,6 +558,49 @@ Tile Level::TileAt(const int x, const int y)
 	{
 		return Tile{.ID = TileID::ground, .flags = 0};
 	}
+}
+
+void Level::SetLevelSize(const int length, const int height)
+{
+	if ((this->length == length) && (this->height == height))
+	{
+#ifndef NDEBUG
+		std::cout << "Early out.\n";
+#endif // !NDEBUG
+		return;
+	}
+
+	int overlapX{std::min(this->length, length)};
+	int overlapY{std::min(this->height, height)};
+	overlapX = overlapX < 24 ? 24 : overlapX;
+	overlapY = overlapY < 14 ? 14 : overlapY;
+
+	vector<Tile> oldGrid(this->grid);
+	this->grid.clear();
+	this->grid.resize(length * height);
+
+#ifndef NDEBUG
+	std::cout << length << " x " << height << '\n';
+	std::cout << oldGrid.size() << " -> " << this->grid.size() << '\n';
+#endif // !NDEBUG
+
+	for (int x{0}; x < overlapX; x++)
+	{
+		for (int y{0}; y < overlapY; y++)
+		{
+			int i{((this->height - y) * this->length) + x};
+			int j{((height - y) * length) + x};
+
+			if (j < this->grid.size())
+				this->grid[j] = oldGrid[i];
+		}
+	}
+
+	this->length = length;
+	this->height = height;
+	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
+	this->tex = LoadTextureFromImage(this->img);
+	this->StitchTexture();
 }
 
 void Level::Reset() {}
