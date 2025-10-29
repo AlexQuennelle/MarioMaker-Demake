@@ -581,8 +581,6 @@ void Level::SetLevelSize(const int length, const int height)
 
 	int overlapX{std::min(this->length, length)};
 	int overlapY{std::min(this->height, height)};
-	overlapX = overlapX < 24 ? 24 : overlapX;
-	overlapY = overlapY < 14 ? 14 : overlapY;
 
 	vector<Tile> oldGrid(this->grid);
 	this->grid.clear();

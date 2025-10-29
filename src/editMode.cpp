@@ -2,6 +2,7 @@
 #include "gamemode.h"
 #include "tile.h"
 
+#include <algorithm>
 #include <fstream>
 #include <imgui.h>
 #include <nfd.hpp>
@@ -130,6 +131,8 @@ void EditMode::DrawUI()
 	}
 	ImGui::End();
 
+	lvlDims.x = (lvlDims.x > 24) ? lvlDims.x : this->level.GetLength();
+	lvlDims.y = (lvlDims.y > 14) ? lvlDims.y : this->level.GetHeight();
 	if ((this->level.GetLength() != lvlDims.x) ||
 		(this->level.GetHeight() != lvlDims.y))
 	{
