@@ -81,6 +81,10 @@ void Player::Update()
 }
 
 void Player::CheckCollisions() {
+	// no collision needed when falling off screen
+	if (this->dead)
+		return;
+
 	for (const Rectangle col : level.GetColliders())
 	{
 		Rectangle playerCol{GetCollisionRect()};
@@ -139,7 +143,12 @@ void Player::Draw()
 
 	Rectangle frameRec{0, 0, recWidth, 32};
 
-	if (Grounded())
+	if (dead)
+	{
+		//dead
+		frameRec = {160, 32, 32, 32};
+	}
+	else if (Grounded())
 	{
 		if (lastInput.y > 0 && FloatEquals(lastInput.x, 0))
 		{
@@ -204,6 +213,9 @@ void Player::Draw()
 }
 
 void Player::HandleMovement(const bool running, const Vector2 input) {
+	if (this->dead)
+		return;
+
 	this->running = running;
 	this->lastInput = input;
 	if (input.x != 0)
@@ -216,6 +228,7 @@ void Player::HandleJump(const bool jump) { this->jumpPressed = jump; }
 
 void Player::Reset(const Vector2 startPosition) {
 	this->position = startPosition;
+	this->dead = false;
 }
 
 bool Player::Grounded() 
@@ -241,4 +254,16 @@ bool Player::Grounded()
 void Player::AddForce(const Vector2 force)
 {
 	acceleration = Vector2Add(acceleration, force);
+}
+
+void Player::TemporaryDeathTest() { this->Die(); }
+
+void Player::Die()
+{
+	if (this->dead)
+		return;
+
+	this->dead = true;
+	this->lastInput = {0, 0};
+	this->velocity = {0, -0.3f};
 }

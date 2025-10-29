@@ -34,6 +34,7 @@ class GameplayMode : public GamemodeInstance
 	void Reset();
 
 	private:
+	float timeDead{0};
 	float gravity{0.9f};
 	Player player;
 	PlayerInputHandler inputHandler;
