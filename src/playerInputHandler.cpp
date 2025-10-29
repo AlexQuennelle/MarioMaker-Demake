@@ -30,4 +30,9 @@ void PlayerInputHandler::Update()
 	bool jump{IsKeyDown(KEY_SPACE)};
 
 	player.HandleJump(jump);
+	// HACK: remove when death is possible via hazards
+	if (IsKeyDown(KEY_X))
+	{
+		player.TemporaryDeathTest();
+	}
 }

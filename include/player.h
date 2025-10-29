@@ -13,15 +13,20 @@ class Player
 	void Draw();
 	void Reset(const Vector2 startPosition);
 	void AddForce(const Vector2 force);
+	// HACK: remove when death is possible via hazards
+	void TemporaryDeathTest();
+
+	//getters
+	bool IsDead() const { return this->dead; }
 
 	private:
 	Vector2 position{0, 0};
 	Vector2 velocity{0, 0};
 	Vector2 acceleration{0, 0};
 	const float maxWalkSpeed{0.1f};
-	const float maxRunSpeed{0.18f};
+	const float maxRunSpeed{0.17f};
 	const float baseAcceleration{0.4f};
-	const float runAccelerationMult{1.8f};
+	const float runAccelerationMult{2.0f};
 	const float groundFrictionFactor{0.92f};
 	const float jumpForce{0.25f};
 	const float maxTimeJumping{0.15f};
@@ -32,6 +37,7 @@ class Player
 	bool canJump{true};
 	bool facingRight{true};
 	bool luigi{true};
+	bool dead{false};
 	float accumulatedAnimTime{0};
 	float timeBetweenFrames{0.06f};
 	int curFrame{0};
@@ -42,4 +48,5 @@ class Player
 	bool Grounded();
 	void CheckCollisions();
 	const Rectangle GetCollisionRect();
+	void Die();
 };

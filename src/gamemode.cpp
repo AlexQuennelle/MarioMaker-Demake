@@ -21,6 +21,15 @@ void GameplayMode::Update()
 
 	player.AddForce({0, gravity * GetFrameTime()});
 	player.Update();
+
+	if (player.IsDead())
+	{
+		timeDead += GetFrameTime();	
+	}
+	if (timeDead >= 1.5f)
+	{
+		this->Reset();	
+	}
 }
 void GameplayMode::Draw()
 {
@@ -32,4 +41,5 @@ void GameplayMode::Reset()
 {
 	level.Reset();
 	player.Reset(level.GetPlayerStartPos());
+	timeDead = 0;
 }
