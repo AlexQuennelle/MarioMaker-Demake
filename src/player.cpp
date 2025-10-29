@@ -9,30 +9,33 @@ Player::Player(Level& level, PlayerAssets assets) : level(level), assets(assets)
 
 void Player::Update()
 {
-	float horizAcceleration = lastInput.x * baseAcceleration * GetFrameTime();
-	if (running)
+	if (!crouching || !Grounded())
 	{
-		horizAcceleration *= runAccelerationMult;
-
-		if (Grounded() && ((velocity.x > 0 && lastInput.x < 0) ||
-			(velocity.x < 0 && lastInput.x > 0)))
+		float horizAcceleration =
+			lastInput.x * baseAcceleration * GetFrameTime();
+		if (running && !crouching)
 		{
-			horizAcceleration *= 0.5f;
-		}
+			horizAcceleration *= runAccelerationMult;
 
-		// full sprint after charge
-		if (Grounded() && 
-			((velocity.x >= 0.15f && lastInput.x > 0) ||
-			(velocity.x <= -0.15f && lastInput.x < 0)))
-		{
-			velocity.x = copysignf(maxRunSpeed, lastInput.x);
+			if (Grounded() && ((velocity.x > 0 && lastInput.x < 0) ||
+							   (velocity.x < 0 && lastInput.x > 0)))
+			{
+				horizAcceleration *= 0.5f;
+			}
+
+			// full sprint after charge
+			if (Grounded() && ((velocity.x >= 0.15f && lastInput.x > 0) ||
+							   (velocity.x <= -0.15f && lastInput.x < 0)))
+			{
+				velocity.x = copysignf(maxRunSpeed, lastInput.x);
+			}
 		}
+		acceleration.x += horizAcceleration;
 	}
-	acceleration.x += horizAcceleration;
 
 	velocity = Vector2Add(velocity, acceleration);
 
-	if (running)
+	if (running && !crouching)
 	{
 		velocity.x = Clamp(velocity.x, -maxRunSpeed, maxRunSpeed);
 	}
@@ -72,6 +75,8 @@ void Player::Update()
 
 	if (Grounded())
 	{
+		crouching = lastInput.y < 0;
+
 		velocity.x *= groundFrictionFactor;
 	}
 
@@ -128,12 +133,13 @@ void Player::CheckCollisions() {
 
 const Rectangle Player::GetCollisionRect() {
 	// THIS ASSUMES SMALL PLAYER
+	float height = crouching ? 0.6f : 1.0f;
 	return
 	{
 		.x = this->position.x - 0.3f, 
-		.y = this->position.y - 1.0f,
+		.y = this->position.y - height,
 		.width = 0.6f,
-		.height = 1.0f
+		.height = height
 	};
 }
 
@@ -146,7 +152,12 @@ void Player::Draw()
 	if (dead)
 	{
 		//dead
-		frameRec = {160, 32, 32, 32};
+		frameRec = {160, 32, recWidth, 32};
+	}
+	else if (crouching)
+	{
+		//crouching
+		frameRec = {64, 0, recWidth, 32};
 	}
 	else if (Grounded())
 	{
@@ -211,12 +222,12 @@ void Player::Draw()
 
 	accumulatedAnimTime += GetFrameTime();
 
-	#ifdef DRAW_COLS
+	//#ifdef DRAW_COLS
 	Rectangle rec = this->GetCollisionRect();
 	DrawRectangleLinesEx({rec.x * 16, rec.y * 16,
 							 rec.width * 16, rec.height * 16},
 							 1.0f, {0, 255, 0, 255});
-	#endif // DRAW_COLS
+	//#endif // DRAW_COLS
 }
 
 void Player::HandleMovement(const bool running, const Vector2 input) {
