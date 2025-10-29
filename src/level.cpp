@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <csignal>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -20,7 +21,7 @@
 #include <vector>
 
 #ifndef NDEBUG
-//#define DRAW_COLS
+#define DRAW_COLS
 #endif // !NDEBUG
 
 //Level::Level()
@@ -170,9 +171,9 @@ void Level::Draw()
 #ifdef DRAW_COLS
 	for (auto rec : this->colliders)
 	{
-		DrawRectangleLinesEx({rec.position.x * 16, rec.position.y * 16,
-							  rec.size.x * 16, rec.size.y * 16},
-							 1.0f, {0, 200, 255, 120});
+		DrawRectangleLinesEx(
+			{rec.x * 16, rec.y * 16, rec.width * 16, rec.height * 16}, 1.0f,
+			{0, 200, 255, 170});
 	}
 #endif // DRAW_COLS
 }
@@ -201,6 +202,12 @@ void Level::GenCollisionMap()
 		for (int y{0}; y < this->height; y++)
 		{
 			int i = (y * this->length) + x;
+			if (x == 17 && y == 2)
+			{
+				std::cout << (int)TileAt(x, y).ID << '\n';
+				std::cout << i << '\n';
+				std::cout << visited[i] << '\n';
+			}
 			if (TileAt(x, y).ID == TileID::ground && !visited[i])
 				this->colliders.push_back(GenCollisionRect(x, y, visited));
 		}
@@ -212,7 +219,7 @@ Rectangle Level::GenCollisionRect(const int x, const int y,
 	int rWidth{0};
 	for (int w{x}; w < this->length; w++)
 	{
-		int i = (y * this->height) + w;
+		int i = (y * this->length) + w;
 		if ((TileAt(w, y).ID == TileID::ground) && !visited[i])
 		{
 			visited[i] = true;
@@ -222,8 +229,8 @@ Rectangle Level::GenCollisionRect(const int x, const int y,
 			break;
 	}
 
-	int rHeight{0};
-	for (int h{y + 0}; h < this->height; h++)
+	int rHeight{1};
+	for (int h{y + 1}; h < this->height; h++)
 	{
 		bool canExpand{true};
 		for (int w{x}; w < rWidth + x; w++)
