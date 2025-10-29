@@ -18,6 +18,7 @@ class Player
 
 	//getters
 	bool IsDead() const { return this->dead; }
+	Vector2 GetPosition() const { return this->position; }
 
 	private:
 	Vector2 position{0, 0};
