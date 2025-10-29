@@ -2,7 +2,9 @@
 #include "gamemode.h"
 #include "tile.h"
 
+#include <fstream>
 #include <imgui.h>
+#include <nfd.hpp>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -94,12 +96,24 @@ void EditMode::DrawUI()
 						   ImGuiWindowFlags_AlwaysAutoResize};
 	if (ImGui::Begin("Debug Info", &open, flags))
 	{
+		if (ImGui::BeginTable("Buttons", 2, ImGuiTableFlags_SizingStretchSame))
+		{
+			ImGui::TableSetupColumn("1");
+			ImGui::TableSetupColumn("2");
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			if (ImGui::Button("Save"))
+			{
+				this->SaveLevel();
+			}
+		}
+		ImGui::EndTable();
+
 		ImGui::InputFloat2("Camera offset", &camOffset.x);
 		ImGui::InputFloat2("Mouse position in level", &lvlMousePos.x);
 		ImGui::InputInt2("Hovered cell", &this->selectedTile.x);
 		ImGui::Text(" ");
-		//
-		//ImGui::InputInt2("Level Size", &lvlDims.x);
 		if (ImGui::BeginTable("Level size", 2,
 							  ImGuiTableFlags_SizingStretchSame))
 		{
@@ -109,7 +123,6 @@ void EditMode::DrawUI()
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0);
 			ImGui::SliderInt(" ", &lvlDims.x, 24, 500);
-			//ImGui::SliderInt2(" ", &lvlDims.x, 24, 500);
 			ImGui::TableSetColumnIndex(1);
 			ImGui::SliderInt("#01", &lvlDims.y, 14, 32);
 		}
@@ -117,13 +130,80 @@ void EditMode::DrawUI()
 	}
 	ImGui::End();
 
-	//if (IsKeyPressed(KEY_ENTER))
 	if ((this->level.GetLength() != lvlDims.x) ||
 		(this->level.GetHeight() != lvlDims.y))
 	{
 		this->level.SetLevelSize(lvlDims.x, lvlDims.y);
+		camOffset = {
+			//this->camera.offset = {
+			.x = camOffset.x,
+			.y = 216 - (this->level.GetHeight() * 16.0f),
+		};
+		// FIX: Potential problem here with texture loading
+		UnloadTexture(this->tex.texture);
+		UnloadRenderTexture(this->tex);
+		this->tex = LoadRenderTexture(this->level.GetLength() * 16,
+									  this->level.GetHeight() * 16);
 		this->level.DrawGrid(this->tex);
+		this->camera.offset = {.x = -camOffset.x, .y = camOffset.y};
+	}
+	else
+	{
+
+		this->camera.offset = {.x = -camOffset.x, .y = camOffset.y};
+	}
+}
+
+void EditMode::SaveLevel()
+{
+	std::ofstream outFile;
+	if (this->level.HasFilepath())
+	{
+		outFile = std::ofstream(this->level.GetFilepath(),
+								std::ios::out | std::ios::binary);
+	}
+	else
+	{
+		NFD::Guard nfdGuard;
+		NFD::UniquePath outPath;
+		nfdfilteritem_t filter{"Level Files", "lvl"};
+		nfdresult_t result{NFD::SaveDialog(outPath, &filter, 1, RESOURCES_PATH,
+										   "MyLevel.lvl")};
+		if (result == NFD_OKAY)
+		{
+			this->level.SetFilepath(outPath.get());
+			outFile =
+				std::ofstream(outPath.get(), std::ios::out | std::ios::binary);
+		}
+		else if (result == NFD_ERROR)
+		{
+			std::cout << NFD_GetError() << '\n';
+			return;
+		}
+		else if (result == NFD_CANCEL)
+		{
+			std::cout << "Save cancelled.\n";
+			return;
+		}
 	}
 
-	this->camera.offset = {.x = -camOffset.x, .y = camOffset.y};
+	if (outFile.is_open())
+	{
+		const vector<byte> data{this->level.Serialize()};
+
+		outFile.write(reinterpret_cast<const char*>(data.data()), data.size());
+
+		outFile.close();
+	}
+	else
+	{
+		SetTextColor(ERROR);
+		std::cerr << "ERROR: could not open file." << '\n';
+		ClearStyles();
+	}
+}
+void EditMode::SaveLevelAs()
+{
+	this->level.SetFilepath("");
+	this->SaveLevel();
 }

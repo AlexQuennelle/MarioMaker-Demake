@@ -53,6 +53,9 @@ class EditMode : public GamemodeInstance
 	void DrawUI() override;
 
 	private:
+	void SaveLevel();
+	void SaveLevelAs();
+
 	RenderTexture tex;
 	Vector2Int selectedTile;
 	Vector2 lvlMousePos;

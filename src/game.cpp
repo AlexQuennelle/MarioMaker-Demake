@@ -15,19 +15,18 @@
 
 Game::Game()
 	: imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 216)),
-	  assetManager(std::make_unique<AssetManager>()),
-	  // HACK: Temporarily hardcode in path to level file
-	  level(RESOURCES_PATH "MyLevel.lvl")
+	  assetManager(std::make_unique<AssetManager>()) //,
 {
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
 
+	this->level = Level(RESOURCES_PATH "MyLevel.lvl", assetManager.get());
 	//this->LoadLevel();
 
-	this->gamemode = std::make_unique<EditMode>(this->level, this->assetManager,
-												this->imguiIO);
-	//this->gamemode =
-	//	std::make_unique<GameplayMode>(this->level, this->assetManager);
+	///this->gamemode = std::make_unique<EditMode>(this->level, this->assetManager,
+	///											this->imguiIO);
+	this->gamemode =
+		std::make_unique<GameplayMode>(this->level, this->assetManager);
 
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";
@@ -133,7 +132,7 @@ void Game::LoadLevel()
 	if (result == NFD_OKAY)
 	{
 		std::cout << outPath.get() << '\n';
-		this->level = Level(outPath.get());
+		this->level = Level(outPath.get(), this->assetManager.get());
 	}
 	else if (result == NFD_ERROR)
 	{

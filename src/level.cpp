@@ -1,4 +1,5 @@
 #include "level.h"
+#include "assetmanager.h"
 #include "tile.h"
 #include "utils.h"
 
@@ -22,34 +23,31 @@
 //#define DRAW_COLS
 #endif // !NDEBUG
 
-Level::Level()
-	: height(15), length(100), playerStartPos({.x = 5, .y = 0}),
-	  name("My Level"),
-	  // FIX: This should be moved to a resource manager
-	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
-{
-	std::srand(std::time({}));
-	this->grid.resize(this->height * this->length);
-	// HACK: This is temporary to fill in the ground
-	for (int x{0}; x < this->length; x++)
-	{
-		for (int y{0}; y < this->height; y++)
-		{
-			if (y > 10)
-				this->SetTileAt(TileID::ground, x, y);
-			else
-				this->SetTileAt(TileID::air, x, y);
-		}
-	}
-	this->GenCollisionMap();
-
-	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
-	this->tex = LoadTextureFromImage(this->img);
-	this->StitchTexture();
-}
-Level::Level(const std::string& filepath)
-	: // FIX: This should be moved to a resource manager
-	  sprites(LoadImage(RESOURCES_PATH "sprites/groundSprites.png"))
+//Level::Level()
+//	: height(15), length(100), playerStartPos({.x = 5, .y = 0}),
+//	  name("My Level")
+//{
+//	std::srand(std::time({}));
+//	this->grid.resize(this->height * this->length);
+//	// HACK: This is temporary to fill in the ground
+//	for (int x{0}; x < this->length; x++)
+//	{
+//		for (int y{0}; y < this->height; y++)
+//		{
+//			if (y > 10)
+//				this->SetTileAt(TileID::ground, x, y);
+//			else
+//				this->SetTileAt(TileID::air, x, y);
+//		}
+//	}
+//	this->GenCollisionMap();
+//
+//	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
+//	this->tex = LoadTextureFromImage(this->img);
+//	this->StitchTexture();
+//}
+Level::Level(const std::string& filepath, AssetManager* am)
+	: sprites(am->groundTiles)
 {
 	namespace fs = std::filesystem;
 	using std::ios;

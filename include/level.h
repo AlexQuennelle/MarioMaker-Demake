@@ -1,5 +1,6 @@
 #pragma once
 
+#include "assetmanager.h"
 #include "tile.h"
 #include "utils.h"
 
@@ -26,8 +27,8 @@ struct Vector2Int
 class Level
 {
 	public:
-	Level();
-	Level(const std::string& filepath);
+	Level() = default;
+	Level(const std::string& filepath, AssetManager* am);
 	~Level();
 
 	[[nodiscard]] vector<byte> Serialize() const;
@@ -134,6 +135,7 @@ class Level
 	Image img;
 	Image sprites;
 	Texture tex;
+	AssetManager* am{nullptr};
 	std::string name;
 	std::string filepath;
 	Vector2 playerStartPos;
