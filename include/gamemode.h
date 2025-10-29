@@ -48,4 +48,6 @@ class EditMode : public GamemodeInstance
 
 	private:
 	RenderTexture tex;
+	Vector2Int selectedTile;
+	Vector2 lvlMousePos;
 };

@@ -12,6 +12,12 @@
 using std::array;
 using std::vector;
 
+struct Vector2Int
+{
+	int x;
+	int y;
+};
+
 class Level
 {
 	public:

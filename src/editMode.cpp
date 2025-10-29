@@ -1,6 +1,7 @@
 #include "gamemode.h"
 
 #include <array>
+#include <cstdint>
 #include <imgui.h>
 #include <raylib.h>
 
@@ -19,9 +20,23 @@ EditMode::EditMode(Level& lvl) : GamemodeInstance(lvl)
 }
 void EditMode::Update()
 {
-	Vector2 lvlMousePos{GetMousePosition() + this->camera.offset};
 	float cellSize{GetScreenWidth() / 24.0f};
-	int cellX{static_cast<int>(lvlMousePos.x / cellSize)};
+	this->lvlMousePos = {(GetMousePosition() / cellSize) -
+						 this->camera.offset / 16.0f};
+
+	if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))
+	{
+		this->camera.offset.x += 1.0f;
+	}
+	else if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))
+	{
+		this->camera.offset.x -= 1.0f;
+	}
+
+	this->selectedTile = {
+		.x = static_cast<int>(lvlMousePos.x),
+		.y = static_cast<int>(lvlMousePos.y),
+	};
 }
 void EditMode::Draw()
 {
@@ -32,21 +47,20 @@ void EditMode::Draw()
 }
 void EditMode::DrawUI()
 {
-	Vector2 lvlMousePos{GetMousePosition() + this->camera.offset};
 	float cellSize{GetScreenWidth() / 24.0f};
-	std::array<int, 2> cell{static_cast<int>(lvlMousePos.x / cellSize),
-							static_cast<int>(lvlMousePos.y / cellSize)};
-	DrawRectangle(cell[0] * cellSize, cell[1] * cellSize, cellSize, cellSize,
-				  GREEN);
-
+	DrawRectangle(
+		(this->selectedTile.x + (this->camera.offset.x / 16.0f)) * cellSize,
+		(this->selectedTile.y + (this->camera.offset.y / 16.0f)) * cellSize,
+		cellSize, cellSize, GREEN);
 	// ImGui demo
 	bool open = true;
 	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings |
 						   ImGuiWindowFlags_AlwaysAutoResize};
 	if (ImGui::Begin("Debug Info", &open, flags))
 	{
+		ImGui::InputFloat2("Camera offset", &this->camera.offset.x);
 		ImGui::InputFloat2("Mouse position in level", &lvlMousePos.x);
-		ImGui::InputInt2("Hovered cell", cell.data());
+		ImGui::InputInt2("Hovered cell", &this->selectedTile.x);
 	}
 	ImGui::End();
 }
