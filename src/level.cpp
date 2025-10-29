@@ -446,13 +446,13 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	Rectangle botL;
 	if ((mask & 18) == 0)
 	{
-		botL = {.x = 0.0f, .y = 8.0f, .width = 8.0f, .height = 8.0f};
+		botL = {.x = 0.0f, .y = 24.0f, .width = 8.0f, .height = 8.0f};
 	}
 	else if ((mask & 16) == 0)
 	{
 		botL = {
 			.x = 16.0f,
-			.y = static_cast<float>((std::rand() % 2) * 8),
+			.y = static_cast<float>((std::rand() % 2) * 8) + 16,
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -468,7 +468,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	}
 	else if ((mask & 4) == 0)
 	{
-		botL = {.x = 8.0f, .y = 8.0f, .width = 8.0f, .height = 8.0f};
+		botL = {.x = 8.0f, .y = 24.0f, .width = 8.0f, .height = 8.0f};
 	}
 	else
 	{
@@ -484,13 +484,13 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	Rectangle botR;
 	if ((mask & 80) == 0)
 	{
-		botR = {.x = 0.0f, .y = 8.0f, .width = 8.0f, .height = 8.0f};
+		botR = {.x = 0.0f, .y = 16.0f, .width = 8.0f, .height = 8.0f};
 	}
 	else if ((mask & 16) == 0)
 	{
 		botR = {
 			.x = 16.0f,
-			.y = static_cast<float>((std::rand() % 2) * 8),
+			.y = static_cast<float>((std::rand() % 2) * 8) + 16.0f,
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -506,7 +506,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	}
 	else if ((mask & 128) == 0)
 	{
-		botR = {.x = 8.0f, .y = 8.0f, .width = 8.0f, .height = 8.0f};
+		botR = {.x = 8.0f, .y = 16.0f, .width = 8.0f, .height = 8.0f};
 	}
 	else
 	{
