@@ -1,6 +1,7 @@
 #pragma once
 
 #include "assetmanager.h"
+#include "imgui.h"
 #include "level.h"
 #include "player.h"
 #include "playerInputHandler.h"
@@ -45,7 +46,7 @@ class GameplayMode : public GamemodeInstance
 class EditMode : public GamemodeInstance
 {
 	public:
-	EditMode(Level& lvl, asset_ptr& am);
+	EditMode(Level& lvl, asset_ptr& am, const ImGuiIO& imgui);
 
 	void Update() override;
 	void Draw() override;
@@ -55,4 +56,5 @@ class EditMode : public GamemodeInstance
 	RenderTexture tex;
 	Vector2Int selectedTile;
 	Vector2 lvlMousePos;
+	const ImGuiIO& imGuiIO;
 };

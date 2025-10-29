@@ -4,7 +4,9 @@
 #include <raylib.h>
 
 GameplayMode::GameplayMode(Level& lvl, asset_ptr& am)
-	: GamemodeInstance(lvl, am), player(lvl,{this->assetManager->playerSprites}), inputHandler(this->player)
+	: GamemodeInstance(lvl, am),
+	  player(lvl, {this->assetManager->playerSprites}),
+	  inputHandler(this->player)
 {
 	this->camera = Camera2D{0};
 	this->camera.target = {.x = 0.0f, .y = 0.0f};
@@ -24,11 +26,11 @@ void GameplayMode::Update()
 
 	if (player.IsDead())
 	{
-		timeDead += GetFrameTime();	
+		timeDead += GetFrameTime();
 	}
 	if (timeDead >= 1.5f)
 	{
-		this->Reset();	
+		this->Reset();
 	}
 }
 void GameplayMode::Draw()

@@ -6,7 +6,8 @@
 #include <raylib.h>
 #include <raymath.h>
 
-EditMode::EditMode(Level& lvl, asset_ptr& am) : GamemodeInstance(lvl, am)
+EditMode::EditMode(Level& lvl, asset_ptr& am, const ImGuiIO& imgui)
+	: GamemodeInstance(lvl, am), imGuiIO(imgui)
 {
 	// Initialize mode
 	this->camera = Camera2D{0};
@@ -28,9 +29,25 @@ void EditMode::Update()
 	this->lvlMousePos = {(GetMousePosition() / cellSize) -
 						 this->camera.offset / 16.0f};
 
-	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+	Vector2Int newSelection{
+		.x = static_cast<int>(lvlMousePos.x),
+		.y = static_cast<int>(lvlMousePos.y),
+	};
+	bool MouseMoved{newSelection != this->selectedTile};
+	this->selectedTile = newSelection;
+
+	if (!this->imGuiIO.WantCaptureMouse)
 	{
-		this->level.SetTileAtEditor(TileID::ground, this->selectedTile);
+		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
+			(IsMouseButtonDown(MOUSE_LEFT_BUTTON) && MouseMoved))
+		{
+			this->level.SetTileAtEditor(TileID::ground, this->selectedTile);
+		}
+		else if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) ||
+				 (IsMouseButtonDown(MOUSE_RIGHT_BUTTON) && MouseMoved))
+		{
+			this->level.SetTileAtEditor(TileID::air, this->selectedTile);
+		}
 	}
 
 	if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))
@@ -43,11 +60,6 @@ void EditMode::Update()
 		if (this->camera.offset.x > -((this->level.GetLength() * 16.0f) - 384))
 			this->camera.offset.x -= 1.0f;
 	}
-
-	this->selectedTile = {
-		.x = static_cast<int>(lvlMousePos.x),
-		.y = static_cast<int>(lvlMousePos.y),
-	};
 }
 void EditMode::Draw()
 {
@@ -58,11 +70,14 @@ void EditMode::Draw()
 }
 void EditMode::DrawUI()
 {
-	float cellSize{GetScreenWidth() / 24.0f};
-	DrawRectangle(
-		(this->selectedTile.x + (this->camera.offset.x / 16.0f)) * cellSize,
-		(this->selectedTile.y + (this->camera.offset.y / 16.0f)) * cellSize,
-		cellSize, cellSize, GREEN);
+	if (!this->imGuiIO.WantCaptureMouse)
+	{
+		float cellSize{GetScreenWidth() / 24.0f};
+		DrawRectangle(
+			(this->selectedTile.x + (this->camera.offset.x / 16.0f)) * cellSize,
+			(this->selectedTile.y + (this->camera.offset.y / 16.0f)) * cellSize,
+			cellSize, cellSize, Fade(WHITE, 0.4f));
+	}
 
 	Vector2 camOffset = {
 		.x = -this->camera.offset.x,

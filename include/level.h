@@ -16,6 +16,11 @@ struct Vector2Int
 {
 	int x;
 	int y;
+
+	bool operator==(const Vector2Int other)
+	{
+		return (this->x == other.x) && (this->y == other.y);
+	}
 };
 
 class Level

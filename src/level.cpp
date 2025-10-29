@@ -545,6 +545,10 @@ void Level::SetTileAt(const TileID tile, const Vector2Int pos,
 void Level::SetTileAtEditor(const TileID tile, const Vector2Int pos,
 							const uint8_t flags)
 {
+	auto prevTile{this->TileAt(pos.x, pos.y)};
+	if (prevTile.ID == tile && prevTile.flags == flags)
+		return;
+
 	this->SetTileAt(tile, pos, flags);
 	this->StitchTexture();
 }

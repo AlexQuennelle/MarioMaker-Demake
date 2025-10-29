@@ -24,8 +24,8 @@ Game::Game()
 
 	//this->LoadLevel();
 
-	this->gamemode =
-		std::make_unique<EditMode>(this->level, this->assetManager);
+	this->gamemode = std::make_unique<EditMode>(this->level, this->assetManager,
+												this->imguiIO);
 	//this->gamemode =
 	//	std::make_unique<GameplayMode>(this->level, this->assetManager);
 
