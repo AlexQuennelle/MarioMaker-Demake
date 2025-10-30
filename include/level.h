@@ -74,6 +74,8 @@ class Level
 	int GetLength() const { return this->length; }
 	int GetHeight() const { return this->height; }
 	void SetLevelSize(const int length, const int height);
+	const std::string& GetName() const { return this->name; }
+	void SetName(const std::string& newName) { this->name = newName; }
 
 	private:
 	/**

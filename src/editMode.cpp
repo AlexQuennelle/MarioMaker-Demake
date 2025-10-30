@@ -2,17 +2,21 @@
 #include "gamemode.h"
 #include "tile.h"
 
-#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <imgui.h>
+#include <iostream>
+#include <misc/cpp/imgui_stdlib.h>
 #include <nfd.hpp>
 #include <raylib.h>
 #include <raymath.h>
+#include <string>
 
 EditMode::EditMode(Level& lvl, asset_ptr& am, const ImGuiIO& imgui)
 	: GamemodeInstance(lvl, am), imGuiIO(imgui)
 {
-	// Initialize mode
 	this->camera = Camera2D{0};
 	this->camera.target = {.x = 0.0f, .y = 0.0f};
 	this->camera.offset = {
@@ -44,24 +48,37 @@ void EditMode::Update()
 		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
 			(IsMouseButtonDown(MOUSE_LEFT_BUTTON) && MouseMoved))
 		{
-			this->level.SetTileAtEditor(TileID::ground, this->selectedTile);
+			this->level.SetTileAtEditor(this->brush.ID, this->selectedTile);
 		}
 		else if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) ||
 				 (IsMouseButtonDown(MOUSE_RIGHT_BUTTON) && MouseMoved))
 		{
 			this->level.SetTileAtEditor(TileID::air, this->selectedTile);
 		}
-	}
 
-	if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))
-	{
-		if (this->camera.offset.x < 0.0f)
-			this->camera.offset.x += 1.0f;
-	}
-	else if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))
-	{
-		if (this->camera.offset.x > -((this->level.GetLength() * 16.0f) - 384))
-			this->camera.offset.x -= 1.0f;
+		float cameraSpeed{2.0f};
+		if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))
+		{
+			if (this->camera.offset.x < 0.0f)
+				this->camera.offset.x += cameraSpeed;
+		}
+		else if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))
+		{
+			if (this->camera.offset.x >
+				-((this->level.GetLength() * 16.0f) - 384))
+				this->camera.offset.x -= cameraSpeed;
+		}
+		if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))
+		{
+			if (this->camera.offset.y < 0.0f)
+				this->camera.offset.y += cameraSpeed;
+		}
+		else if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))
+		{
+			if (this->camera.offset.y >
+				-((this->level.GetHeight() * 16.0f) - 216))
+				this->camera.offset.y -= cameraSpeed;
+		}
 	}
 }
 void EditMode::Draw()
@@ -83,77 +100,134 @@ void EditMode::DrawUI()
 	}
 
 	Vector2 camOffset = {
-		.x = -this->camera.offset.x,
-		.y = this->camera.offset.y,
+		.x = -this->camera.offset.x / 16.0f,
+		.y = -this->camera.offset.y / 16.0f,
 	};
-
 	Vector2Int lvlDims{
 		.x = this->level.GetLength(),
 		.y = this->level.GetHeight(),
 	};
 
-	bool open = true;
+	std::array<char, 256> nameBuf{};
+	strcpy(nameBuf.data(), this->level.GetName().c_str());
+
 	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings |
-						   ImGuiWindowFlags_AlwaysAutoResize};
-	if (ImGui::Begin("Debug Info", &open, flags))
+						   ImGuiWindowFlags_AlwaysAutoResize |
+						   ImGuiWindowFlags_NoCollapse};
+	if (ImGui::Begin("Menu", nullptr, flags))
 	{
-		if (ImGui::BeginTable("Buttons", 2, ImGuiTableFlags_SizingStretchSame))
+		this->DrawButtons();
+		this->DrawPallette();
+
+		ImGui::Separator();
+		ImGui::Text("CameraPosition:");
+		ImGui::SameLine();
+		ImGui::SliderFloat("##CamOffsetX", &camOffset.x, 0.0f,
+						   this->level.GetLength() - 24.0f);
+		ImGui::SameLine();
+		ImGui::SliderFloat("##CamOffsetY", &camOffset.y, 0.0f,
+						   this->level.GetHeight() - 14.0f);
+		// Debug info
+		//ImGui::InputFloat2("Mouse position in level", &lvlMousePos.x);
+		//ImGui::InputInt2("Hovered cell", &this->selectedTile.x);
+
+		ImGui::Separator();
+		ImGuiTreeNodeFlags lvlInfo{ImGuiTreeNodeFlags_DefaultOpen};
+		if (ImGui::CollapsingHeader("LevelInfo", nullptr, lvlInfo))
 		{
-			ImGui::TableSetupColumn("1");
-			ImGui::TableSetupColumn("2");
+			ImGui::Text("Level Name");
+			ImGui::InputText("##LevelName", nameBuf.data(), 255);
 
-			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(0);
-			if (ImGui::Button("Save"))
-			{
-				this->SaveLevel();
-			}
+			ImGui::Separator();
+
+			ImGui::Text("Level Size");
+			ImGui::Text("Width: ");
+			ImGui::SameLine();
+			ImGui::DragInt("##lvlDimsX", &lvlDims.x, 0.05f, 24, 500);
+			ImGui::SameLine();
+			if (ImGui::Button("+##lvlX"))
+				lvlDims.x++;
+			ImGui::SameLine();
+			if (ImGui::Button("-##lvlX"))
+				lvlDims.x--;
+			ImGui::Text("Height:");
+			ImGui::SameLine();
+			ImGui::DragInt("##lvlDimsY", &lvlDims.y, 0.05f, 14, 32);
+			ImGui::SameLine();
+			if (ImGui::Button("+##lvlY"))
+				lvlDims.y++;
+			ImGui::SameLine();
+			if (ImGui::Button("-##lvlY"))
+				lvlDims.y--;
 		}
-		ImGui::EndTable();
-
-		ImGui::InputFloat2("Camera offset", &camOffset.x);
-		ImGui::InputFloat2("Mouse position in level", &lvlMousePos.x);
-		ImGui::InputInt2("Hovered cell", &this->selectedTile.x);
-		ImGui::Text(" ");
-		if (ImGui::BeginTable("Level size", 2,
-							  ImGuiTableFlags_SizingStretchSame))
-		{
-			ImGui::TableSetupColumn("Width");
-			ImGui::TableSetupColumn("Height");
-
-			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(0);
-			ImGui::SliderInt(" ", &lvlDims.x, 24, 500);
-			ImGui::TableSetColumnIndex(1);
-			ImGui::SliderInt("#01", &lvlDims.y, 14, 32);
-		}
-		ImGui::EndTable();
 	}
 	ImGui::End();
 
-	lvlDims.x = (lvlDims.x > 24) ? lvlDims.x : this->level.GetLength();
-	lvlDims.y = (lvlDims.y > 14) ? lvlDims.y : this->level.GetHeight();
+	std::string newName{nameBuf.data()};
+	if (newName != this->level.GetName())
+	{
+		this->level.SetName(newName);
+	}
+
+	lvlDims.x = (lvlDims.x >= 24) ? lvlDims.x : this->level.GetLength();
+	lvlDims.y = (lvlDims.y >= 14) ? lvlDims.y : this->level.GetHeight();
 	if ((this->level.GetLength() != lvlDims.x) ||
 		(this->level.GetHeight() != lvlDims.y))
 	{
 		this->level.SetLevelSize(lvlDims.x, lvlDims.y);
-		camOffset = {
-			//this->camera.offset = {
-			.x = camOffset.x,
-			.y = 216 - (this->level.GetHeight() * 16.0f),
-		};
 		// FIX: Potential problem here with texture loading
 		UnloadTexture(this->tex.texture);
 		UnloadRenderTexture(this->tex);
 		this->tex = LoadRenderTexture(this->level.GetLength() * 16,
 									  this->level.GetHeight() * 16);
 		this->level.DrawGrid(this->tex);
-		this->camera.offset = {.x = -camOffset.x, .y = camOffset.y};
+		this->camera.offset = {
+			.x = -camOffset.x * 16.0f,
+			.y = -camOffset.y * 16.0f,
+		};
 	}
 	else
 	{
+		this->camera.offset = {
+			.x = -camOffset.x * 16.0f,
+			.y = -camOffset.y * 16.0f,
+		};
+	}
+}
 
-		this->camera.offset = {.x = -camOffset.x, .y = camOffset.y};
+void EditMode::DrawButtons()
+{
+	if (ImGui::Button("Save"))
+	{
+		this->SaveLevel();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Save As"))
+	{
+		this->SaveLevelAs();
+	}
+}
+void EditMode::DrawPallette()
+{
+	const char* prev{
+		this->tileNames[static_cast<uint8_t>(this->brush.ID) - 1].data()};
+	if (ImGui::BeginCombo("Tile", prev))
+	{
+		for (int i{0}; i < this->tileNames.size(); i++)
+		{
+			bool selected{prev == this->tileNames[i].data()};
+			if (ImGui::Selectable(this->tileNames[i].c_str(), selected))
+			{
+				prev = this->tileNames[static_cast<uint8_t>(this->brush.ID) - 1]
+						   .data();
+				this->brush = {.ID = static_cast<TileID>(i + 1), .flags = 0};
+			}
+			if (selected)
+			{
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
 	}
 }
 

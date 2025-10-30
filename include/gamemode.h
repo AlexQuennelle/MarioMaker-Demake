@@ -5,8 +5,11 @@
 #include "level.h"
 #include "player.h"
 #include "playerInputHandler.h"
+#include "tile.h"
 
+#include <array>
 #include <raylib.h>
+#include <string>
 
 class GamemodeInstance
 {
@@ -53,6 +56,8 @@ class EditMode : public GamemodeInstance
 	void DrawUI() override;
 
 	private:
+	void DrawButtons();
+	void DrawPallette();
 	void SaveLevel();
 	void SaveLevelAs();
 
@@ -60,4 +65,11 @@ class EditMode : public GamemodeInstance
 	Vector2Int selectedTile;
 	Vector2 lvlMousePos;
 	const ImGuiIO& imGuiIO;
+	Tile brush{.ID = TileID::ground, .flags = 0};
+	const std::array<std::string, 4> tileNames{
+		"Ground",
+		"Bricks",
+		"Spikes",
+		"Item Box",
+	};
 };
