@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <raylib.h>
 
@@ -21,7 +22,7 @@ struct PlayerAssets
 	float luigiOffset{128};
 };
 
-enum class PlayerAnimState
+enum class PlayerAnimState : uint8_t
 {
 	idle,
 	lookUp,

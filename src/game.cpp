@@ -20,7 +20,7 @@ Game::Game()
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
 
-	this->level = Level(RESOURCES_PATH "MyLevel.lvl", assetManager.get());
+	this->level = Level(RESOURCES_PATH "1-1.lvl", assetManager.get());
 	//this->LoadLevel();
 
 	//this->gamemode = std::make_unique<EditMode>(this->level, this->assetManager,

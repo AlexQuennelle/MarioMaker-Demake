@@ -6,6 +6,7 @@ enum class TileID : uint8_t
 {
 	air,
 	ground,
+	brick,
 	spikes,
 	itemBox,
 };

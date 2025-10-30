@@ -1,6 +1,7 @@
 #include "player.h"
 #include "assetmanager.h"
 
+#include <algorithm>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -95,7 +96,7 @@ void Player::Update()
 	}
 
 	// reset acceleration
-	acceleration = {0, 0};
+	acceleration = {.x = 0, .y = 0};
 
 	CheckCollisions();
 }
@@ -148,7 +149,7 @@ void Player::CheckCollisions()
 	}
 }
 
-const Rectangle Player::GetCollisionRect()
+Rectangle Player::GetCollisionRect()
 {
 	// THIS ASSUMES SMALL PLAYER
 	float height = crouching ? 0.6f : 1.0f;
@@ -168,25 +169,25 @@ void Player::Draw()
 	if (dead)
 	{
 		//dead
-		frameRec = {160, 32, recWidth, 32};
+		frameRec = {.x = 160, .y = 32, .width = recWidth, .height = 32};
 	}
 	else if (crouching)
 	{
 		//crouching
-		frameRec = {64, 0, recWidth, 32};
+		frameRec = {.x = 64, .y = 0, .width = recWidth, .height = 32};
 	}
 	else if (Grounded())
 	{
-		if (lastInput.y > 0 && FloatEquals(lastInput.x, 0))
+		if (lastInput.y > 0 && (FloatEquals(lastInput.x, 0) != 0))
 		{
 			// look up
-			frameRec = {32, 0, recWidth, 32};
+			frameRec = {.x = 32, .y = 0, .width = recWidth, .height = 32};
 		}
 		else if ((velocity.x > 0 && lastInput.x < 0) ||
 				 (velocity.x < 0 && lastInput.x > 0))
 		{
 			// skid
-			frameRec = {0, 32, recWidth, 32};
+			frameRec = {.x = 0, .y = 32, .width = recWidth, .height = 32};
 		}
 		else if (fabsf(velocity.x) > 0.05f)
 		{
@@ -204,12 +205,18 @@ void Player::Draw()
 			if (fabsf(velocity.x) > 0.15f)
 			{
 				//running
-				frameRec = {192.0f + (curFrame * 32), 0, recWidth, 32};
+				frameRec = {.x = 192.0f + (curFrame * 32),
+							.y = 0,
+							.width = recWidth,
+							.height = 32};
 			}
 			else
 			{
 				//walking
-				frameRec = {96.0f + (curFrame * 32), 0, recWidth, 32};
+				frameRec = {.x = 96.0f + (curFrame * 32),
+							.y = 0,
+							.width = recWidth,
+							.height = 32};
 			}
 		}
 	}
@@ -218,12 +225,12 @@ void Player::Draw()
 		if (velocity.y < 0)
 		{
 			// jump up
-			frameRec = {32, 32, recWidth, 32};
+			frameRec = {.x = 32, .y = 32, .width = recWidth, .height = 32};
 		}
 		else
 		{
 			// falling
-			frameRec = {64, 32, recWidth, 32};
+			frameRec = {.x = 64, .y = 32, .width = recWidth, .height = 32};
 		}
 	}
 
@@ -271,19 +278,27 @@ void Player::Reset(const Vector2 startPosition)
 bool Player::Grounded()
 {
 	// box cast underneath player
-	Rectangle groundedBox{.x = this->position.x - 0.5f,
-						  .y = this->position.y,
-						  .width = 1.0f,
-						  .height = 0.1f};
+	Rectangle groundedBox{
+		.x = this->position.x - 0.25f,
+		.y = this->position.y,
+		.width = 0.5f,
+		.height = 0.1f,
+	};
 
-	for (const Rectangle col : level.GetColliders())
-	{
-		if (CheckCollisionRecs(col, groundedBox))
-		{
-			return true;
-		}
-	}
-	return false;
+	return std::ranges::any_of(
+		this->level.GetColliders(), //
+		[groundedBox](Rectangle col)
+		{ return CheckCollisionRecs(groundedBox, col); } //
+	);
+
+	//for (const Rectangle col : level.GetColliders())
+	//{
+	//	if (CheckCollisionRecs(col, groundedBox))
+	//	{
+	//		return true;
+	//	}
+	//}
+	//return false;
 }
 
 // Public method for applying forces to the player
@@ -300,6 +315,6 @@ void Player::Die()
 		return;
 
 	this->dead = true;
-	this->lastInput = {0, 0};
-	this->velocity = {0, -0.3f};
+	this->lastInput = {.x = 0, .y = 0};
+	this->velocity = {.x = 0, .y = -0.3f};
 }
