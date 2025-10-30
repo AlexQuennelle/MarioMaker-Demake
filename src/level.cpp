@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <array>
 #include <bit>
-#include <csignal>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -119,9 +118,9 @@ vector<byte> Level::Serialize() const
 
 	// Name
 	InsertAsBytes(bytes, static_cast<uint32_t>(this->name.length()));
-	for (auto ch : this->name)
+	for (auto character : this->name)
 	{
-		bytes.push_back(ch);
+		bytes.push_back(character);
 	}
 	// Pad bytes for alignment
 	int alignment{

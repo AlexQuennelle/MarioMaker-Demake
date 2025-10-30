@@ -49,6 +49,6 @@ class Player
 
 	bool Grounded();
 	void CheckCollisions();
-	const Rectangle GetCollisionRect();
+	Rectangle GetCollisionRect();
 	void Die();
 };
