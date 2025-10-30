@@ -279,9 +279,9 @@ bool Player::Grounded()
 {
 	// box cast underneath player
 	Rectangle groundedBox{
-		.x = this->position.x - 0.5f,
+		.x = this->position.x - 0.25f,
 		.y = this->position.y,
-		.width = 1.0f,
+		.width = 0.5f,
 		.height = 0.1f,
 	};
 
