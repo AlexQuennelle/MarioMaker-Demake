@@ -39,6 +39,8 @@ void GameplayMode::Update()
 		this->Reset();
 	}
 
+	this->level.Update();
+
 	// Update camera target to player position
 	this->camera.target = this->player.GetPosition() * 16.0f;
 }

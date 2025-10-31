@@ -1,17 +1,20 @@
 #pragma once
 
 #include "assetmanager.h"
+#include "entity.h"
 #include "tile.h"
 #include "utils.h"
 
 #include <array>
 #include <cstdint>
+#include <memory>
 #include <raylib.h>
 #include <string>
 #include <vector>
 
 using std::array;
 using std::vector;
+using Entity_ptr = std::unique_ptr<Entity>;
 
 struct Vector2Int
 {
@@ -29,10 +32,17 @@ class Level
 	public:
 	Level() = default;
 	Level(const std::string& filepath, AssetManager* am);
+	Level(const Level& other) = delete;
+	Level(Level&& other) = default;
+
 	~Level();
+
+	Level& operator=(const Level& other) = delete;
+	Level& operator=(Level&& other) = default;
 
 	[[nodiscard]] vector<byte> Serialize() const;
 
+	void Update();
 	void Draw();
 	void DrawGrid(RenderTexture& tex);
 	/**
@@ -64,6 +74,8 @@ class Level
 	 *          returns a @link TileID::ground @endlink.
 	 */
 	Tile TileAt(const int x, const int y);
+	void SpawnEntity(const int x, const int y, const Tile basis);
+	void SpawnEntityEditor(const int x, const int y, const Tile basis);
 
 	// getters
 	Vector2 GetPlayerStartPos() const { return playerStartPos; }
@@ -83,7 +95,7 @@ class Level
 	 *        are generated using a 2D greedy meshing algorithm to minimize the
 	 *        amount of collision checks required.
 	 */
-	void GenCollisionMap();
+	void PopulateLevel();
 	/**
 	 * @brief Generates a collision rectangle starting at (x, y) that expands as
 	 *        much to the left and down as it can without encountering a cell
@@ -143,5 +155,5 @@ class Level
 	Vector2 playerStartPos;
 	vector<Tile> grid;
 	vector<Rectangle> colliders;
-	// TODO: Vector of entity
+	vector<Entity_ptr> entities;
 };

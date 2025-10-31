@@ -1,5 +1,6 @@
 #include "level.h"
 #include "assetmanager.h"
+#include "entity.h"
 #include "tile.h"
 #include "utils.h"
 
@@ -15,6 +16,7 @@
 #include <fstream>
 #include <iosfwd>
 #include <iostream>
+#include <memory>
 #include <raylib.h>
 #include <string>
 #include <vector>
@@ -23,31 +25,8 @@
 //#define DRAW_COLS
 #endif // !NDEBUG
 
-//Level::Level()
-//	: height(15), length(100), playerStartPos({.x = 5, .y = 0}),
-//	  name("My Level")
-//{
-//	std::srand(std::time({}));
-//	this->grid.resize(this->height * this->length);
-//	// HACK: This is temporary to fill in the ground
-//	for (int x{0}; x < this->length; x++)
-//	{
-//		for (int y{0}; y < this->height; y++)
-//		{
-//			if (y > 10)
-//				this->SetTileAt(TileID::ground, x, y);
-//			else
-//				this->SetTileAt(TileID::air, x, y);
-//		}
-//	}
-//	this->GenCollisionMap();
-//
-//	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
-//	this->tex = LoadTextureFromImage(this->img);
-//	this->StitchTexture();
-//}
 Level::Level(const std::string& filepath, AssetManager* am)
-	: sprites(am->groundTiles)
+	: sprites(am->groundTiles), entities(0)
 {
 	namespace fs = std::filesystem;
 	using std::ios;
@@ -80,12 +59,13 @@ Level::Level(const std::string& filepath, AssetManager* am)
 
 			this->ParseData(data);
 
-			this->GenCollisionMap();
+			this->Reset();
+			//this->GenCollisionMap();
 
-			this->img =
-				GenImageColor(this->length * 16, this->height * 16, BLANK);
-			this->tex = LoadTextureFromImage(this->img);
-			this->StitchTexture();
+			//this->img =
+			//	GenImageColor(this->length * 16, this->height * 16, BLANK);
+			//this->tex = LoadTextureFromImage(this->img);
+			//this->StitchTexture();
 		}
 	}
 	else
@@ -164,9 +144,20 @@ template <typename T> void Level::InsertAsBytes(vector<byte>& vec, T data)
 	}
 }
 
+void Level::Update()
+{
+	for (const auto& entity : this->entities)
+	{
+		entity->Update();
+	}
+}
 void Level::Draw()
 {
 	DrawTexture(this->tex, 0, 0, WHITE);
+	for (const auto& entity : this->entities)
+	{
+		entity->Draw();
+	}
 #ifdef DRAW_COLS
 	for (auto rec : this->colliders)
 	{
@@ -191,7 +182,7 @@ void Level::DrawGrid(RenderTexture& tex)
 	EndTextureMode();
 }
 
-void Level::GenCollisionMap()
+void Level::PopulateLevel()
 {
 	std::vector<bool> visited{};
 	visited.resize(this->height * this->length);
@@ -201,14 +192,19 @@ void Level::GenCollisionMap()
 		for (int y{0}; y < this->height; y++)
 		{
 			int i = (y * this->length) + x;
-			if (x == 17 && y == 2)
+			Tile currTile{this->TileAt(x, y)};
+			if (currTile.ID == TileID::ground)
 			{
-				std::cout << (int)TileAt(x, y).ID << '\n';
-				std::cout << i << '\n';
-				std::cout << visited[i] << '\n';
+				if (!visited[i])
+				{
+					this->colliders.push_back(
+						this->GenCollisionRect(x, y, visited));
+				}
 			}
-			if (TileAt(x, y).ID == TileID::ground && !visited[i])
-				this->colliders.push_back(GenCollisionRect(x, y, visited));
+			else if (currTile.ID != TileID::air)
+			{
+				this->SpawnEntity(x, y, this->TileAt(x, y));
+			}
 		}
 	}
 }
@@ -554,7 +550,8 @@ void Level::SetTileAtEditor(const TileID tile, const Vector2Int pos,
 		return;
 
 	this->SetTileAt(tile, pos, flags);
-	this->StitchTexture();
+	//this->StitchTexture();
+	this->Reset();
 }
 Tile Level::TileAt(const int x, const int y)
 {
@@ -565,6 +562,17 @@ Tile Level::TileAt(const int x, const int y)
 	else
 	{
 		return Tile{.ID = TileID::ground, .flags = 0};
+	}
+}
+void Level::SpawnEntity(const int x, const int y, const Tile basis)
+{
+	switch (basis.ID)
+	{
+	case (TileID::brick):
+		this->entities.push_back(std::make_unique<Brick>(x, y, *this->am));
+		break;
+	default:
+		break;
 	}
 }
 
@@ -604,9 +612,18 @@ void Level::SetLevelSize(const int length, const int height)
 
 	this->length = length;
 	this->height = height;
+	this->Reset();
+	//this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
+	//this->tex = LoadTextureFromImage(this->img);
+	//this->StitchTexture();
+}
+
+void Level::Reset()
+{
+	this->entities.clear();
+	this->colliders.clear();
+	this->PopulateLevel();
 	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
 	this->tex = LoadTextureFromImage(this->img);
 	this->StitchTexture();
 }
-
-void Level::Reset() {}
