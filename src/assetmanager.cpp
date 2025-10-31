@@ -1,5 +1,6 @@
+#include <raylib.h>
+
 #include "assetmanager.h"
-#include "raylib.h"
 
 AssetManager::AssetManager()
 {
@@ -12,6 +13,7 @@ AssetManager::~AssetManager()
 { 
 	UnloadTexture(playerSprites);
 	UnloadFont(smallFont);
+	UnloadImage(groundTiles);
 }
 	
 

@@ -6,6 +6,7 @@
 #include "player.h"
 #include "playerInputHandler.h"
 #include "tile.h"
+#include "gameUIDisplay.h"
 
 #include <array>
 #include <raylib.h>
@@ -42,8 +43,10 @@ class GameplayMode : public GamemodeInstance
 	private:
 	float timeDead{0};
 	float gravity{0.9f};
+	float time{0};
 	Player player;
 	PlayerInputHandler inputHandler;
+	GameUIDisplay uiDisplay;
 };
 
 class EditMode : public GamemodeInstance
