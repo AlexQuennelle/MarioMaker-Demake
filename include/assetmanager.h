@@ -1,7 +1,8 @@
 #pragma once
 
-#include <raylib.h>
+#include <cstdint>
 #include <memory>
+#include <raylib.h>
 
 class AssetManager
 {
@@ -10,6 +11,7 @@ class AssetManager
 	~AssetManager();
 	Texture2D playerSprites;
 	Font smallFont;
+	Image groundTiles;
 };
 
 struct PlayerAssets

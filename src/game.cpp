@@ -14,17 +14,19 @@
 #include <rlImGui.h>
 
 Game::Game()
-	: imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 224)),
-	  assetManager(std::make_unique<AssetManager>()),
-	  // HACK: Temporarily hardcode in path to level file
-	  level(RESOURCES_PATH "MyLevel.lvl")
+	: imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 216)),
+	  assetManager(std::make_unique<AssetManager>()) //,
 {
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
 
+	this->level = Level(RESOURCES_PATH "1-1.lvl", assetManager.get());
 	//this->LoadLevel();
 
-	this->gamemode = std::make_unique<GameplayMode>(this->level, this->assetManager);
+	//this->gamemode = std::make_unique<EditMode>(this->level, this->assetManager,
+	//											this->imguiIO);
+	this->gamemode =
+		std::make_unique<GameplayMode>(this->level, this->assetManager);
 
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";
@@ -34,6 +36,8 @@ Game::Game()
 void Game::Update()
 {
 	BeginTextureMode(this->renderTex);
+	ClearBackground({100, 149, 237, 255});
+	BeginMode2D(this->gamemode->camera);
 
 	this->gamemode->Update();
 
@@ -43,10 +47,9 @@ void Game::Update()
 
 void Game::Draw()
 {
-	ClearBackground({100, 149, 237, 255});
-
 	this->gamemode->Draw();
 
+	EndMode2D();
 	EndTextureMode();
 
 	BeginDrawing();
@@ -61,15 +64,7 @@ void Game::Draw()
 					static_cast<float>(GetScreenHeight())},
 				   {0.0f}, 0.0f, WHITE);
 
-	// ImGui demo
-	bool open = true;
-	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings |
-						   ImGuiWindowFlags_AlwaysAutoResize};
-	if (ImGui::Begin("ImGui Window", &open, flags))
-	{
-		ImGui::Text("Text.");
-	}
-	ImGui::End();
+	this->gamemode->DrawUI();
 
 	rlImGuiEnd();
 	EndDrawing();
@@ -137,7 +132,7 @@ void Game::LoadLevel()
 	if (result == NFD_OKAY)
 	{
 		std::cout << outPath.get() << '\n';
-		this->level = Level(outPath.get());
+		this->level = Level(outPath.get(), this->assetManager.get());
 	}
 	else if (result == NFD_ERROR)
 	{
