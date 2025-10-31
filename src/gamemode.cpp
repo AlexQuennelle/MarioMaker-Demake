@@ -52,10 +52,13 @@ void GameplayMode::Draw()
 	BeginMode2D(this->camera);
 	this->level.Draw();
 	this->player.Draw();
-	this->uiDisplay.Draw(this->time);
 	EndMode2D();
 }
-void GameplayMode::DrawUI() {}
+void GameplayMode::DrawUI() 
+{ 
+	this->uiDisplay.Draw(this->time); 
+}
+
 void GameplayMode::Reset()
 {
 	level.Reset();
