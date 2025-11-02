@@ -32,7 +32,7 @@ class Game
 #endif
 
 	std::unique_ptr<GamemodeInstance> gamemode;
-	Level level;
+	std::unique_ptr<Level> level{nullptr};
 
 	ImGuiIO& imguiIO;
 	RenderTexture2D renderTex;

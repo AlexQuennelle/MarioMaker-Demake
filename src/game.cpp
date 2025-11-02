@@ -22,13 +22,14 @@ Game::Game()
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
 
-	this->level = Level(RESOURCES_PATH "1-1.lvl", assetManager.get());
+	this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
+										  this->assetManager.get());
 	//this->LoadLevel();
 
-	//this->gamemode = std::make_unique<EditMode>(this->level, this->assetManager,
-	//											this->imguiIO);
-	this->gamemode =
-		std::make_unique<GameplayMode>(this->level, this->assetManager);
+	this->gamemode = std::make_unique<EditMode>(
+		*this->level, this->assetManager, this->imguiIO);
+	//this->gamemode =
+	//	std::make_unique<GameplayMode>(*this->level, this->assetManager);
 
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";
@@ -75,9 +76,9 @@ void Game::Draw()
 void Game::SaveLevel()
 {
 	std::ofstream outFile;
-	if (this->level.HasFilepath())
+	if (this->level->HasFilepath())
 	{
-		outFile = std::ofstream(this->level.GetFilepath(),
+		outFile = std::ofstream(this->level->GetFilepath(),
 								std::ios::out | std::ios::binary);
 	}
 	else
@@ -90,7 +91,7 @@ void Game::SaveLevel()
 										   "MyLevel.lvl")};
 		if (result == NFD_OKAY)
 		{
-			this->level.SetFilepath(outPath.get());
+			this->level->SetFilepath(outPath.get());
 			outFile =
 				std::ofstream(outPath.get(), std::ios::out | std::ios::binary);
 		}
@@ -109,7 +110,7 @@ void Game::SaveLevel()
 
 	if (outFile.is_open())
 	{
-		const vector<byte> data{this->level.Serialize()};
+		const vector<byte> data{this->level->Serialize()};
 
 		outFile.write(reinterpret_cast<const char*>(data.data()), data.size());
 
@@ -125,7 +126,7 @@ void Game::SaveLevel()
 #if !defined(PLATFORM_WEB)
 void Game::SaveLevelAs()
 {
-	this->level.SetFilepath("");
+	this->level->SetFilepath("");
 	this->SaveLevel();
 }
 void Game::LoadLevel()
@@ -137,7 +138,9 @@ void Game::LoadLevel()
 	if (result == NFD_OKAY)
 	{
 		std::cout << outPath.get() << '\n';
-		this->level = Level(outPath.get(), this->assetManager.get());
+		this->level = std::make_unique<Level>(
+			Level{outPath.get(), this->assetManager.get()});
+		//this->level = Level(outPath.get(), this->assetManager.get());
 	}
 	else if (result == NFD_ERROR)
 	{
