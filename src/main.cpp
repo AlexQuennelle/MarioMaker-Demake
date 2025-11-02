@@ -17,6 +17,7 @@ int main()
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
 #if defined(PLATFORM_WEB)
 	InitWindow(800, 450, NAME);
+	SetTargetFPS(60);
 	rlImGuiSetup(true);
 	game = std::make_unique<Game>();
 	emscripten_set_main_loop(Update, 0, 1);

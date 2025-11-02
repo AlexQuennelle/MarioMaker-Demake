@@ -1,7 +1,7 @@
 #pragma once
 
-#include "gamemode.h"
 #include "assetmanager.h"
+#include "gamemode.h"
 #include "level.h"
 
 #include <imgui.h>
@@ -27,8 +27,10 @@ class Game
 
 	void Reset();
 	void SaveLevel();
+#if !defined(PLATFORM_WEB)
 	void SaveLevelAs();
 	void LoadLevel();
+#endif
 
 	std::unique_ptr<GamemodeInstance> gamemode;
 	Level level;

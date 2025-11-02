@@ -62,7 +62,9 @@ class EditMode : public GamemodeInstance
 	void DrawButtons();
 	void DrawPallette();
 	void SaveLevel();
+#if !defined(PLATFORM_WEB)
 	void SaveLevelAs();
+#endif
 
 	RenderTexture tex;
 	Vector2Int selectedTile;
