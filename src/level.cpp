@@ -21,6 +21,7 @@
 
 #ifndef NDEBUG
 //#define DRAW_COLS
+//#define LOG_LEVEL_DATA
 #endif // !NDEBUG
 
 //Level::Level()
@@ -72,11 +73,11 @@ Level::Level(const std::string& filepath, AssetManager* am)
 
 		if (fileID == "LVL")
 		{
-#ifndef NDEBUG
+#ifndef LOG_LEVEL_DATA
 			SetTextColor(SUCCESS);
 			std::cout << "Valid level file found\n";
 			ClearStyles();
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 
 			this->ParseData(data);
 
@@ -97,12 +98,8 @@ Level::Level(const std::string& filepath, AssetManager* am)
 }
 Level::~Level()
 {
-	// NOTE: Remove when asset manager is merged.
-	//UnloadImage(this->img);
-	//UnloadImage(this->sprites);
-	// BUG: Commenting this line causes a memory leak, but uncommenting it means
-	// texturs no longer load correctly
-	// UnloadTexture(this->tex);
+	UnloadImage(this->img);
+	UnloadTexture(this->tex);
 }
 
 vector<byte> Level::Serialize() const
@@ -251,10 +248,10 @@ Rectangle Level::GenCollisionRect(const int x, const int y,
 			break;
 	}
 
-#ifndef NDEBUG
+#ifndef LOG_LEVEL_DATA
 	std::cout << std::format("Rect: [({}, {}) -> {} x {}]\n", x, y, rWidth,
 							 rHeight);
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 
 	return {
 		static_cast<float>(x),
@@ -325,10 +322,10 @@ void Level::ParseData(const vector<char>& data)
 {
 	std::memcpy(&this->length, &data[4], 4);
 	std::memcpy(&this->height, &data[8], 4);
-#ifndef NDEBUG
+#ifdef LOG_LEVEL_DATA
 	std::cout << std::format("Level size: {} x {}\n", this->length,
 							 this->height);
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 
 	uint32_t playStartX{0};
 	uint32_t playStartY{0};
@@ -339,18 +336,18 @@ void Level::ParseData(const vector<char>& data)
 		.y = static_cast<float>(playStartY),
 	};
 
-#ifndef NDEBUG
+#ifdef LOG_LEVEL_DATA
 	std::cout << std::format("Player start: ({}, {})\n", this->playerStartPos.x,
 							 this->playerStartPos.y);
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 
 	uint32_t nameLen{0};
 	std::memcpy(&nameLen, &data[20], 4);
 	this->name = std::string(nameLen, 0);
 	std::memcpy(this->name.data(), &data[24], nameLen);
-#ifndef NDEBUG
+#ifdef LOG_LEVEL_DATA
 	std::cout << "Level name: " << this->name << '\n';
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 
 	const char* addr{&data[24 + (((nameLen / 4) + 1) * 4)]};
 	const char* endAddr{data.data() + data.size() - 1};
@@ -539,7 +536,7 @@ void Level::SetTileAt(const TileID tile, const int x, const int y,
 		std::cout << "WARNING: Attempted to set tile out of bounds";
 		ClearStyles();
 	}
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 }
 void Level::SetTileAt(const TileID tile, const Vector2Int pos,
 					  const uint8_t flags)
@@ -554,7 +551,7 @@ void Level::SetTileAtEditor(const TileID tile, const Vector2Int pos,
 		return;
 
 	this->SetTileAt(tile, pos, flags);
-	this->StitchTexture();
+	this->Reset();
 }
 Tile Level::TileAt(const int x, const int y)
 {
@@ -572,9 +569,9 @@ void Level::SetLevelSize(const int length, const int height)
 {
 	if ((this->length == length) && (this->height == height))
 	{
-#ifndef NDEBUG
+#ifdef LOG_LEVEL_DATA
 		std::cout << "Early out.\n";
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 		return;
 	}
 
@@ -585,10 +582,10 @@ void Level::SetLevelSize(const int length, const int height)
 	this->grid.clear();
 	this->grid.resize(length * height);
 
-#ifndef NDEBUG
+#ifdef LOG_LEVEL_DATA
 	std::cout << length << " x " << height << '\n';
 	std::cout << oldGrid.size() << " -> " << this->grid.size() << '\n';
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 
 	for (int x{0}; x < overlapX; x++)
 	{
@@ -604,9 +601,18 @@ void Level::SetLevelSize(const int length, const int height)
 
 	this->length = length;
 	this->height = height;
+	this->Reset();
+	//this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
+	//this->tex = LoadTextureFromImage(this->img);
+	//this->StitchTexture();
+}
+
+void Level::Reset()
+{
+	this->colliders.clear();
+	this->GenCollisionMap();
+	UnloadTexture(this->tex);
 	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
 	this->tex = LoadTextureFromImage(this->img);
 	this->StitchTexture();
 }
-
-void Level::Reset() {}

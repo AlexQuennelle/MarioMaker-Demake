@@ -1,5 +1,6 @@
 #include "assetmanager.h"
-#include "raylib.h"
+
+#include <raylib.h>
 
 AssetManager::AssetManager()
 {
