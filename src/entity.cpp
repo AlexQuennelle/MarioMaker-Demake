@@ -11,6 +11,7 @@ Brick::Brick(const int x, const int y, const AssetManager& assetManager)
 	: Entity(x, y)
 {
 	// TODO: Proper initialization
+	this->solid = true;
 }
 void Brick::Update() {}
 void Brick::Draw()

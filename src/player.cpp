@@ -106,7 +106,15 @@ void Player::CheckCollisions()
 	// no collision needed when falling off screen
 	if (this->dead)
 		return;
-	for (const Rectangle col : level.GetColliders())
+
+	vector<Rectangle> solidCols = level.GetSolidEntityColliders();
+	vector<Rectangle> levelCols = level.GetColliders();
+
+	solidCols.reserve(solidCols.size() + levelCols.size());
+
+	solidCols.insert(solidCols.end(), levelCols.begin(), levelCols.end());
+
+	for (const Rectangle col : solidCols)
 	{
 		Rectangle playerCol{GetCollisionRect()};
 
@@ -132,7 +140,7 @@ void Player::CheckCollisions()
 			const float minDistY = hs1.y + hs2.y - fabsf(delta.y);
 
 			// Adjusted object position based on minimum distance
-			if (minDistX < minDistY)
+			if (minDistX > minDistY)
 			{
 				this->position.x += copysignf(minDistX, delta.x);
 				this->velocity.x = 0;
@@ -285,8 +293,15 @@ bool Player::Grounded()
 		.height = 0.1f,
 	};
 
+	vector<Rectangle> solidCols = level.GetSolidEntityColliders();
+	vector<Rectangle> levelCols = level.GetColliders();
+
+	solidCols.reserve(solidCols.size() + levelCols.size());
+
+	solidCols.insert(solidCols.end(), levelCols.begin(), levelCols.end());
+
 	return std::ranges::any_of(
-		this->level.GetColliders(), //
+		solidCols, //
 		[groundedBox](Rectangle col)
 		{ return CheckCollisionRecs(groundedBox, col); } //
 	);

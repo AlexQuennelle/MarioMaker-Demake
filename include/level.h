@@ -11,6 +11,7 @@
 #include <raylib.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using std::array;
 using std::vector;
@@ -88,6 +89,15 @@ class Level
 	void SetLevelSize(const int length, const int height);
 	const std::string& GetName() const { return this->name; }
 	void SetName(const std::string& newName) { this->name = newName; }
+
+	const vector<Rectangle> GetSolidEntityColliders() {
+		vector<Rectangle> solids;
+		for (Entity_ptr& e : this->entities)
+		{
+			solids.push_back(e->GetCollider());
+		}
+		return solids;
+	}
 
 	private:
 	/**
