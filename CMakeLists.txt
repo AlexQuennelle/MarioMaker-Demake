@@ -70,10 +70,12 @@ FetchContent_MakeAvailable(rlImGui)
 FetchContent_GetProperties(rlImGui SOURCE_DIR RLIMGUI_DIR)
 
 add_library(rlImGui STATIC ${rlimgui_SOURCE_DIR}/rlImGui.cpp)
-target_link_libraries(rlImGui PRIVATE ImGui raylib nfd)
+target_link_libraries(rlImGui PRIVATE ImGui raylib)
 target_include_directories(rlImGui INTERFACE ${rlimgui_SOURCE_DIR})
 
-add_subdirectory(nativefiledialog-extended-1.2.1)
+if(NOT EMSCRIPTEN)
+    add_subdirectory(nativefiledialog-extended-1.2.1)
+endif()
 
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
@@ -86,7 +88,7 @@ if(EMSCRIPTEN)
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     set_target_properties(
         ${CMAKE_PROJECT_NAME} PROPERTIES LINK_FLAGS
-        "--preload-file ../resources@./resources"
+        "--preload-file ../resources@./resources -sALLOW_MEMORY_GROWTH"
     )
 endif()
 target_compile_definitions(
@@ -126,6 +128,10 @@ target_compile_features("${CMAKE_PROJECT_NAME}" PRIVATE cxx_std_20)
 target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES} )
 
 target_link_libraries(${PROJECT_NAME} raylib ImGui rlImGui)
+
+if(NOT EMSCRIPTEN)
+    target_link_libraries("${PROJECT_NAME}" nfd)
+endif()
 
 target_include_directories(
     "${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/"
