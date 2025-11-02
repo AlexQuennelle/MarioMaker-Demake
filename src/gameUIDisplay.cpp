@@ -1,4 +1,6 @@
 #include "gameUIDisplay.h"
+#include <cmath>
+#include <string>
 
 GameUIDisplay::GameUIDisplay(Font& font) : font(font)
 {
@@ -13,8 +15,11 @@ GameUIDisplay::~GameUIDisplay()
 void GameUIDisplay::Draw(const float time)
 {
 	BeginTextureMode(this->renderTex);
-	DrawTextEx(font, "TIME", {0, 0},
-			   static_cast<float>(font.baseSize) / 4, 0, YELLOW);
+	ClearBackground(BLANK);
+	DrawTextEx(font, "TIME",
+			   {348, 8}, static_cast<float>(font.baseSize) / 4, 0, WHITE);
+	DrawTextEx(font, std::to_string(static_cast<int>(std::ceil(time))).c_str(), {348, 16},
+			   static_cast<float>(font.baseSize) / 4, 0, WHITE);
 	EndTextureMode();
 
 	// Draw scaled up render texture
