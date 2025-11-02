@@ -8,10 +8,12 @@
 #include <ios>
 #include <iostream>
 #include <memory>
-#include <nfd.h>
-#include <nfd.hpp>
 #include <raylib.h>
 #include <rlImGui.h>
+#if !defined(PLATFORM_WEB)
+#include <nfd.h>
+#include <nfd.hpp>
+#endif
 
 Game::Game()
 	: imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 216)),
@@ -80,6 +82,7 @@ void Game::SaveLevel()
 	}
 	else
 	{
+#if !defined(PLATFORM_WEB)
 		NFD::Guard nfdGuard;
 		NFD::UniquePath outPath;
 		nfdfilteritem_t filter{"Level Files", "lvl"};
@@ -101,6 +104,7 @@ void Game::SaveLevel()
 			std::cout << "Save cancelled.\n";
 			return;
 		}
+#endif
 	}
 
 	if (outFile.is_open())
@@ -118,6 +122,7 @@ void Game::SaveLevel()
 		ClearStyles();
 	}
 }
+#if !defined(PLATFORM_WEB)
 void Game::SaveLevelAs()
 {
 	this->level.SetFilepath("");
@@ -145,3 +150,4 @@ void Game::LoadLevel()
 		return;
 	}
 }
+#endif

@@ -9,10 +9,12 @@
 #include <imgui.h>
 #include <iostream>
 #include <misc/cpp/imgui_stdlib.h>
-#include <nfd.hpp>
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
+#if !defined(PLATFORM_WEB)
+#include <nfd.hpp>
+#endif
 
 EditMode::EditMode(Level& lvl, asset_ptr& am, const ImGuiIO& imgui)
 	: GamemodeInstance(lvl, am), imGuiIO(imgui)
@@ -201,11 +203,13 @@ void EditMode::DrawButtons()
 	{
 		this->SaveLevel();
 	}
+#if !defined(PLATFORM_WEB)
 	ImGui::SameLine();
 	if (ImGui::Button("Save As"))
 	{
 		this->SaveLevelAs();
 	}
+#endif
 }
 void EditMode::DrawPallette()
 {
@@ -241,6 +245,7 @@ void EditMode::SaveLevel()
 	}
 	else
 	{
+#if !defined(PLATFORM_WEB)
 		NFD::Guard nfdGuard;
 		NFD::UniquePath outPath;
 		nfdfilteritem_t filter{"Level Files", "lvl"};
@@ -262,6 +267,7 @@ void EditMode::SaveLevel()
 			std::cout << "Save cancelled.\n";
 			return;
 		}
+#endif
 	}
 
 	if (outFile.is_open())
@@ -279,8 +285,10 @@ void EditMode::SaveLevel()
 		ClearStyles();
 	}
 }
+#if !defined(PLATFORM_WEB)
 void EditMode::SaveLevelAs()
 {
 	this->level.SetFilepath("");
 	this->SaveLevel();
 }
+#endif
