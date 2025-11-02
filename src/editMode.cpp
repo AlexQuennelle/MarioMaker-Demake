@@ -16,7 +16,7 @@
 #include <nfd.hpp>
 #endif
 
-EditMode::EditMode(Level& lvl, asset_ptr& am, const ImGuiIO& imgui)
+EditMode::EditMode(Level& lvl, AssetManager& am, const ImGuiIO& imgui)
 	: GamemodeInstance(lvl, am), imGuiIO(imgui)
 {
 	this->camera = Camera2D{0};

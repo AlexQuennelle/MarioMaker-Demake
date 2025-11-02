@@ -4,9 +4,9 @@
 #include <raylib.h>
 #include <raymath.h>
 
-GameplayMode::GameplayMode(Level& lvl, asset_ptr& am)
+GameplayMode::GameplayMode(Level& lvl, AssetManager& am)
 	: GamemodeInstance(lvl, am),
-	  player(lvl, {this->assetManager->playerSprites}),
+	  player(lvl, {this->assetManager.playerSprites}),
 	  inputHandler(this->player)
 {
 	this->camera = Camera2D{0};
