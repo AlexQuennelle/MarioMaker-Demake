@@ -16,21 +16,21 @@
 #include <nfd.hpp>
 #endif
 
-EditMode::EditMode(Level& lvl, AssetManager& am, const ImGuiIO& imgui)
+EditMode::EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui)
 	: GamemodeInstance(lvl, am), imGuiIO(imgui)
 {
 	this->camera = Camera2D{0};
 	this->camera.target = {.x = 0.0f, .y = 0.0f};
 	this->camera.offset = {
 		.x = 0.0f,
-		.y = 216 - (this->level.GetHeight() * 16.0f),
+		.y = 216 - (this->level->GetHeight() * 16.0f),
 	};
 	this->camera.rotation = 0.0f;
 	this->camera.zoom = 1.0f;
 
-	this->tex = LoadRenderTexture(this->level.GetLength() * 16,
-								  this->level.GetHeight() * 16);
-	this->level.DrawGrid(this->tex);
+	this->tex = LoadRenderTexture(this->level->GetLength() * 16,
+								  this->level->GetHeight() * 16);
+	this->level->DrawGrid(this->tex);
 }
 void EditMode::Update()
 {
@@ -50,12 +50,12 @@ void EditMode::Update()
 		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
 			(IsMouseButtonDown(MOUSE_LEFT_BUTTON) && MouseMoved))
 		{
-			this->level.SetTileAtEditor(this->brush.ID, this->selectedTile);
+			this->level->SetTileAtEditor(this->brush.ID, this->selectedTile);
 		}
 		else if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) ||
 				 (IsMouseButtonDown(MOUSE_RIGHT_BUTTON) && MouseMoved))
 		{
-			this->level.SetTileAtEditor(TileID::air, this->selectedTile);
+			this->level->SetTileAtEditor(TileID::air, this->selectedTile);
 		}
 
 		float cameraSpeed{2.0f};
@@ -67,7 +67,7 @@ void EditMode::Update()
 		else if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))
 		{
 			if (this->camera.offset.x >
-				-((this->level.GetLength() * 16.0f) - 384))
+				-((this->level->GetLength() * 16.0f) - 384))
 				this->camera.offset.x -= cameraSpeed;
 		}
 		if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))
@@ -78,7 +78,7 @@ void EditMode::Update()
 		else if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))
 		{
 			if (this->camera.offset.y >
-				-((this->level.GetHeight() * 16.0f) - 216))
+				-((this->level->GetHeight() * 16.0f) - 216))
 				this->camera.offset.y -= cameraSpeed;
 		}
 	}
@@ -86,7 +86,7 @@ void EditMode::Update()
 void EditMode::Draw()
 {
 	BeginMode2D(this->camera);
-	this->level.Draw();
+	this->level->Draw();
 	DrawTexture(this->tex.texture, 0, 0, WHITE);
 	EndMode2D();
 }
@@ -106,12 +106,12 @@ void EditMode::DrawUI()
 		.y = -this->camera.offset.y / 16.0f,
 	};
 	Vector2Int lvlDims{
-		.x = this->level.GetLength(),
-		.y = this->level.GetHeight(),
+		.x = this->level->GetLength(),
+		.y = this->level->GetHeight(),
 	};
 
 	std::array<char, 256> nameBuf{};
-	strcpy(nameBuf.data(), this->level.GetName().c_str());
+	strcpy(nameBuf.data(), this->level->GetName().c_str());
 
 	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings |
 						   ImGuiWindowFlags_AlwaysAutoResize |
@@ -125,10 +125,10 @@ void EditMode::DrawUI()
 		ImGui::Text("CameraPosition:");
 		ImGui::SameLine();
 		ImGui::SliderFloat("##CamOffsetX", &camOffset.x, 0.0f,
-						   this->level.GetLength() - 24.0f);
+						   this->level->GetLength() - 24.0f);
 		ImGui::SameLine();
 		ImGui::SliderFloat("##CamOffsetY", &camOffset.y, 0.0f,
-						   this->level.GetHeight() - 14.0f);
+						   this->level->GetHeight() - 14.0f);
 		// Debug info
 		//ImGui::InputFloat2("Mouse position in level", &lvlMousePos.x);
 		//ImGui::InputInt2("Hovered cell", &this->selectedTile.x);
@@ -166,23 +166,23 @@ void EditMode::DrawUI()
 	ImGui::End();
 
 	std::string newName{nameBuf.data()};
-	if (newName != this->level.GetName())
+	if (newName != this->level->GetName())
 	{
-		this->level.SetName(newName);
+		this->level->SetName(newName);
 	}
 
-	lvlDims.x = (lvlDims.x >= 24) ? lvlDims.x : this->level.GetLength();
-	lvlDims.y = (lvlDims.y >= 14) ? lvlDims.y : this->level.GetHeight();
-	if ((this->level.GetLength() != lvlDims.x) ||
-		(this->level.GetHeight() != lvlDims.y))
+	lvlDims.x = (lvlDims.x >= 24) ? lvlDims.x : this->level->GetLength();
+	lvlDims.y = (lvlDims.y >= 14) ? lvlDims.y : this->level->GetHeight();
+	if ((this->level->GetLength() != lvlDims.x) ||
+		(this->level->GetHeight() != lvlDims.y))
 	{
-		this->level.SetLevelSize(lvlDims.x, lvlDims.y);
+		this->level->SetLevelSize(lvlDims.x, lvlDims.y);
 		// FIX: Potential problem here with texture loading
 		UnloadTexture(this->tex.texture);
 		UnloadRenderTexture(this->tex);
-		this->tex = LoadRenderTexture(this->level.GetLength() * 16,
-									  this->level.GetHeight() * 16);
-		this->level.DrawGrid(this->tex);
+		this->tex = LoadRenderTexture(this->level->GetLength() * 16,
+									  this->level->GetHeight() * 16);
+		this->level->DrawGrid(this->tex);
 		this->camera.offset = {
 			.x = -camOffset.x * 16.0f,
 			.y = -camOffset.y * 16.0f,
@@ -238,10 +238,11 @@ void EditMode::DrawPallette()
 void EditMode::SaveLevel()
 {
 	std::ofstream outFile;
-	if (this->level.HasFilepath())
+	using std::ios;
+	if (this->level->HasFilepath())
 	{
-		outFile = std::ofstream(this->level.GetFilepath(),
-								std::ios::out | std::ios::binary);
+		outFile =
+			std::ofstream(this->level->GetFilepath(), ios::out | ios::binary);
 	}
 	else
 	{
@@ -253,7 +254,7 @@ void EditMode::SaveLevel()
 										   "MyLevel.lvl")};
 		if (result == NFD_OKAY)
 		{
-			this->level.SetFilepath(outPath.get());
+			this->level->SetFilepath(outPath.get());
 			outFile =
 				std::ofstream(outPath.get(), std::ios::out | std::ios::binary);
 		}
@@ -272,7 +273,7 @@ void EditMode::SaveLevel()
 
 	if (outFile.is_open())
 	{
-		const vector<byte> data{this->level.Serialize()};
+		const vector<byte> data{this->level->Serialize()};
 
 		outFile.write(reinterpret_cast<const char*>(data.data()), data.size());
 
@@ -288,7 +289,7 @@ void EditMode::SaveLevel()
 #if !defined(PLATFORM_WEB)
 void EditMode::SaveLevelAs()
 {
-	this->level.SetFilepath("");
+	this->level->SetFilepath("");
 	this->SaveLevel();
 }
 #endif

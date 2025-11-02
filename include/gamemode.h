@@ -23,7 +23,7 @@ enum class SwitchRequest : uint8_t
 class GamemodeInstance
 {
 	public:
-	GamemodeInstance(Level& lvl, AssetManager& am)
+	GamemodeInstance(Level* lvl, AssetManager& am)
 		: level(lvl), assetManager(am) {};
 	virtual ~GamemodeInstance() = default;
 
@@ -37,14 +37,14 @@ class GamemodeInstance
 
 	protected:
 	SwitchRequest switchReq{SwitchRequest::None};
-	Level& level;
+	Level* level;
 	AssetManager& assetManager;
 };
 
 class GameplayMode : public GamemodeInstance
 {
 	public:
-	GameplayMode(Level& lvl, AssetManager& am);
+	GameplayMode(Level* lvl, AssetManager& am);
 
 	void Update() override;
 	void Draw() override;
@@ -61,7 +61,7 @@ class GameplayMode : public GamemodeInstance
 class EditMode : public GamemodeInstance
 {
 	public:
-	EditMode(Level& lvl, AssetManager& am, const ImGuiIO& imgui);
+	EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui);
 
 	void Update() override;
 	void Draw() override;
@@ -90,7 +90,7 @@ class EditMode : public GamemodeInstance
 
 class MainMenu : public GamemodeInstance
 {
-	MainMenu(Level& lvl, AssetManager& am);
+	MainMenu(Level* lvl, AssetManager& am);
 
 	void Update() override;
 	void Draw() override;

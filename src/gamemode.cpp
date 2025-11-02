@@ -4,9 +4,9 @@
 #include <raylib.h>
 #include <raymath.h>
 
-GameplayMode::GameplayMode(Level& lvl, AssetManager& am)
+GameplayMode::GameplayMode(Level* lvl, AssetManager& am)
 	: GamemodeInstance(lvl, am),
-	  player(lvl, {this->assetManager.playerSprites}),
+	  player(*lvl, {this->assetManager.playerSprites}),
 	  inputHandler(this->player)
 {
 	this->camera = Camera2D{0};
@@ -16,7 +16,7 @@ GameplayMode::GameplayMode(Level& lvl, AssetManager& am)
 	this->camera.rotation = 0.0f;
 	this->camera.zoom = 1.0f;
 
-	player.Reset(level.GetPlayerStartPos());
+	player.Reset(level->GetPlayerStartPos());
 }
 void GameplayMode::Update()
 {
@@ -45,14 +45,14 @@ void GameplayMode::Update()
 void GameplayMode::Draw()
 {
 	BeginMode2D(this->camera);
-	this->level.Draw();
+	this->level->Draw();
 	this->player.Draw();
 	EndMode2D();
 }
 void GameplayMode::DrawUI() {}
 void GameplayMode::Reset()
 {
-	level.Reset();
-	player.Reset(level.GetPlayerStartPos());
+	level->Reset();
+	player.Reset(level->GetPlayerStartPos());
 	timeDead = 0;
 }
