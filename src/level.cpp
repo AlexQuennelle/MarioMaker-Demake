@@ -31,6 +31,9 @@ Level::Level(const std::string& filepath, AssetManager* am)
 	namespace fs = std::filesystem;
 	using std::ios;
 
+	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
+	this->tex = LoadTextureFromImage(this->img);
+
 	std::srand(std::time({}));
 
 	this->filepath = std::string(filepath);
@@ -82,7 +85,7 @@ Level::~Level()
 	//UnloadImage(this->sprites);
 	// BUG: Commenting this line causes a memory leak, but uncommenting it means
 	// texturs no longer load correctly
-	// UnloadTexture(this->tex);
+	UnloadTexture(this->tex);
 }
 
 vector<byte> Level::Serialize() const

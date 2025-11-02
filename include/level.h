@@ -90,11 +90,24 @@ class Level
 	const std::string& GetName() const { return this->name; }
 	void SetName(const std::string& newName) { this->name = newName; }
 
+	const vector<Entity*> GetEntities()
+	{
+		vector<Entity*> entities;
+		for (Entity_ptr& e : this->entities)
+		{
+			entities.push_back(e.get());
+		}
+		return entities;
+	}
+
 	const vector<Rectangle> GetSolidEntityColliders() {
 		vector<Rectangle> solids;
 		for (Entity_ptr& e : this->entities)
 		{
-			solids.push_back(e->GetCollider());
+			if (e->IsSolid())
+			{
+				solids.push_back(e->GetCollider());
+			}
 		}
 		return solids;
 	}

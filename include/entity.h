@@ -3,6 +3,7 @@
 #include "assetmanager.h"
 #include "raylib.h"
 
+class Player;
 
 class Entity
 {
@@ -11,9 +12,8 @@ class Entity
 
 	virtual void Update() = 0;
 	virtual void Draw() = 0;
-	//virtual void OnPlayerCollision(Player& player) = 0;
-	// IDK this might be stupid
-	virtual bool Bonk(const bool isPlayer, const bool big) = 0;
+	virtual void OnPlayerCollision(Player& player) = 0;
+	virtual void OnEntityCollision(Entity& entity) = 0;
 
 	virtual bool IsSolid() const = 0;
 	Rectangle GetCollider() const { 
@@ -39,8 +39,9 @@ class Brick : public Entity
 
 	void Update() override;
 	void Draw() override;
+	void OnPlayerCollision(Player& player) override {};
+	void OnEntityCollision(Entity& entity) override {};
 	bool IsSolid() const override { return this->solid; }
-	bool Bonk(const bool isPlayer, const bool big) override;
 
 	private:
 };

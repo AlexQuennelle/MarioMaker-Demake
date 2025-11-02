@@ -25,4 +25,3 @@ void Brick::Draw()
 					   this->collider.height, Fade(RED, 0.6f));
 #endif // DEBUG
 }
-bool Brick::Bonk(const bool isPlayer, const bool big) { return true; }

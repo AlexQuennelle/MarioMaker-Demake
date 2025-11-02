@@ -107,6 +107,8 @@ void Player::CheckCollisions()
 	if (this->dead)
 		return;
 
+	
+
 	vector<Rectangle> solidCols = level.GetSolidEntityColliders();
 	vector<Rectangle> levelCols = level.GetColliders();
 
@@ -140,7 +142,7 @@ void Player::CheckCollisions()
 			const float minDistY = hs1.y + hs2.y - fabsf(delta.y);
 
 			// Adjusted object position based on minimum distance
-			if (minDistX > minDistY)
+			if (minDistX < minDistY)
 			{
 				this->position.x += copysignf(minDistX, delta.x);
 				this->velocity.x = 0;
