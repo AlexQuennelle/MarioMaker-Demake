@@ -15,6 +15,7 @@ class Player
 	void AddForce(const Vector2 force);
 	// HACK: remove when death is possible via hazards
 	void TemporaryDeathTest();
+	void Die();
 
 	//getters
 	bool IsDead() const { return this->dead; }
@@ -50,5 +51,4 @@ class Player
 	bool Grounded();
 	void CheckCollisions();
 	Rectangle GetCollisionRect();
-	void Die();
 };

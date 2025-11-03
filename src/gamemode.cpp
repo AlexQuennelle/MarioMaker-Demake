@@ -42,6 +42,12 @@ void GameplayMode::Update()
 		this->Reset();
 	}
 
+	if (time <= 0)
+	{
+		time = 0;
+		player.Die();
+	}
+
 	time -= GetFrameTime();
 
 	// Update camera target to player position
