@@ -95,7 +95,10 @@ class Level
 		vector<Entity*> entities;
 		for (Entity_ptr& e : this->entities)
 		{
-			entities.push_back(e.get());
+			if (e->IsActive())
+			{
+				entities.push_back(e.get());
+			}
 		}
 		return entities;
 	}
@@ -104,7 +107,7 @@ class Level
 		vector<Rectangle> solids;
 		for (Entity_ptr& e : this->entities)
 		{
-			if (e->IsSolid())
+			if (e->IsSolid() && e->IsActive())
 			{
 				solids.push_back(e->GetCollider());
 			}

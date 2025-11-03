@@ -9,6 +9,7 @@ class Entity
 {
 	public:
 	Entity(const int x, const int y /*, Texture& sprites*/);
+	virtual ~Entity() {};
 
 	virtual void Update() = 0;
 	virtual void Draw() = 0;
@@ -16,6 +17,7 @@ class Entity
 	virtual void OnEntityCollision(Entity& entity) = 0;
 
 	virtual bool IsSolid() const = 0;
+	virtual bool IsActive() const = 0;
 	Rectangle GetCollider() const { 
 		return {.x = this->collider.x + this->position.x,
 				.y = this->collider.y + this->position.y,
@@ -39,9 +41,10 @@ class Brick : public Entity
 
 	void Update() override;
 	void Draw() override;
-	void OnPlayerCollision(Player& player) override {};
-	void OnEntityCollision(Entity& entity) override {};
+	void OnPlayerCollision(Player& player) override;
+	void OnEntityCollision(Entity& entity) override;
 	bool IsSolid() const override { return this->solid; }
+	bool IsActive() const override { return this->isActive; }
 
 	private:
 };

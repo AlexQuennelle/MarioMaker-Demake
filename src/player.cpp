@@ -107,7 +107,15 @@ void Player::CheckCollisions()
 	if (this->dead)
 		return;
 
-	
+	Rectangle playerCol{GetCollisionRect()};
+
+	for (Entity* e_ptr : level.GetEntities())
+	{
+		if (CheckCollisionRecs(playerCol, e_ptr->GetCollider()))
+		{
+			e_ptr->OnPlayerCollision(*this);
+		}
+	}
 
 	vector<Rectangle> solidCols = level.GetSolidEntityColliders();
 	vector<Rectangle> levelCols = level.GetColliders();
@@ -118,7 +126,7 @@ void Player::CheckCollisions()
 
 	for (const Rectangle col : solidCols)
 	{
-		Rectangle playerCol{GetCollisionRect()};
+		playerCol = GetCollisionRect();
 
 		if (CheckCollisionRecs(playerCol, col))
 		{

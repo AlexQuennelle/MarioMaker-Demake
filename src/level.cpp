@@ -153,7 +153,10 @@ void Level::Update()
 {
 	for (const auto& entity : this->entities)
 	{
-		entity->Update();
+		if (entity->IsActive())
+		{
+			entity->Update();
+		}
 	}
 }
 void Level::Draw()
@@ -161,7 +164,10 @@ void Level::Draw()
 	DrawTexture(this->tex, 0, 0, WHITE);
 	for (const auto& entity : this->entities)
 	{
-		entity->Draw();
+		if (entity->IsActive())
+		{
+			entity->Draw();
+		}
 	}
 #ifdef DRAW_COLS
 	for (auto rec : this->colliders)

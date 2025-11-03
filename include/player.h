@@ -19,6 +19,14 @@ class Player
 	//getters
 	bool IsDead() const { return this->dead; }
 	Vector2 GetPosition() const { return this->position; }
+	Vector2 GetVelocity() const { return this->velocity; }
+	Rectangle GetCollisionRect();
+
+	// EVIL SETTER AAAAAAA (i kinda need it)
+	void SetVelocity(const Vector2 velocity)
+	{ 
+		this->velocity = velocity;
+	}
 
 	private:
 	Vector2 position{0, 0};
@@ -49,6 +57,5 @@ class Player
 
 	bool Grounded();
 	void CheckCollisions();
-	Rectangle GetCollisionRect();
 	void Die();
 };
