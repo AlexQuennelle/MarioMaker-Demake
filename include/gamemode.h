@@ -45,6 +45,7 @@ class GameplayMode : public GamemodeInstance
 {
 	public:
 	GameplayMode(Level* lvl, AssetManager& am);
+	~GameplayMode() override = default;
 
 	void Update() override;
 	void Draw() override;
@@ -62,6 +63,7 @@ class EditMode : public GamemodeInstance
 {
 	public:
 	EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui);
+	~EditMode() override;
 
 	void Update() override;
 	void Draw() override;
@@ -76,7 +78,7 @@ class EditMode : public GamemodeInstance
 #endif
 
 	RenderTexture tex;
-	Vector2Int selectedTile;
+	Vector2Int selectedTile{.x = 0, .y = 0};
 	Vector2 lvlMousePos;
 	const ImGuiIO& imGuiIO;
 	Tile brush{.ID = TileID::ground, .flags = 0};
@@ -90,9 +92,13 @@ class EditMode : public GamemodeInstance
 
 class MainMenu : public GamemodeInstance
 {
-	MainMenu(Level* lvl, AssetManager& am);
+	public:
+	MainMenu(AssetManager& am);
+	~MainMenu() override = default;
 
 	void Update() override;
 	void Draw() override;
 	void DrawUI() override;
+
+	private:
 };

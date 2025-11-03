@@ -3,6 +3,7 @@
 #include "level.h"
 #include "utils.h"
 
+#include <cassert>
 #include <fstream>
 #include <imgui.h>
 #include <ios>
@@ -22,12 +23,13 @@ Game::Game()
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
 
-	this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
-										  this->assetManager.get());
+	//this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
+	//									  this->assetManager.get());
 	//this->LoadLevel();
 
-	this->gamemode = std::make_unique<EditMode>(
-		this->level.get(), *this->assetManager, this->imguiIO);
+	this->gamemode = std::make_unique<MainMenu>(*this->assetManager);
+	//this->gamemode = std::make_unique<EditMode>(
+	//	this->level.get(), *this->assetManager, this->imguiIO);
 	//this->gamemode =
 	//	std::make_unique<GameplayMode>(this->level.get(), *this->assetManager);
 
@@ -43,6 +45,12 @@ void Game::Update()
 	BeginMode2D(this->gamemode->camera);
 
 	this->gamemode->Update();
+
+	SwitchRequest newMode{this->gamemode->GetNextMode()};
+	if (newMode != SwitchRequest::None)
+	{
+		SwitchMode(newMode);
+	}
 
 	// draw everything
 	Draw();
@@ -71,6 +79,36 @@ void Game::Draw()
 
 	rlImGuiEnd();
 	EndDrawing();
+}
+
+void Game::SwitchMode(SwitchRequest newMode)
+{
+	switch (newMode)
+	{
+	case SwitchRequest::GameplayMode:
+		this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
+											  this->assetManager.get());
+
+		assert(this->level != nullptr);
+		this->gamemode = std::make_unique<GameplayMode>(this->level.get(),
+														*this->assetManager);
+		break;
+
+	case SwitchRequest::EditMode:
+		this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
+											  this->assetManager.get());
+
+		assert(this->level != nullptr);
+		this->gamemode = std::make_unique<EditMode>(
+			this->level.get(), *this->assetManager, this->imguiIO);
+		break;
+
+	case SwitchRequest::MainMenu:
+	default:
+		this->level.reset(nullptr);
+		this->gamemode = std::make_unique<MainMenu>(*this->assetManager);
+		break;
+	}
 }
 
 void Game::SaveLevel()

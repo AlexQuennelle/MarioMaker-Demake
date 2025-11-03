@@ -73,7 +73,7 @@ Level::Level(const std::string& filepath, AssetManager* am)
 
 		if (fileID == "LVL")
 		{
-#ifndef LOG_LEVEL_DATA
+#ifdef LOG_LEVEL_DATA
 			SetTextColor(SUCCESS);
 			std::cout << "Valid level file found\n";
 			ClearStyles();
@@ -83,9 +83,6 @@ Level::Level(const std::string& filepath, AssetManager* am)
 
 			this->GenCollisionMap();
 
-			this->img =
-				GenImageColor(this->length * 16, this->height * 16, BLANK);
-			this->tex = LoadTextureFromImage(this->img);
 			this->StitchTexture();
 		}
 	}
@@ -99,7 +96,10 @@ Level::Level(const std::string& filepath, AssetManager* am)
 Level::~Level()
 {
 	UnloadImage(this->img);
+	this->img = {
+		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	UnloadTexture(this->tex);
+	this->tex.id = 0;
 }
 
 vector<byte> Level::Serialize() const
@@ -198,12 +198,6 @@ void Level::GenCollisionMap()
 		for (int y{0}; y < this->height; y++)
 		{
 			int i = (y * this->length) + x;
-			if (x == 17 && y == 2)
-			{
-				std::cout << (int)TileAt(x, y).ID << '\n';
-				std::cout << i << '\n';
-				std::cout << visited[i] << '\n';
-			}
 			if (TileAt(x, y).ID == TileID::ground && !visited[i])
 				this->colliders.push_back(GenCollisionRect(x, y, visited));
 		}
@@ -248,7 +242,7 @@ Rectangle Level::GenCollisionRect(const int x, const int y,
 			break;
 	}
 
-#ifndef LOG_LEVEL_DATA
+#ifdef LOG_LEVEL_DATA
 	std::cout << std::format("Rect: [({}, {}) -> {} x {}]\n", x, y, rWidth,
 							 rHeight);
 #endif // !LOG_LEVEL_DATA
@@ -262,6 +256,8 @@ Rectangle Level::GenCollisionRect(const int x, const int y,
 }
 void Level::StitchTexture()
 {
+	this->img = {
+		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
 	for (int y{0}; y < this->height; y++)
 	{
@@ -285,7 +281,8 @@ void Level::StitchTexture()
 			}
 		}
 	}
-	UpdateTexture(this->tex, this->img.data);
+	this->tex = LoadTextureFromImage(this->img);
+	//UpdateTexture(this->tex, this->img.data);
 }
 byte Level::MarchSquares(const int x, const int y)
 {
@@ -536,7 +533,7 @@ void Level::SetTileAt(const TileID tile, const int x, const int y,
 		std::cout << "WARNING: Attempted to set tile out of bounds";
 		ClearStyles();
 	}
-#endif // !LOG_LEVEL_DATA
+#endif // !NDEBUG
 }
 void Level::SetTileAt(const TileID tile, const Vector2Int pos,
 					  const uint8_t flags)
@@ -611,8 +608,12 @@ void Level::Reset()
 {
 	this->colliders.clear();
 	this->GenCollisionMap();
+	UnloadImage(this->img);
+	this->img = {
+		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	UnloadTexture(this->tex);
-	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
-	this->tex = LoadTextureFromImage(this->img);
+	this->tex = {.id = 0, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
+	//this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
+	//this->tex = LoadTextureFromImage(this->img);
 	this->StitchTexture();
 }

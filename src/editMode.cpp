@@ -32,6 +32,10 @@ EditMode::EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui)
 								  this->level->GetHeight() * 16);
 	this->level->DrawGrid(this->tex);
 }
+EditMode::~EditMode()
+{
+	UnloadRenderTexture(this->tex);
+}
 void EditMode::Update()
 {
 	float cellSize{GetScreenWidth() / 24.0f};
@@ -80,6 +84,10 @@ void EditMode::Update()
 			if (this->camera.offset.y >
 				-((this->level->GetHeight() * 16.0f) - 216))
 				this->camera.offset.y -= cameraSpeed;
+		}
+		else if (IsKeyDown(KEY_BACKSPACE))
+		{
+			this->switchReq = SwitchRequest::MainMenu;
 		}
 	}
 }

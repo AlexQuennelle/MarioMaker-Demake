@@ -8,6 +8,10 @@ AssetManager::AssetManager()
 	groundTiles = LoadImage(RESOURCES_PATH "sprites/groundSprites.png");
 }
 
-AssetManager::~AssetManager() { UnloadTexture(playerSprites); }
+AssetManager::~AssetManager()
+{
+	UnloadTexture(this->playerSprites);
+	UnloadImage(this->groundTiles);
+}
 
 PlayerAssets::PlayerAssets(Texture2D& tex) : sprites(tex) {}
