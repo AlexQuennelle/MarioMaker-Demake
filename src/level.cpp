@@ -63,13 +63,14 @@ Level::Level(const std::string& filepath, AssetManager* am)
 
 			this->ParseData(data);
 
-			this->Reset();
+			//this->Reset();
 			//this->GenCollisionMap();
 
 			//this->img =
 			//	GenImageColor(this->length * 16, this->height * 16, BLANK);
 			//this->tex = LoadTextureFromImage(this->img);
-			//this->StitchTexture();
+			this->PopulateLevel();
+			this->StitchTexture();
 		}
 	}
 	else
@@ -295,7 +296,8 @@ void Level::StitchTexture()
 			}
 		}
 	}
-	UpdateTexture(this->tex, this->img.data);
+	//UpdateTexture(this->tex, this->img.data);
+	this->tex = LoadTextureFromImage(this->img);
 }
 byte Level::MarchSquares(const int x, const int y)
 {
@@ -630,11 +632,14 @@ void Level::SetLevelSize(const int length, const int height)
 
 void Level::Reset()
 {
-	this->entities.clear();
 	this->colliders.clear();
 	this->PopulateLevel();
+	UnloadImage(this->img);
+	this->img = {
+		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	UnloadTexture(this->tex);
-	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
-	this->tex = LoadTextureFromImage(this->img);
+	this->tex = {.id = 0, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
+	//this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
+	//this->tex = LoadTextureFromImage(this->img);
 	this->StitchTexture();
 }

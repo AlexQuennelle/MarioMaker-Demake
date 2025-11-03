@@ -2,18 +2,21 @@
 #include "assetmanager.h"
 #include "player.h"
 
+#include <iostream>
 #include <raylib.h>
 #include <raymath.h>
 
-Entity::Entity(const int x, const int y /*, Texture& sprites*/)
-	: position(x, y) /* sprites(sprites)*/
+Entity::Entity(const int x, const int y, AssetManager& assetManager)
+	: position(x, y), assetManager(assetManager)
 {}
 
-Brick::Brick(const int x, const int y, const AssetManager& assetManager)
-	: Entity(x, y)
+Brick::Brick(const int x, const int y, AssetManager& assetManager)
+	: Entity(x, y, assetManager), sprite(assetManager.playerSprites)
 {
 	// TODO: Proper initialization
-	this->solid = true;
+
+	//this->solid = true;
+	std::cout << this->assetManager.playerSprites.id << '\n';
 }
 void Brick::Update() {}
 void Brick::Draw()
@@ -22,13 +25,18 @@ void Brick::Draw()
 	DrawRectangleRec(
 		{this->position.x * 16.0f, this->position.y * 16.0f, 16.0f, 16.0f},
 		BROWN);
+	Rectangle sourceRect{0.0f, 0.0f, 16.0f, 16.0f};
+	//DrawTexture(sprite, 0, 0, WHITE);
+	//DrawTextureRec(this->assetManager.staticEntities, sourceRect,
+	//			   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
 #ifdef DRAW_COLS
 	DrawRectangleLines(this->position.x, this->position.y, this->collider.width,
 					   this->collider.height, Fade(RED, 0.6f));
 #endif // DEBUG
 }
 
-void Brick::OnPlayerCollision(Player& player) {
+void Brick::OnPlayerCollision(Player& player)
+{
 
 	Rectangle playerCol{player.GetCollisionRect()};
 	Rectangle col{this->GetCollider()};
@@ -53,6 +61,4 @@ void Brick::OnPlayerCollision(Player& player) {
 	}
 }
 
-void Brick::OnEntityCollision(Entity& entity) {
-
-}
+void Brick::OnEntityCollision(Entity& entity) {}
