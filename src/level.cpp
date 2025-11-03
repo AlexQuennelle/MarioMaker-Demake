@@ -12,7 +12,6 @@
 #include <cstring>
 #include <ctime>
 #include <filesystem>
-#include <format>
 #include <fstream>
 #include <iosfwd>
 #include <iostream>
@@ -22,12 +21,13 @@
 #include <vector>
 
 #ifndef NDEBUG
+#include <format>
 //#define DRAW_COLS
 //#define LOG_LEVEL_DATA
 #endif // !NDEBUG
 
 Level::Level(const std::string& filepath, AssetManager* am)
-	: sprites(am->groundTiles), entities(0)
+	: am(am), sprites(am->groundTiles), entities(0)
 {
 	namespace fs = std::filesystem;
 	using std::ios;
@@ -55,7 +55,7 @@ Level::Level(const std::string& filepath, AssetManager* am)
 
 		if (fileID == "LVL")
 		{
-#ifndef LOG_LEVEL_DATA
+#ifdef LOG_LEVEL_DATA
 			SetTextColor(SUCCESS);
 			std::cout << "Valid level file found\n";
 			ClearStyles();
@@ -66,9 +66,6 @@ Level::Level(const std::string& filepath, AssetManager* am)
 			//this->Reset();
 			//this->GenCollisionMap();
 
-			//this->img =
-			//	GenImageColor(this->length * 16, this->height * 16, BLANK);
-			//this->tex = LoadTextureFromImage(this->img);
 			this->PopulateLevel();
 			this->StitchTexture();
 		}
@@ -82,13 +79,11 @@ Level::Level(const std::string& filepath, AssetManager* am)
 }
 Level::~Level()
 {
-	// NOTE: Remove when asset manager is merged.
-	//UnloadImage(this->img);
-	//UnloadImage(this->sprites);
-	// BUG: Commenting this line causes a memory leak, but uncommenting it means
-	// texturs no longer load correctly
 	UnloadImage(this->img);
+	this->img = {
+		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	UnloadTexture(this->tex);
+	this->tex.id = 0;
 }
 
 vector<byte> Level::Serialize() const
@@ -259,7 +254,7 @@ Rectangle Level::GenCollisionRect(const int x, const int y,
 			break;
 	}
 
-#ifndef LOG_LEVEL_DATA
+#ifdef LOG_LEVEL_DATA
 	std::cout << std::format("Rect: [({}, {}) -> {} x {}]\n", x, y, rWidth,
 							 rHeight);
 #endif // !LOG_LEVEL_DATA
@@ -273,6 +268,8 @@ Rectangle Level::GenCollisionRect(const int x, const int y,
 }
 void Level::StitchTexture()
 {
+	this->img = {
+		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
 	for (int y{0}; y < this->height; y++)
 	{
@@ -296,8 +293,8 @@ void Level::StitchTexture()
 			}
 		}
 	}
-	//UpdateTexture(this->tex, this->img.data);
 	this->tex = LoadTextureFromImage(this->img);
+	//UpdateTexture(this->tex, this->img.data);
 }
 byte Level::MarchSquares(const int x, const int y)
 {

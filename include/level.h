@@ -19,8 +19,8 @@ using Entity_ptr = std::unique_ptr<Entity>;
 
 struct Vector2Int
 {
-	int x;
-	int y;
+	int x{0};
+	int y{0};
 
 	bool operator==(const Vector2Int other)
 	{
@@ -31,7 +31,7 @@ struct Vector2Int
 class Level
 {
 	public:
-	Level() = default;
+	Level() = delete;
 	Level(const std::string& filepath, AssetManager* am);
 	Level(const Level& other) = delete;
 	Level(Level&& other) = default;

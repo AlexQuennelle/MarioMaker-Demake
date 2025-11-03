@@ -2,7 +2,6 @@
 #include "assetmanager.h"
 #include "player.h"
 
-#include <iostream>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -11,24 +10,16 @@ Entity::Entity(const int x, const int y, AssetManager& assetManager)
 {}
 
 Brick::Brick(const int x, const int y, AssetManager& assetManager)
-	: Entity(x, y, assetManager), sprite(assetManager.playerSprites)
+	: Entity(x, y, assetManager), sprite(assetManager.staticEntities)
 {
 	// TODO: Proper initialization
-
-	//this->solid = true;
-	std::cout << this->assetManager.playerSprites.id << '\n';
 }
 void Brick::Update() {}
 void Brick::Draw()
 {
-	// HACK: Temp square for testing
-	DrawRectangleRec(
-		{this->position.x * 16.0f, this->position.y * 16.0f, 16.0f, 16.0f},
-		BROWN);
 	Rectangle sourceRect{0.0f, 0.0f, 16.0f, 16.0f};
-	//DrawTexture(sprite, 0, 0, WHITE);
-	//DrawTextureRec(this->assetManager.staticEntities, sourceRect,
-	//			   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
+	DrawTextureRec(this->sprite, sourceRect,
+				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
 #ifdef DRAW_COLS
 	DrawRectangleLines(this->position.x, this->position.y, this->collider.width,
 					   this->collider.height, Fade(RED, 0.6f));

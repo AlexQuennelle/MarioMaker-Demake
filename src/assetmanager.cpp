@@ -9,10 +9,11 @@ AssetManager::AssetManager()
 	staticEntities = LoadTexture(RESOURCES_PATH "sprites/staticEntities.png");
 }
 
-AssetManager::~AssetManager() {
-	UnloadTexture(playerSprites);
-	//UnloadImage(this->groundTiles);
-	//UnloadTexture(this->staticEntities);
+AssetManager::~AssetManager()
+{
+	UnloadTexture(this->playerSprites);
+	UnloadImage(this->groundTiles);
+	UnloadTexture(this->staticEntities);
 }
 
 PlayerAssets::PlayerAssets(Texture2D& tex) : sprites(tex) {}

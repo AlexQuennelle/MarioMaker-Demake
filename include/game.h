@@ -24,6 +24,8 @@ class Game
 	private:
 	void Draw();
 
+	void SwitchMode(SwitchRequest newMode);
+
 	void Reset();
 	void SaveLevel();
 #if !defined(PLATFORM_WEB)
