@@ -32,10 +32,7 @@ EditMode::EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui)
 								  this->level->GetHeight() * 16);
 	this->level->DrawGrid(this->tex);
 }
-EditMode::~EditMode()
-{
-	UnloadRenderTexture(this->tex);
-}
+EditMode::~EditMode() { UnloadRenderTexture(this->tex); }
 void EditMode::Update()
 {
 	float cellSize{GetScreenWidth() / 24.0f};
