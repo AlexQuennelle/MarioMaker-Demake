@@ -2,8 +2,20 @@
 
 #include "assetmanager.h"
 #include "raylib.h"
+#include "raymath.h"
 
 class Player;
+
+// collision utilities
+struct RecCollisionInfo
+{
+	public:
+	Vector2 delta;
+	float minDistX;
+	float minDistY;
+};
+
+RecCollisionInfo GetCollisionInfo(Rectangle, Rectangle);
 
 class Entity
 {
@@ -30,7 +42,7 @@ class Entity
 
 	protected:
 	bool isActive{true};
-	bool solid{true};
+	bool solid{false};
 	Vector2 position;
 	Rectangle collider{0.0f, 0.0f, 1.0f, 1.0f};
 	AssetManager& assetManager;
@@ -48,4 +60,21 @@ class Brick : public Entity
 
 	private:
 	Texture2D& sprite;
+};
+
+class Coin : public Entity
+{
+	public:
+	Coin(const int x, const int y, AssetManager& assetmanager);
+
+	void Update() override;
+	void Draw() override;
+	void OnPlayerCollision(Player& player) override;
+	void OnEntityCollision(Entity& entity) override;
+
+	private:
+	Texture2D& sprite;
+	float accumulatedAnimTime{0};
+	float timeBetweenFrames{0.12f};
+	int curFrame{0};
 };

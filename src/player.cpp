@@ -131,37 +131,20 @@ void Player::CheckCollisions()
 
 		if (CheckCollisionRecs(playerCol, col))
 		{
-			// Calculation of centers of rectangles
-			const Vector2 center1 = {playerCol.x + (playerCol.width / 2),
-									 playerCol.y + (playerCol.height / 2)};
-			const Vector2 center2 = {col.x + (col.width / 2),
-									 col.y + (col.height / 2)};
-
-			// Calculation of the distance vector between the centers of the
-			// rectangles
-			const Vector2 delta = Vector2Subtract(center1, center2);
-
-			// Calculation of half-widths and half-heights of rectangles
-			const Vector2 hs1 = {playerCol.width * .5f, playerCol.height * .5f};
-			const Vector2 hs2 = {col.width * .5f, col.height * .5f};
-
-			// Calculation of the minimum distance at which the two rectangles
-			// can be separated
-			const float minDistX = hs1.x + hs2.x - fabsf(delta.x);
-			const float minDistY = hs1.y + hs2.y - fabsf(delta.y);
+			RecCollisionInfo info = GetCollisionInfo(playerCol, col);
 
 			// Adjusted object position based on minimum distance
-			if (minDistX < minDistY)
+			if (info.minDistX < info.minDistY)
 			{
-				this->position.x += copysignf(minDistX, delta.x);
+				this->position.x += copysignf(info.minDistX, info.delta.x);
 				this->velocity.x = 0;
 			}
 			else
 			{
 				// cancel jump holding if vertical collision
-				this->cancelJump = (delta.y > 0);
+				this->cancelJump = (info.delta.y > 0);
 
-				this->position.y += copysignf(minDistY, delta.y);
+				this->position.y += copysignf(info.minDistY, info.delta.y);
 				this->velocity.y = 0;
 			}
 		}
@@ -170,8 +153,15 @@ void Player::CheckCollisions()
 
 Rectangle Player::GetCollisionRect()
 {
-	// THIS ASSUMES SMALL PLAYER
-	float height = crouching ? 0.6f : 1.0f;
+	float height;
+	if (this->big)
+	{
+		height = crouching ? 1.0f : 1.6f;
+	}
+	else
+	{
+		height = crouching ? 0.6f : 1.0f;
+	}
 	return {.x = this->position.x - 0.3f,
 			.y = this->position.y - height,
 			.width = 0.6f,
@@ -253,9 +243,14 @@ void Player::Draw()
 		}
 	}
 
-	if (luigi)
+	if (this->luigi)
 	{
 		frameRec.y += assets.luigiOffset;
+	}
+
+	if (this->big)
+	{
+		frameRec.y += 64;
 	}
 
 	DrawTextureRec(assets.sprites, frameRec,

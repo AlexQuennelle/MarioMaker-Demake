@@ -85,11 +85,12 @@ class EditMode : public GamemodeInstance
 	Vector2 lvlMousePos;
 	const ImGuiIO& imGuiIO;
 	Tile brush{.ID = TileID::ground, .flags = 0};
-	const std::array<std::string, 4> tileNames{
+	const std::array<std::string, 5> tileNames{
 		"Ground",
 		"Bricks",
 		"Spikes",
-		"Item Box",
+		"Item Box", 
+		"Coin",
 	};
 };
 

@@ -17,9 +17,12 @@ class Player
 	void TemporaryDeathTest();
 	void Die();
 	void CancelJump() { this->cancelJump = true; }
+	void GainCoin() { this->coins++; }
 
 	//getters
 	bool IsDead() const { return this->dead; }
+	bool IsBig() const { return this->big; }
+	int GetCoins() const { return this->coins; }
 	Vector2 GetPosition() const { return this->position; }
 	Vector2 GetVelocity() const { return this->velocity; }
 	Rectangle GetCollisionRect();
@@ -47,9 +50,11 @@ class Player
 	bool facingRight{true};
 	bool luigi{false};
 	bool dead{false};
+	bool big{false};
 	float accumulatedAnimTime{0};
 	float timeBetweenFrames{0.06f};
 	int curFrame{0};
+	int coins{0};
 	Vector2 lastInput{0, 0};
 	Level& level;
 	PlayerAssets assets;
