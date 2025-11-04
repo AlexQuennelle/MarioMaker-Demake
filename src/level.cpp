@@ -32,9 +32,6 @@ Level::Level(const std::string& filepath, AssetManager* am)
 	namespace fs = std::filesystem;
 	using std::ios;
 
-	//this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
-	//this->tex = LoadTextureFromImage(this->img);
-
 	std::srand(std::time({}));
 
 	this->filepath = std::string(filepath);
@@ -62,9 +59,6 @@ Level::Level(const std::string& filepath, AssetManager* am)
 #endif // !LOG_LEVEL_DATA
 
 			this->ParseData(data);
-
-			//this->Reset();
-			//this->GenCollisionMap();
 
 			this->PopulateLevel();
 			this->StitchTexture();
@@ -294,7 +288,6 @@ void Level::StitchTexture()
 		}
 	}
 	this->tex = LoadTextureFromImage(this->img);
-	//UpdateTexture(this->tex, this->img.data);
 }
 byte Level::MarchSquares(const int x, const int y)
 {
@@ -622,21 +615,17 @@ void Level::SetLevelSize(const int length, const int height)
 	this->length = length;
 	this->height = height;
 	this->Reset();
-	//this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
-	//this->tex = LoadTextureFromImage(this->img);
-	//this->StitchTexture();
 }
 
 void Level::Reset()
 {
 	this->colliders.clear();
+	this->entities.clear();
 	this->PopulateLevel();
 	UnloadImage(this->img);
 	this->img = {
 		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	UnloadTexture(this->tex);
 	this->tex = {.id = 0, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
-	//this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
-	//this->tex = LoadTextureFromImage(this->img);
 	this->StitchTexture();
 }

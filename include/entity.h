@@ -16,8 +16,6 @@ class Entity
 	virtual void OnPlayerCollision(Player& player) = 0;
 	virtual void OnEntityCollision(Entity& entity) = 0;
 
-	//virtual bool IsSolid() const = 0;
-	//virtual bool IsActive() const = 0;
 	bool IsSolid() const { return this->solid; }
 	bool IsActive() const { return this->isActive; }
 	Rectangle GetCollider() const
@@ -32,7 +30,6 @@ class Entity
 
 	protected:
 	bool isActive{true};
-	// must be set in child constructors, might be kinda hacky
 	bool solid{true};
 	Vector2 position;
 	Rectangle collider{0.0f, 0.0f, 1.0f, 1.0f};
@@ -48,8 +45,6 @@ class Brick : public Entity
 	void Draw() override;
 	void OnPlayerCollision(Player& player) override;
 	void OnEntityCollision(Entity& entity) override;
-	//bool IsSolid() const override { return this->solid; }
-	//bool IsActive() const override { return this->isActive; }
 
 	private:
 	Texture2D& sprite;

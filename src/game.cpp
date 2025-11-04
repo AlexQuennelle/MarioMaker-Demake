@@ -23,15 +23,7 @@ Game::Game()
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
 
-	//this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
-	//									  this->assetManager.get());
-	//this->LoadLevel();
-
 	this->gamemode = std::make_unique<MainMenu>(*this->assetManager);
-	//this->gamemode = std::make_unique<EditMode>(
-	//	this->level.get(), *this->assetManager, this->imguiIO);
-	//this->gamemode =
-	//	std::make_unique<GameplayMode>(this->level.get(), *this->assetManager);
 
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";
@@ -178,7 +170,6 @@ void Game::LoadLevel()
 		std::cout << outPath.get() << '\n';
 		this->level = std::make_unique<Level>(
 			Level{outPath.get(), this->assetManager.get()});
-		//this->level = Level(outPath.get(), this->assetManager.get());
 	}
 	else if (result == NFD_ERROR)
 	{
