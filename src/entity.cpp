@@ -86,6 +86,9 @@ void Coin::Draw() {
 }
 
 void Coin::OnPlayerCollision(Player& player)
-{ this->isActive = false; }
+{ 
+	this->isActive = false;
+	player.GainCoin();
+}
 
 void Coin::OnEntityCollision(Entity& entity) {}
