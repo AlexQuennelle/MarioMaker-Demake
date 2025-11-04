@@ -34,8 +34,10 @@ Entity::Entity(const int x, const int y, AssetManager& assetManager)
 	: position(x, y), assetManager(assetManager)
 {}
 
-Brick::Brick(const int x, const int y, AssetManager& assetManager)
-	: Entity(x, y, assetManager), sprite(assetManager.staticEntities)
+Brick::Brick(const int x, const int y, AssetManager& assetManager,
+			 const bool variant)
+	: Entity(x, y, assetManager), isVariant(variant),
+	  sprite(assetManager.staticEntities)
 {
 	// TODO: Proper initialization
 	this->solid = true;
@@ -44,8 +46,12 @@ EntityReq Brick::Update() { return {}; }
 void Brick::Draw()
 {
 	Rectangle sourceRect{0.0f, 0.0f, 16.0f, 16.0f};
+	if (this->isVariant)
+		sourceRect.y += 16.0f;
+
 	DrawTextureRec(this->sprite, sourceRect,
 				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
+
 #ifdef DRAW_COLS
 	DrawRectangleLines(this->position.x, this->position.y, this->collider.width,
 					   this->collider.height, Fade(RED, 0.6f));
@@ -53,6 +59,9 @@ void Brick::Draw()
 }
 EntityReq Brick::OnPlayerCollision(Player& player)
 {
+	if (this->isVariant)
+		return {};
+
 	RecCollisionInfo info =
 		GetCollisionInfo(player.GetCollisionRect(), this->GetCollider());
 

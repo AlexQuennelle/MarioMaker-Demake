@@ -591,10 +591,12 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 {
 	switch (basis.ID)
 	{
-	case (TileID::brick):
-		this->entities.push_back(std::make_unique<Brick>(x, y, *this->am));
+		using enum TileID;
+	case (brick):
+		this->entities.push_back(
+			std::make_unique<Brick>(x, y, *this->am, basis.flags & 1));
 		break;
-	case (TileID::coin):
+	case (coin):
 		this->entities.push_back(std::make_unique<Coin>(x, y, *this->am));
 		break;
 	default:

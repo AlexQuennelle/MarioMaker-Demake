@@ -64,7 +64,8 @@ class Entity
 class Brick : public Entity
 {
 	public:
-	Brick(const int x, const int y, AssetManager& assetManager);
+	Brick(const int x, const int y, AssetManager& assetManager,
+		  const bool variant = false);
 
 	EntityReq Update() override;
 	void Draw() override;
@@ -72,6 +73,7 @@ class Brick : public Entity
 	EntityReq OnEntityCollision(Entity& entity) override;
 
 	private:
+	bool isVariant;
 	Texture2D& sprite;
 };
 

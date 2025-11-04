@@ -32,10 +32,7 @@ EditMode::EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui)
 								  this->level->GetHeight() * 16);
 	this->level->DrawGrid(this->tex);
 }
-EditMode::~EditMode()
-{
-	UnloadRenderTexture(this->tex);
-}
+EditMode::~EditMode() { UnloadRenderTexture(this->tex); }
 void EditMode::Update()
 {
 	float cellSize{GetScreenWidth() / 24.0f};
@@ -241,6 +238,10 @@ void EditMode::DrawPallette()
 		}
 		ImGui::EndCombo();
 	}
+	bool alt{static_cast<bool>(this->brush.flags & 1)};
+	ImGui::Checkbox("Alt", &alt);
+	this->brush.flags = static_cast<uint16_t>(alt);
+		//this->brush.flags & ((static_cast<uint16_t>(alt) & 1) & 0xffff);
 }
 
 void EditMode::SaveLevel()
