@@ -56,5 +56,4 @@ class Player
 
 	bool Grounded();
 	void CheckCollisions();
-	Rectangle GetCollisionRect();
 };
