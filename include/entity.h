@@ -2,8 +2,20 @@
 
 #include "assetmanager.h"
 #include "raylib.h"
+#include "raymath.h"
 
 class Player;
+
+// collision utilities
+struct RecCollisionInfo
+{
+	public:
+	Vector2 delta;
+	float minDistX;
+	float minDistY;
+};
+
+RecCollisionInfo GetCollisionInfo(Rectangle, Rectangle);
 
 class Entity
 {
