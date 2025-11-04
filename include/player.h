@@ -21,6 +21,7 @@ class Player
 
 	//getters
 	bool IsDead() const { return this->dead; }
+	bool IsBig() const { return this->big; }
 	int GetCoins() const { return this->coins; }
 	Vector2 GetPosition() const { return this->position; }
 	Vector2 GetVelocity() const { return this->velocity; }
@@ -49,6 +50,7 @@ class Player
 	bool facingRight{true};
 	bool luigi{false};
 	bool dead{false};
+	bool big{false};
 	float accumulatedAnimTime{0};
 	float timeBetweenFrames{0.06f};
 	int curFrame{0};

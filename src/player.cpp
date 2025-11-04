@@ -153,8 +153,15 @@ void Player::CheckCollisions()
 
 Rectangle Player::GetCollisionRect()
 {
-	// THIS ASSUMES SMALL PLAYER
-	float height = crouching ? 0.6f : 1.0f;
+	float height;
+	if (this->big)
+	{
+		height = crouching ? 1.0f : 1.6f;
+	}
+	else
+	{
+		height = crouching ? 0.6f : 1.0f;
+	}
 	return {.x = this->position.x - 0.3f,
 			.y = this->position.y - height,
 			.width = 0.6f,
@@ -236,9 +243,14 @@ void Player::Draw()
 		}
 	}
 
-	if (luigi)
+	if (this->luigi)
 	{
 		frameRec.y += assets.luigiOffset;
+	}
+
+	if (this->big)
+	{
+		frameRec.y += 64;
 	}
 
 	DrawTextureRec(assets.sprites, frameRec,

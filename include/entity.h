@@ -74,4 +74,7 @@ class Coin : public Entity
 
 	private:
 	Texture2D& sprite;
+	float accumulatedAnimTime{0};
+	float timeBetweenFrames{0.12f};
+	int curFrame{0};
 };
