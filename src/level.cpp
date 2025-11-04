@@ -150,8 +150,6 @@ void Level::Update()
 	{
 		if (entity->IsActive())
 		{
-			//auto request{entity->Update()};
-			//HandleRequest(std::move(request));
 			HandleRequest(entity->Update());
 		}
 	}
@@ -595,6 +593,9 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 	case (brick):
 		this->entities.push_back(std::make_unique<Brick>(
 			x, y, *this->am, static_cast<bool>(basis.flags & 1)));
+		break;
+	case (itemBox):
+		this->entities.push_back(std::make_unique<ItemBox>(x, y, *this->am));
 		break;
 	case (coin):
 		this->entities.push_back(std::make_unique<Coin>(x, y, *this->am));

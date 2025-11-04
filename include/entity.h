@@ -93,3 +93,23 @@ class Coin : public Entity
 	float timeBetweenFrames{0.12f};
 	int curFrame{0};
 };
+
+class ItemBox : public Entity
+{
+	public:
+	ItemBox(const int x, const int y, AssetManager& assetManager);
+
+	EntityReq Update() override;
+	void Draw() override;
+	EntityReq OnPlayerCollision(Player& player) override;
+	EntityReq OnEntityCollision(Entity& entity) override;
+
+	private:
+	const bool isBrick{false};
+	const bool isHidden{false};
+	bool empty{false};
+	float accumulatedAnimTime{0};
+	float timeBetweenFrames{0.12f};
+	int curFrame{0};
+	Texture2D& sprite;
+};
