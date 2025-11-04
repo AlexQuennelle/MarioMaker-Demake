@@ -49,6 +49,7 @@ void Brick::OnPlayerCollision(Player& player)
 		// head bonk
 		this->isActive = false;
 		player.SetVelocity({player.GetVelocity().x, 0});
+		player.CancelJump();
 	}
 }
 

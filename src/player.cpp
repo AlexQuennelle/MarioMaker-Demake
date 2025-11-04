@@ -111,7 +111,8 @@ void Player::CheckCollisions()
 
 	for (Entity* e_ptr : level.GetEntities())
 	{
-		if (CheckCollisionRecs(playerCol, e_ptr->GetCollider()))
+		Rectangle entityCol{e_ptr->GetCollider()};
+		if (CheckCollisionRecs(playerCol, entityCol))
 		{
 			e_ptr->OnPlayerCollision(*this);
 		}
@@ -158,7 +159,7 @@ void Player::CheckCollisions()
 			else
 			{
 				// cancel jump holding if vertical collision
-				this->cancelJump = (delta.y < 0);
+				this->cancelJump = (delta.y > 0);
 
 				this->position.y += copysignf(minDistY, delta.y);
 				this->velocity.y = 0;

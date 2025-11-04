@@ -13,7 +13,7 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 #     set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 # endif()
 # add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-O0;-g;-ffast-math>;-fsanitize=address;")
-add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-O0;-g;-ffast-math;>")
+# add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-O0;-g;-ffast-math;>")
 
 # Change this to match the name of the current folder
 project(MarioMaker-Demake LANGUAGES CXX C VERSION 0.0)
