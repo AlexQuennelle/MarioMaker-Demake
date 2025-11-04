@@ -42,7 +42,7 @@ class Entity
 
 	protected:
 	bool isActive{true};
-	bool solid{true};
+	bool solid{false};
 	Vector2 position;
 	Rectangle collider{0.0f, 0.0f, 1.0f, 1.0f};
 	AssetManager& assetManager;
@@ -52,6 +52,20 @@ class Brick : public Entity
 {
 	public:
 	Brick(const int x, const int y, AssetManager& assetManager);
+
+	void Update() override;
+	void Draw() override;
+	void OnPlayerCollision(Player& player) override;
+	void OnEntityCollision(Entity& entity) override;
+
+	private:
+	Texture2D& sprite;
+};
+
+class Coin : public Entity
+{
+	public:
+	Coin(const int x, const int y, AssetManager& assetmanager);
 
 	void Update() override;
 	void Draw() override;

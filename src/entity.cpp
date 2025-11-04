@@ -13,6 +13,7 @@ Brick::Brick(const int x, const int y, AssetManager& assetManager)
 	: Entity(x, y, assetManager), sprite(assetManager.staticEntities)
 {
 	// TODO: Proper initialization
+	this->solid = true;
 }
 void Brick::Update() {}
 void Brick::Draw()
@@ -65,3 +66,26 @@ RecCollisionInfo GetCollisionInfo(Rectangle col1, Rectangle col2)
 
 	return {.delta = delta, .minDistX = minDistX, .minDistY = minDistY};
 };
+
+Coin::Coin(const int x, const int y, AssetManager& assetManager)
+	: Entity(x, y, assetManager), sprite(assetManager.staticEntities)
+{
+	this->solid = false;
+}
+
+void Coin::Update() {}
+
+void Coin::Draw() {
+	Rectangle sourceRect{32.0f, 16.0f, 16.0f, 16.0f};
+	DrawTextureRec(this->sprite, sourceRect,
+				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
+#ifdef DRAW_COLS
+	DrawRectangleLines(this->position.x, this->position.y, this->collider.width,
+					   this->collider.height, Fade(RED, 0.6f));
+#endif // DEBUG
+}
+
+void Coin::OnPlayerCollision(Player& player)
+{ this->isActive = false; }
+
+void Coin::OnEntityCollision(Entity& entity) {}
