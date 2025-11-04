@@ -22,9 +22,11 @@
 #include <vector>
 
 #ifndef NDEBUG
-#include <format>
 //#define DRAW_COLS
 //#define LOG_LEVEL_DATA
+#ifdef LOG_LEVEL_DATA
+#include <format>
+#endif // LOG_LEVEL_DATA
 #endif // !NDEBUG
 
 Level::Level(const std::string& filepath, AssetManager* am)
@@ -115,7 +117,6 @@ vector<byte> Level::Serialize() const
 		{
 			InsertAsBytes(bytes, run);
 			InsertAsBytes(bytes, currTile);
-			bytes.push_back(0);
 
 			currTile = this->grid[i];
 			run = 0;
@@ -124,7 +125,6 @@ vector<byte> Level::Serialize() const
 	}
 	InsertAsBytes(bytes, run);
 	InsertAsBytes(bytes, currTile);
-	bytes.push_back(0);
 
 	return bytes;
 }
@@ -593,8 +593,8 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 	{
 		using enum TileID;
 	case (brick):
-		this->entities.push_back(
-			std::make_unique<Brick>(x, y, *this->am, basis.flags & 1));
+		this->entities.push_back(std::make_unique<Brick>(
+			x, y, *this->am, static_cast<bool>(basis.flags & 1)));
 		break;
 	case (coin):
 		this->entities.push_back(std::make_unique<Coin>(x, y, *this->am));

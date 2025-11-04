@@ -38,7 +38,6 @@ void Player::Update()
 		}
 		// apply movement force to acceleration
 		acceleration.x += horizAcceleration;
-		this->big = true;
 	}
 
 	velocity = Vector2Add(velocity, acceleration);

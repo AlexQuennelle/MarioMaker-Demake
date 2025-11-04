@@ -2,6 +2,7 @@
 #include "assetmanager.h"
 #include "player.h"
 
+#include <iostream>
 #include <memory>
 #include <raylib.h>
 #include <raymath.h>
@@ -39,7 +40,6 @@ Brick::Brick(const int x, const int y, AssetManager& assetManager,
 	: Entity(x, y, assetManager), isVariant(variant),
 	  sprite(assetManager.staticEntities)
 {
-	// TODO: Proper initialization
 	this->solid = true;
 }
 EntityReq Brick::Update() { return {}; }

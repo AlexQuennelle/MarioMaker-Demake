@@ -51,7 +51,7 @@ void EditMode::Update()
 		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
 			(IsMouseButtonDown(MOUSE_LEFT_BUTTON) && MouseMoved))
 		{
-			this->level->SetTileAtEditor(this->brush.ID, this->selectedTile);
+			this->level->SetTileAtEditor(this->brush.ID, this->selectedTile,this->brush.flags);
 		}
 		else if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) ||
 				 (IsMouseButtonDown(MOUSE_RIGHT_BUTTON) && MouseMoved))
