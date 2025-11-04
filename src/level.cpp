@@ -142,11 +142,13 @@ template <typename T> void Level::InsertAsBytes(vector<byte>& vec, T data)
 
 void Level::Update()
 {
+	vector<Rectangle> colliders(0);
+
 	for (const auto& entity : this->entities)
 	{
 		if (entity->IsActive())
 		{
-			entity->Update();
+			entity->Update(colliders);
 		}
 	}
 }

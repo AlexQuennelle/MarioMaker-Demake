@@ -13,7 +13,7 @@ Mushroom::Mushroom(const int x, const int y, AssetManager& assetManager)
 }
 
 
-void Mushroom::Update() {}
+void Mushroom::Update(const vector<Rectangle>& colliders) {}
 void Mushroom::Draw()
 {
 	Rectangle sourceRect{0.0f, 0.0f, 16.0f, 16.0f};
