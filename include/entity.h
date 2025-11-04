@@ -1,8 +1,9 @@
 #pragma once
 
 #include "assetmanager.h"
-#include "raylib.h"
-#include "raymath.h"
+
+#include <raylib.h>
+#include <raymath.h>
 
 class Player;
 
