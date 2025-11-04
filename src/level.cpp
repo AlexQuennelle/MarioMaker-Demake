@@ -18,6 +18,7 @@
 #include <memory>
 #include <raylib.h>
 #include <string>
+#include <utility>
 #include <vector>
 
 #ifndef NDEBUG
@@ -141,11 +142,19 @@ template <typename T> void Level::InsertAsBytes(vector<byte>& vec, T data)
 
 void Level::Update()
 {
+	for (auto& entity : this->spawnQueue)
+	{
+		this->entities.push_back(std::move(entity));
+	}
+	this->spawnQueue.clear();
+
 	for (const auto& entity : this->entities)
 	{
 		if (entity->IsActive())
 		{
-			entity->Update();
+			//auto request{entity->Update()};
+			//HandleRequest(std::move(request));
+			HandleRequest(entity->Update());
 		}
 	}
 }
@@ -259,6 +268,20 @@ Rectangle Level::GenCollisionRect(const int x, const int y,
 		static_cast<float>(rWidth),
 		static_cast<float>(rHeight),
 	};
+}
+void Level::HandleRequest(EntityReq request)
+{
+	switch (request.index())
+	{
+	case 1: // Spawn requested Entity
+		this->spawnQueue.push_back(std::move(std::get<1>(request).entity));
+		break;
+	case 2: // Toggle state of toggle tiles
+		this->toggleState = !this->toggleState;
+		break;
+	default:
+		break;
+	}
 }
 void Level::StitchTexture()
 {

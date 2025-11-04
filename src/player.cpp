@@ -38,6 +38,7 @@ void Player::Update()
 		}
 		// apply movement force to acceleration
 		acceleration.x += horizAcceleration;
+		this->big = true;
 	}
 
 	velocity = Vector2Add(velocity, acceleration);
@@ -114,7 +115,7 @@ void Player::CheckCollisions()
 		Rectangle entityCol{e_ptr->GetCollider()};
 		if (CheckCollisionRecs(playerCol, entityCol))
 		{
-			e_ptr->OnPlayerCollision(*this);
+			this->level.HandleRequest(e_ptr->OnPlayerCollision(*this));
 		}
 	}
 

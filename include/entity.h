@@ -2,8 +2,10 @@
 
 #include "assetmanager.h"
 
+#include <memory>
 #include <raylib.h>
 #include <raymath.h>
+#include <variant>
 
 class Player;
 
@@ -18,16 +20,26 @@ struct RecCollisionInfo
 
 RecCollisionInfo GetCollisionInfo(Rectangle, Rectangle);
 
+class Entity;
+struct SpawnEntityRequest
+{
+	std::unique_ptr<Entity> entity;
+};
+struct ToggleRequest
+{};
+using EntityReq =
+	std::variant<std::monostate, SpawnEntityRequest, ToggleRequest>;
+
 class Entity
 {
 	public:
 	Entity(const int x, const int y, AssetManager& assetManager);
 	virtual ~Entity() = default;
 
-	virtual void Update() = 0;
+	virtual EntityReq Update() = 0;
 	virtual void Draw() = 0;
-	virtual void OnPlayerCollision(Player& player) = 0;
-	virtual void OnEntityCollision(Entity& entity) = 0;
+	virtual EntityReq OnPlayerCollision(Player& player) = 0;
+	virtual EntityReq OnEntityCollision(Entity& entity) = 0;
 
 	bool IsSolid() const { return this->solid; }
 	bool IsActive() const { return this->isActive; }
@@ -54,10 +66,10 @@ class Brick : public Entity
 	public:
 	Brick(const int x, const int y, AssetManager& assetManager);
 
-	void Update() override;
+	EntityReq Update() override;
 	void Draw() override;
-	void OnPlayerCollision(Player& player) override;
-	void OnEntityCollision(Entity& entity) override;
+	EntityReq OnPlayerCollision(Player& player) override;
+	EntityReq OnEntityCollision(Entity& entity) override;
 
 	private:
 	Texture2D& sprite;
@@ -68,10 +80,10 @@ class Coin : public Entity
 	public:
 	Coin(const int x, const int y, AssetManager& assetmanager);
 
-	void Update() override;
+	EntityReq Update() override;
 	void Draw() override;
-	void OnPlayerCollision(Player& player) override;
-	void OnEntityCollision(Entity& entity) override;
+	EntityReq OnPlayerCollision(Player& player) override;
+	EntityReq OnEntityCollision(Entity& entity) override;
 
 	private:
 	Texture2D& sprite;

@@ -2,6 +2,7 @@
 #include "assetmanager.h"
 #include "player.h"
 
+#include <memory>
 #include <raylib.h>
 #include <raymath.h>
 
@@ -39,7 +40,7 @@ Brick::Brick(const int x, const int y, AssetManager& assetManager)
 	// TODO: Proper initialization
 	this->solid = true;
 }
-void Brick::Update() {}
+EntityReq Brick::Update() { return {}; }
 void Brick::Draw()
 {
 	Rectangle sourceRect{0.0f, 0.0f, 16.0f, 16.0f};
@@ -50,7 +51,7 @@ void Brick::Draw()
 					   this->collider.height, Fade(RED, 0.6f));
 #endif // DEBUG
 }
-void Brick::OnPlayerCollision(Player& player)
+EntityReq Brick::OnPlayerCollision(Player& player)
 {
 	RecCollisionInfo info =
 		GetCollisionInfo(player.GetCollisionRect(), this->GetCollider());
@@ -62,17 +63,18 @@ void Brick::OnPlayerCollision(Player& player)
 		player.SetVelocity({player.GetVelocity().x, 0});
 		player.CancelJump();
 	}
+	return {};
 }
-void Brick::OnEntityCollision(Entity& entity) {}
+EntityReq Brick::OnEntityCollision(Entity& /*entity*/) { return {}; }
 
 Coin::Coin(const int x, const int y, AssetManager& assetManager)
 	: Entity(x, y, assetManager), sprite(assetManager.staticEntities)
 {
 	this->solid = false;
 }
-void Coin::Update() {}
-void Coin::Draw() {
-	
+EntityReq Coin::Update() { return {}; }
+void Coin::Draw()
+{
 
 	if (accumulatedAnimTime >= timeBetweenFrames)
 	{
@@ -95,9 +97,10 @@ void Coin::Draw() {
 					   this->collider.height, Fade(RED, 0.6f));
 #endif // DEBUG
 }
-void Coin::OnPlayerCollision(Player& player)
-{ 
+EntityReq Coin::OnPlayerCollision(Player& player)
+{
 	this->isActive = false;
 	player.GainCoin();
+	return {};
 }
-void Coin::OnEntityCollision(Entity& entity) {}
+EntityReq Coin::OnEntityCollision(Entity& /*entity*/) { return {}; }
