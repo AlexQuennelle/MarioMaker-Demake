@@ -116,7 +116,6 @@ vector<byte> Level::Serialize() const
 			InsertAsBytes(bytes, run);
 			InsertAsBytes(bytes, currTile);
 			bytes.push_back(0);
-			bytes.push_back(0);
 
 			currTile = this->grid[i];
 			run = 0;
@@ -125,7 +124,6 @@ vector<byte> Level::Serialize() const
 	}
 	InsertAsBytes(bytes, run);
 	InsertAsBytes(bytes, currTile);
-	bytes.push_back(0);
 	bytes.push_back(0);
 
 	return bytes;
@@ -383,7 +381,7 @@ void Level::ParseData(const vector<char>& data)
 		uint32_t runLength{0};
 		std::memcpy(&runLength, addr, 4);
 		Tile tile{.ID = TileID::air, .flags = 0};
-		std::memcpy(&tile, addr + 4, 2);
+		std::memcpy(&tile, addr + 4, 3);
 		for (int i{0}; i < runLength; i++)
 		{
 			this->grid.push_back(tile);

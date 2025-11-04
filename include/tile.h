@@ -15,7 +15,7 @@ enum class TileID : uint8_t
 struct Tile
 {
 	TileID ID;
-	uint8_t flags;
+	uint16_t flags;
 
 	bool operator==(const Tile& other)
 	{
