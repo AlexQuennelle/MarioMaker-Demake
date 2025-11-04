@@ -106,9 +106,28 @@ void Player::CheckCollisions()
 	// no collision needed when falling off screen
 	if (this->dead)
 		return;
-	for (const Rectangle col : level.GetColliders())
+
+	Rectangle playerCol{GetCollisionRect()};
+
+	for (Entity* e_ptr : level.GetEntities())
 	{
-		Rectangle playerCol{GetCollisionRect()};
+		Rectangle entityCol{e_ptr->GetCollider()};
+		if (CheckCollisionRecs(playerCol, entityCol))
+		{
+			e_ptr->OnPlayerCollision(*this);
+		}
+	}
+
+	vector<Rectangle> solidCols = level.GetSolidEntityColliders();
+	vector<Rectangle> levelCols = level.GetColliders();
+
+	solidCols.reserve(solidCols.size() + levelCols.size());
+
+	solidCols.insert(solidCols.end(), levelCols.begin(), levelCols.end());
+
+	for (const Rectangle col : solidCols)
+	{
+		playerCol = GetCollisionRect();
 
 		if (CheckCollisionRecs(playerCol, col))
 		{
@@ -140,7 +159,7 @@ void Player::CheckCollisions()
 			else
 			{
 				// cancel jump holding if vertical collision
-				this->cancelJump = (delta.y < 0);
+				this->cancelJump = (delta.y > 0);
 
 				this->position.y += copysignf(minDistY, delta.y);
 				this->velocity.y = 0;
@@ -285,8 +304,15 @@ bool Player::Grounded()
 		.height = 0.1f,
 	};
 
+	vector<Rectangle> solidCols = level.GetSolidEntityColliders();
+	vector<Rectangle> levelCols = level.GetColliders();
+
+	solidCols.reserve(solidCols.size() + levelCols.size());
+
+	solidCols.insert(solidCols.end(), levelCols.begin(), levelCols.end());
+
 	return std::ranges::any_of(
-		this->level.GetColliders(), //
+		solidCols, //
 		[groundedBox](Rectangle col)
 		{ return CheckCollisionRecs(groundedBox, col); } //
 	);

@@ -1,5 +1,6 @@
 #include "level.h"
 #include "assetmanager.h"
+#include "entity.h"
 #include "tile.h"
 #include "utils.h"
 
@@ -11,43 +12,22 @@
 #include <cstring>
 #include <ctime>
 #include <filesystem>
-#include <format>
 #include <fstream>
 #include <iosfwd>
 #include <iostream>
+#include <memory>
 #include <raylib.h>
 #include <string>
 #include <vector>
 
 #ifndef NDEBUG
+#include <format>
 //#define DRAW_COLS
+//#define LOG_LEVEL_DATA
 #endif // !NDEBUG
 
-//Level::Level()
-//	: height(15), length(100), playerStartPos({.x = 5, .y = 0}),
-//	  name("My Level")
-//{
-//	std::srand(std::time({}));
-//	this->grid.resize(this->height * this->length);
-//	// HACK: This is temporary to fill in the ground
-//	for (int x{0}; x < this->length; x++)
-//	{
-//		for (int y{0}; y < this->height; y++)
-//		{
-//			if (y > 10)
-//				this->SetTileAt(TileID::ground, x, y);
-//			else
-//				this->SetTileAt(TileID::air, x, y);
-//		}
-//	}
-//	this->GenCollisionMap();
-//
-//	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
-//	this->tex = LoadTextureFromImage(this->img);
-//	this->StitchTexture();
-//}
 Level::Level(const std::string& filepath, AssetManager* am)
-	: sprites(am->groundTiles)
+	: am(am), sprites(am->groundTiles), entities(0)
 {
 	namespace fs = std::filesystem;
 	using std::ios;
@@ -72,19 +52,15 @@ Level::Level(const std::string& filepath, AssetManager* am)
 
 		if (fileID == "LVL")
 		{
-#ifndef NDEBUG
+#ifdef LOG_LEVEL_DATA
 			SetTextColor(SUCCESS);
 			std::cout << "Valid level file found\n";
 			ClearStyles();
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 
 			this->ParseData(data);
 
-			this->GenCollisionMap();
-
-			this->img =
-				GenImageColor(this->length * 16, this->height * 16, BLANK);
-			this->tex = LoadTextureFromImage(this->img);
+			this->PopulateLevel();
 			this->StitchTexture();
 		}
 	}
@@ -97,12 +73,11 @@ Level::Level(const std::string& filepath, AssetManager* am)
 }
 Level::~Level()
 {
-	// NOTE: Remove when asset manager is merged.
-	//UnloadImage(this->img);
-	//UnloadImage(this->sprites);
-	// BUG: Commenting this line causes a memory leak, but uncommenting it means
-	// texturs no longer load correctly
-	// UnloadTexture(this->tex);
+	UnloadImage(this->img);
+	this->img = {
+		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
+	UnloadTexture(this->tex);
+	this->tex.id = 0;
 }
 
 vector<byte> Level::Serialize() const
@@ -164,9 +139,26 @@ template <typename T> void Level::InsertAsBytes(vector<byte>& vec, T data)
 	}
 }
 
+void Level::Update()
+{
+	for (const auto& entity : this->entities)
+	{
+		if (entity->IsActive())
+		{
+			entity->Update();
+		}
+	}
+}
 void Level::Draw()
 {
 	DrawTexture(this->tex, 0, 0, WHITE);
+	for (const auto& entity : this->entities)
+	{
+		if (entity->IsActive())
+		{
+			entity->Draw();
+		}
+	}
 #ifdef DRAW_COLS
 	for (auto rec : this->colliders)
 	{
@@ -191,7 +183,7 @@ void Level::DrawGrid(RenderTexture& tex)
 	EndTextureMode();
 }
 
-void Level::GenCollisionMap()
+void Level::PopulateLevel()
 {
 	std::vector<bool> visited{};
 	visited.resize(this->height * this->length);
@@ -201,14 +193,19 @@ void Level::GenCollisionMap()
 		for (int y{0}; y < this->height; y++)
 		{
 			int i = (y * this->length) + x;
-			if (x == 17 && y == 2)
+			Tile currTile{this->TileAt(x, y)};
+			if (currTile.ID == TileID::ground)
 			{
-				std::cout << (int)TileAt(x, y).ID << '\n';
-				std::cout << i << '\n';
-				std::cout << visited[i] << '\n';
+				if (!visited[i])
+				{
+					this->colliders.push_back(
+						this->GenCollisionRect(x, y, visited));
+				}
 			}
-			if (TileAt(x, y).ID == TileID::ground && !visited[i])
-				this->colliders.push_back(GenCollisionRect(x, y, visited));
+			else if (currTile.ID != TileID::air)
+			{
+				this->SpawnEntity(x, y, this->TileAt(x, y));
+			}
 		}
 	}
 }
@@ -251,10 +248,10 @@ Rectangle Level::GenCollisionRect(const int x, const int y,
 			break;
 	}
 
-#ifndef NDEBUG
+#ifdef LOG_LEVEL_DATA
 	std::cout << std::format("Rect: [({}, {}) -> {} x {}]\n", x, y, rWidth,
 							 rHeight);
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 
 	return {
 		static_cast<float>(x),
@@ -265,6 +262,8 @@ Rectangle Level::GenCollisionRect(const int x, const int y,
 }
 void Level::StitchTexture()
 {
+	this->img = {
+		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
 	for (int y{0}; y < this->height; y++)
 	{
@@ -288,7 +287,7 @@ void Level::StitchTexture()
 			}
 		}
 	}
-	UpdateTexture(this->tex, this->img.data);
+	this->tex = LoadTextureFromImage(this->img);
 }
 byte Level::MarchSquares(const int x, const int y)
 {
@@ -325,10 +324,10 @@ void Level::ParseData(const vector<char>& data)
 {
 	std::memcpy(&this->length, &data[4], 4);
 	std::memcpy(&this->height, &data[8], 4);
-#ifndef NDEBUG
+#ifdef LOG_LEVEL_DATA
 	std::cout << std::format("Level size: {} x {}\n", this->length,
 							 this->height);
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 
 	uint32_t playStartX{0};
 	uint32_t playStartY{0};
@@ -339,18 +338,18 @@ void Level::ParseData(const vector<char>& data)
 		.y = static_cast<float>(playStartY),
 	};
 
-#ifndef NDEBUG
+#ifdef LOG_LEVEL_DATA
 	std::cout << std::format("Player start: ({}, {})\n", this->playerStartPos.x,
 							 this->playerStartPos.y);
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 
 	uint32_t nameLen{0};
 	std::memcpy(&nameLen, &data[20], 4);
 	this->name = std::string(nameLen, 0);
 	std::memcpy(this->name.data(), &data[24], nameLen);
-#ifndef NDEBUG
+#ifdef LOG_LEVEL_DATA
 	std::cout << "Level name: " << this->name << '\n';
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 
 	const char* addr{&data[24 + (((nameLen / 4) + 1) * 4)]};
 	const char* endAddr{data.data() + data.size() - 1};
@@ -539,7 +538,7 @@ void Level::SetTileAt(const TileID tile, const int x, const int y,
 		std::cout << "WARNING: Attempted to set tile out of bounds";
 		ClearStyles();
 	}
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 }
 void Level::SetTileAt(const TileID tile, const Vector2Int pos,
 					  const uint8_t flags)
@@ -554,7 +553,7 @@ void Level::SetTileAtEditor(const TileID tile, const Vector2Int pos,
 		return;
 
 	this->SetTileAt(tile, pos, flags);
-	this->StitchTexture();
+	this->Reset();
 }
 Tile Level::TileAt(const int x, const int y)
 {
@@ -567,14 +566,25 @@ Tile Level::TileAt(const int x, const int y)
 		return Tile{.ID = TileID::ground, .flags = 0};
 	}
 }
+void Level::SpawnEntity(const int x, const int y, const Tile basis)
+{
+	switch (basis.ID)
+	{
+	case (TileID::brick):
+		this->entities.push_back(std::make_unique<Brick>(x, y, *this->am));
+		break;
+	default:
+		break;
+	}
+}
 
 void Level::SetLevelSize(const int length, const int height)
 {
 	if ((this->length == length) && (this->height == height))
 	{
-#ifndef NDEBUG
+#ifdef LOG_LEVEL_DATA
 		std::cout << "Early out.\n";
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 		return;
 	}
 
@@ -585,10 +595,10 @@ void Level::SetLevelSize(const int length, const int height)
 	this->grid.clear();
 	this->grid.resize(length * height);
 
-#ifndef NDEBUG
+#ifdef LOG_LEVEL_DATA
 	std::cout << length << " x " << height << '\n';
 	std::cout << oldGrid.size() << " -> " << this->grid.size() << '\n';
-#endif // !NDEBUG
+#endif // !LOG_LEVEL_DATA
 
 	for (int x{0}; x < overlapX; x++)
 	{
@@ -604,9 +614,18 @@ void Level::SetLevelSize(const int length, const int height)
 
 	this->length = length;
 	this->height = height;
-	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
-	this->tex = LoadTextureFromImage(this->img);
-	this->StitchTexture();
+	this->Reset();
 }
 
-void Level::Reset() {}
+void Level::Reset()
+{
+	this->colliders.clear();
+	this->entities.clear();
+	this->PopulateLevel();
+	UnloadImage(this->img);
+	this->img = {
+		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
+	UnloadTexture(this->tex);
+	this->tex = {.id = 0, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
+	this->StitchTexture();
+}

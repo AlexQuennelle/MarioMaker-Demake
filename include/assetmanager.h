@@ -9,8 +9,10 @@ class AssetManager
 	public:
 	AssetManager();
 	~AssetManager();
+
 	Texture2D playerSprites;
 	Image groundTiles;
+	Texture2D staticEntities;
 };
 
 struct PlayerAssets
