@@ -15,6 +15,7 @@ class Player
 	void AddForce(const Vector2 force);
 	// HACK: remove when death is possible via hazards
 	void TemporaryDeathTest();
+	void Die();
 	void CancelJump() { this->cancelJump = true; }
 
 	//getters
@@ -55,5 +56,4 @@ class Player
 
 	bool Grounded();
 	void CheckCollisions();
-	void Die();
 };

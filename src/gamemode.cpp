@@ -7,7 +7,7 @@
 GameplayMode::GameplayMode(Level* lvl, AssetManager& am)
 	: GamemodeInstance(lvl, am),
 	  player(*lvl, {this->assetManager.playerSprites}),
-	  inputHandler(this->player)
+	  inputHandler(this->player), uiDisplay(this->assetManager.smallFont)
 {
 	this->camera = Camera2D{0};
 	this->camera.target = this->player.GetPosition();
@@ -15,6 +15,9 @@ GameplayMode::GameplayMode(Level* lvl, AssetManager& am)
 	this->camera.offset = {.x = 192.0f, .y = 108.0f};
 	this->camera.rotation = 0.0f;
 	this->camera.zoom = 1.0f;
+
+	// HACK: change to read from level soon
+	time = 300;
 
 	player.Reset(level->GetPlayerStartPos());
 }
@@ -39,6 +42,14 @@ void GameplayMode::Update()
 		this->Reset();
 	}
 
+	if (time <= 0)
+	{
+		time = 0;
+		player.Die();
+	}
+
+	time -= GetFrameTime();
+	
 	this->level->Update();
 
 	// Update camera target to player position
@@ -51,10 +62,17 @@ void GameplayMode::Draw()
 	this->player.Draw();
 	EndMode2D();
 }
-void GameplayMode::DrawUI() {}
+void GameplayMode::DrawUI() 
+{ 
+	this->uiDisplay.Draw(this->time); 
+}
+
 void GameplayMode::Reset()
 {
 	level->Reset();
 	player.Reset(level->GetPlayerStartPos());
 	timeDead = 0;
+
+	// HACK: change to read from level soon
+	time = 300;
 }

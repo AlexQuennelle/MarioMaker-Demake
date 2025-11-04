@@ -30,6 +30,8 @@ Game::Game()
 	ClearStyles();
 }
 
+Game::~Game() { UnloadRenderTexture(renderTex); }
+
 void Game::Update()
 {
 	BeginTextureMode(this->renderTex);

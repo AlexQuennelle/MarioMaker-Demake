@@ -15,6 +15,7 @@ class Game
 {
 	public:
 	Game();
+	~Game();
 
 	/**
 	 * The game's main update loop. Should be called  from a loop in main().

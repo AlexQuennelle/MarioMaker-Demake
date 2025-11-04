@@ -11,6 +11,7 @@ class AssetManager
 	~AssetManager();
 
 	Texture2D playerSprites;
+	Font smallFont;
 	Image groundTiles;
 	Texture2D staticEntities;
 };
@@ -22,21 +23,6 @@ struct PlayerAssets
 	Texture2D& sprites;
 	float fireOffset{288};
 	float luigiOffset{128};
-};
-
-enum class PlayerAnimState : uint8_t
-{
-	idle,
-	lookUp,
-	crouch,
-	walk,
-	run,
-	skid,
-	jump,
-	fall,
-	runJump,
-	victory,
-	death,
 };
 
 using asset_ptr = std::unique_ptr<AssetManager>;
