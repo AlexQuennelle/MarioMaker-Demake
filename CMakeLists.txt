@@ -12,7 +12,8 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 # else()
 #     set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 # endif()
-add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-O3;-ffast-math>")
+# add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-O0;-g;-ffast-math>;-fsanitize=address;")
+# add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-O0;-g;-ffast-math;>")
 
 # Change this to match the name of the current folder
 project(MarioMaker-Demake LANGUAGES CXX C VERSION 0.0)
@@ -80,6 +81,8 @@ endif()
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
+
+# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 
 if(EMSCRIPTEN)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}\

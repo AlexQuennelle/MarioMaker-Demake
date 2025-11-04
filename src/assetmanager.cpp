@@ -8,14 +8,14 @@ AssetManager::AssetManager()
 	smallFont = LoadFontEx(RESOURCES_PATH "fonts/nokiafc22.ttf", 40, 0, 250);
 	SetTextureFilter(smallFont.texture, TEXTURE_FILTER_POINT);
 	groundTiles = LoadImage(RESOURCES_PATH "sprites/groundSprites.png");
+	staticEntities = LoadTexture(RESOURCES_PATH "sprites/staticEntities.png");
 }
 
-AssetManager::~AssetManager() 
-{ 
-	UnloadTexture(playerSprites);
-	UnloadFont(smallFont);
-	UnloadImage(groundTiles);
+AssetManager::~AssetManager()
+{
+	UnloadTexture(this->playerSprites);
+	UnloadImage(this->groundTiles);
+	UnloadTexture(this->staticEntities);
 }
-	
 
 PlayerAssets::PlayerAssets(Texture2D& tex) : sprites(tex) {}

@@ -3,6 +3,7 @@
 #include "level.h"
 #include "utils.h"
 
+#include <cassert>
 #include <fstream>
 #include <imgui.h>
 #include <ios>
@@ -17,18 +18,12 @@
 
 Game::Game()
 	: imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 216)),
-	  assetManager(std::make_unique<AssetManager>()) //,
+	  assetManager(std::make_unique<AssetManager>())
 {
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
 
-	this->level = Level(RESOURCES_PATH "1-1.lvl", assetManager.get());
-	//this->LoadLevel();
-
-	//this->gamemode = std::make_unique<EditMode>(this->level, this->assetManager,
-	//											this->imguiIO);
-	this->gamemode =
-		std::make_unique<GameplayMode>(this->level, this->assetManager);
+	this->gamemode = std::make_unique<MainMenu>(*this->assetManager);
 
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";
@@ -44,6 +39,12 @@ void Game::Update()
 	BeginMode2D(this->gamemode->camera);
 
 	this->gamemode->Update();
+
+	SwitchRequest newMode{this->gamemode->GetNextMode()};
+	if (newMode != SwitchRequest::None)
+	{
+		SwitchMode(newMode);
+	}
 
 	// draw everything
 	Draw();
@@ -74,12 +75,42 @@ void Game::Draw()
 	EndDrawing();
 }
 
+void Game::SwitchMode(SwitchRequest newMode)
+{
+	switch (newMode)
+	{
+	case SwitchRequest::GameplayMode:
+		this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
+											  this->assetManager.get());
+
+		assert(this->level != nullptr);
+		this->gamemode = std::make_unique<GameplayMode>(this->level.get(),
+														*this->assetManager);
+		break;
+
+	case SwitchRequest::EditMode:
+		this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
+											  this->assetManager.get());
+
+		assert(this->level != nullptr);
+		this->gamemode = std::make_unique<EditMode>(
+			this->level.get(), *this->assetManager, this->imguiIO);
+		break;
+
+	case SwitchRequest::MainMenu:
+	default:
+		this->level.reset(nullptr);
+		this->gamemode = std::make_unique<MainMenu>(*this->assetManager);
+		break;
+	}
+}
+
 void Game::SaveLevel()
 {
 	std::ofstream outFile;
-	if (this->level.HasFilepath())
+	if (this->level->HasFilepath())
 	{
-		outFile = std::ofstream(this->level.GetFilepath(),
+		outFile = std::ofstream(this->level->GetFilepath(),
 								std::ios::out | std::ios::binary);
 	}
 	else
@@ -92,7 +123,7 @@ void Game::SaveLevel()
 										   "MyLevel.lvl")};
 		if (result == NFD_OKAY)
 		{
-			this->level.SetFilepath(outPath.get());
+			this->level->SetFilepath(outPath.get());
 			outFile =
 				std::ofstream(outPath.get(), std::ios::out | std::ios::binary);
 		}
@@ -111,7 +142,7 @@ void Game::SaveLevel()
 
 	if (outFile.is_open())
 	{
-		const vector<byte> data{this->level.Serialize()};
+		const vector<byte> data{this->level->Serialize()};
 
 		outFile.write(reinterpret_cast<const char*>(data.data()), data.size());
 
@@ -127,7 +158,7 @@ void Game::SaveLevel()
 #if !defined(PLATFORM_WEB)
 void Game::SaveLevelAs()
 {
-	this->level.SetFilepath("");
+	this->level->SetFilepath("");
 	this->SaveLevel();
 }
 void Game::LoadLevel()
@@ -139,7 +170,8 @@ void Game::LoadLevel()
 	if (result == NFD_OKAY)
 	{
 		std::cout << outPath.get() << '\n';
-		this->level = Level(outPath.get(), this->assetManager.get());
+		this->level = std::make_unique<Level>(
+			Level{outPath.get(), this->assetManager.get()});
 	}
 	else if (result == NFD_ERROR)
 	{

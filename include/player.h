@@ -16,10 +16,16 @@ class Player
 	// HACK: remove when death is possible via hazards
 	void TemporaryDeathTest();
 	void Die();
+	void CancelJump() { this->cancelJump = true; }
 
 	//getters
 	bool IsDead() const { return this->dead; }
 	Vector2 GetPosition() const { return this->position; }
+	Vector2 GetVelocity() const { return this->velocity; }
+	Rectangle GetCollisionRect();
+
+	// EVIL SETTER AAAAAAA (i kinda need it)
+	void SetVelocity(const Vector2 velocity) { this->velocity = velocity; }
 
 	private:
 	Vector2 position{0, 0};

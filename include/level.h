@@ -1,22 +1,26 @@
 #pragma once
 
 #include "assetmanager.h"
+#include "entity.h"
 #include "tile.h"
 #include "utils.h"
 
 #include <array>
 #include <cstdint>
+#include <memory>
 #include <raylib.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 using std::array;
 using std::vector;
+using Entity_ptr = std::unique_ptr<Entity>;
 
 struct Vector2Int
 {
-	int x;
-	int y;
+	int x{0};
+	int y{0};
 
 	bool operator==(const Vector2Int other)
 	{
@@ -27,12 +31,19 @@ struct Vector2Int
 class Level
 {
 	public:
-	Level() = default;
+	Level() = delete;
 	Level(const std::string& filepath, AssetManager* am);
+	Level(const Level& other) = delete;
+	Level(Level&& other) = default;
+
 	~Level();
+
+	Level& operator=(const Level& other) = delete;
+	Level& operator=(Level&& other) = default;
 
 	[[nodiscard]] vector<byte> Serialize() const;
 
+	void Update();
 	void Draw();
 	void DrawGrid(RenderTexture& tex);
 	/**
@@ -64,6 +75,8 @@ class Level
 	 *          returns a @link TileID::ground @endlink.
 	 */
 	Tile TileAt(const int x, const int y);
+	void SpawnEntity(const int x, const int y, const Tile basis);
+	void SpawnEntityEditor(const int x, const int y, const Tile basis);
 
 	// getters
 	Vector2 GetPlayerStartPos() const { return playerStartPos; }
@@ -77,13 +90,38 @@ class Level
 	const std::string& GetName() const { return this->name; }
 	void SetName(const std::string& newName) { this->name = newName; }
 
+	const vector<Entity*> GetEntities()
+	{
+		vector<Entity*> entities;
+		for (Entity_ptr& e : this->entities)
+		{
+			if (e->IsActive())
+			{
+				entities.push_back(e.get());
+			}
+		}
+		return entities;
+	}
+
+	const vector<Rectangle> GetSolidEntityColliders() {
+		vector<Rectangle> solids;
+		for (Entity_ptr& e : this->entities)
+		{
+			if (e->IsSolid() && e->IsActive())
+			{
+				solids.push_back(e->GetCollider());
+			}
+		}
+		return solids;
+	}
+
 	private:
 	/**
 	 * @brief Populates the colliders vector with collision rectangles. These
 	 *        are generated using a 2D greedy meshing algorithm to minimize the
 	 *        amount of collision checks required.
 	 */
-	void GenCollisionMap();
+	void PopulateLevel();
 	/**
 	 * @brief Generates a collision rectangle starting at (x, y) that expands as
 	 *        much to the left and down as it can without encountering a cell
@@ -143,5 +181,5 @@ class Level
 	Vector2 playerStartPos;
 	vector<Tile> grid;
 	vector<Rectangle> colliders;
-	// TODO: Vector of entity
+	vector<Entity_ptr> entities;
 };

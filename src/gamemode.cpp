@@ -4,9 +4,9 @@
 #include <raylib.h>
 #include <raymath.h>
 
-GameplayMode::GameplayMode(Level& lvl, asset_ptr& am)
+GameplayMode::GameplayMode(Level* lvl, AssetManager& am)
 	: GamemodeInstance(lvl, am),
-	  player(lvl, {this->assetManager->playerSprites}),
+	  player(*lvl, {this->assetManager.playerSprites}),
 	  inputHandler(this->player), uiDisplay(this->assetManager->smallFont)
 {
 	this->camera = Camera2D{0};
@@ -19,7 +19,7 @@ GameplayMode::GameplayMode(Level& lvl, asset_ptr& am)
 	// HACK: change to read from level soon
 	time = 300;
 
-	player.Reset(level.GetPlayerStartPos());
+	player.Reset(level->GetPlayerStartPos());
 }
 void GameplayMode::Update()
 {
@@ -49,6 +49,8 @@ void GameplayMode::Update()
 	}
 
 	time -= GetFrameTime();
+	
+	this->level->Update();
 
 	// Update camera target to player position
 	this->camera.target = this->player.GetPosition() * 16.0f;
@@ -56,7 +58,7 @@ void GameplayMode::Update()
 void GameplayMode::Draw()
 {
 	BeginMode2D(this->camera);
-	this->level.Draw();
+	this->level->Draw();
 	this->player.Draw();
 	EndMode2D();
 }
@@ -67,8 +69,8 @@ void GameplayMode::DrawUI()
 
 void GameplayMode::Reset()
 {
-	level.Reset();
-	player.Reset(level.GetPlayerStartPos());
+	level->Reset();
+	player.Reset(level->GetPlayerStartPos());
 	timeDead = 0;
 
 	// HACK: change to read from level soon
