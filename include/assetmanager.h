@@ -14,6 +14,7 @@ class AssetManager
 	Font smallFont;
 	Image groundTiles;
 	Texture2D staticEntities;
+	Texture2D powerups;
 };
 
 struct PlayerAssets

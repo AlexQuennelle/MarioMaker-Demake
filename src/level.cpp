@@ -1,6 +1,7 @@
 #include "level.h"
 #include "assetmanager.h"
 #include "entity.h"
+#include "powerup.h"
 #include "tile.h"
 #include "utils.h"
 
@@ -575,6 +576,9 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 		break;
 	case (TileID::coin):
 		this->entities.push_back(std::make_unique<Coin>(x, y, *this->am));
+		break;
+	case (TileID::mushroom):
+		this->entities.push_back(std::make_unique<Mushroom>(x, y, *this->am));
 		break;
 	default:
 		break;
