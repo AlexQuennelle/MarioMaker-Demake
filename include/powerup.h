@@ -5,7 +5,7 @@
 class Mushroom : public Entity
 {
 	public:
-	Mushroom(const int x, const int y, AssetManager& assetManager);
+	Mushroom(const int x, const int y, AssetManager& assetManager, float gravity);
 
 	void Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
@@ -14,4 +14,7 @@ class Mushroom : public Entity
 
 	private:
 	Texture2D& sprite;
+	Vector2 velocity{0, 0};
+	float speed{0.05f};
+	float gravity;
 };

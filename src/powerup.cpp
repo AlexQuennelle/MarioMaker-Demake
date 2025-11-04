@@ -6,14 +6,43 @@
 #include <raymath.h>
 
 
-Mushroom::Mushroom(const int x, const int y, AssetManager& assetManager)
-	: Entity(x, y, assetManager), sprite(assetManager.powerups)
+Mushroom::Mushroom(const int x, const int y, AssetManager& assetManager, float gravity)
+	: Entity(x, y, assetManager), sprite(assetManager.powerups), gravity(gravity)
 {
 	this->solid = false;
+	this->velocity.x = this->speed;
 }
 
 
-void Mushroom::Update(const vector<Rectangle>& colliders) {}
+void Mushroom::Update(const vector<Rectangle>& colliders) 
+{
+	this->velocity.y += gravity * GetFrameTime();
+
+	this->position = Vector2Add(position, velocity);
+
+	for (const Rectangle col : colliders)
+	{
+		if (CheckCollisionRecs(this->GetCollider(), col))
+		{
+			RecCollisionInfo info = GetCollisionInfo(this->GetCollider(), col);
+			if (info.minDistX < info.minDistY)
+			{
+				this->position.x += copysignf(info.minDistX, info.delta.x);
+				if (!(info.delta.x > 0 && velocity.x > 0) &&
+					!(info.delta.x < 0 && velocity.x < 0))
+				{
+					this->velocity.x =
+						copysignf(this->speed, -this->velocity.x);
+				}
+			}
+			else
+			{
+				this->position.y += copysignf(info.minDistY, info.delta.y);
+				this->velocity.y = 0;
+			}
+		}
+	}
+}
 void Mushroom::Draw()
 {
 	Rectangle sourceRect{0.0f, 0.0f, 16.0f, 16.0f};
@@ -26,17 +55,9 @@ void Mushroom::Draw()
 }
 
 void Mushroom::OnPlayerCollision(Player& player)
-{
-	RecCollisionInfo info =
-		GetCollisionInfo(player.GetCollisionRect(), this->GetCollider());
-
-	if (player.IsBig() && info.minDistY < info.minDistX && info.delta.y > 0)
-	{
-		// head bonk
-		this->isActive = false;
-		player.SetVelocity({player.GetVelocity().x, 0});
-		player.CancelJump();
-	}
+{ 
+	player.GetBig(); 
+	this->isActive = false;
 }
 
 void Mushroom::OnEntityCollision(Entity& entity) {}

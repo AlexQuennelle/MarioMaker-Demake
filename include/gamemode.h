@@ -53,9 +53,10 @@ class GameplayMode : public GamemodeInstance
 	void DrawUI() override;
 	void Reset();
 
+	static constexpr float gravity{0.9f};
+
 	private:
 	float timeDead{0};
-	float gravity{0.9f};
 	float time{0};
 	Player player;
 	PlayerInputHandler inputHandler;
