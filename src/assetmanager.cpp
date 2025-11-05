@@ -9,6 +9,7 @@ AssetManager::AssetManager()
 	SetTextureFilter(smallFont.texture, TEXTURE_FILTER_POINT);
 	groundTiles = LoadImage(RESOURCES_PATH "sprites/groundSprites.png");
 	staticEntities = LoadTexture(RESOURCES_PATH "sprites/staticEntities.png");
+	powerups = LoadTexture(RESOURCES_PATH "sprites/powerups.png");
 }
 
 AssetManager::~AssetManager()
@@ -16,6 +17,7 @@ AssetManager::~AssetManager()
 	UnloadTexture(this->playerSprites);
 	UnloadImage(this->groundTiles);
 	UnloadTexture(this->staticEntities);
+	UnloadTexture(this->powerups);
 }
 
 PlayerAssets::PlayerAssets(Texture2D& tex) : sprites(tex) {}

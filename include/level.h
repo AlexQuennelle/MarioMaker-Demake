@@ -32,7 +32,7 @@ class Level
 {
 	public:
 	Level() = delete;
-	Level(const std::string& filepath, AssetManager* am);
+	Level(const std::string& filepath, AssetManager* am, float gravity = 0);
 	Level(const Level& other) = delete;
 	Level(Level&& other) = default;
 
@@ -170,6 +170,7 @@ class Level
 	template <typename T>
 	static inline void InsertAsBytes(vector<byte>& vec, T data);
 
+	float gravity;
 	int32_t height;
 	int32_t length;
 	Image img;

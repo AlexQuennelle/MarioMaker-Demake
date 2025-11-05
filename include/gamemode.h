@@ -53,9 +53,10 @@ class GameplayMode : public GamemodeInstance
 	void DrawUI() override;
 	void Reset();
 
+	static constexpr float gravity{0.9f};
+
 	private:
 	float timeDead{0};
-	float gravity{0.9f};
 	float time{0};
 	Player player;
 	PlayerInputHandler inputHandler;
@@ -85,12 +86,13 @@ class EditMode : public GamemodeInstance
 	Vector2 lvlMousePos;
 	const ImGuiIO& imGuiIO;
 	Tile brush{.ID = TileID::ground, .flags = 0};
-	const std::array<std::string, 5> tileNames{
+	const std::array<std::string, 6> tileNames{
 		"Ground",
 		"Bricks",
 		"Spikes",
 		"Item Box", 
-		"Coin",
+		"Coin",	 
+		"Mushroom",
 	};
 };
 

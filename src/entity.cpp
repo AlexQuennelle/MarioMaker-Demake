@@ -15,7 +15,7 @@ Brick::Brick(const int x, const int y, AssetManager& assetManager)
 	// TODO: Proper initialization
 	this->solid = true;
 }
-void Brick::Update() {}
+void Brick::Update(const vector<Rectangle>& colliders) {}
 void Brick::Draw()
 {
 	Rectangle sourceRect{0.0f, 0.0f, 16.0f, 16.0f};
@@ -73,7 +73,7 @@ Coin::Coin(const int x, const int y, AssetManager& assetManager)
 	this->solid = false;
 }
 
-void Coin::Update() {}
+void Coin::Update(const vector<Rectangle>& colliders) {}
 
 void Coin::Draw() {
 	

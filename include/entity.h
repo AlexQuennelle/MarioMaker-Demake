@@ -3,6 +3,9 @@
 #include "assetmanager.h"
 #include "raylib.h"
 #include "raymath.h"
+#include <vector>
+
+using std::vector;
 
 class Player;
 
@@ -23,7 +26,7 @@ class Entity
 	Entity(const int x, const int y, AssetManager& assetManager);
 	virtual ~Entity() = default;
 
-	virtual void Update() = 0;
+	virtual void Update(const vector<Rectangle>& colliders) = 0;
 	virtual void Draw() = 0;
 	virtual void OnPlayerCollision(Player& player) = 0;
 	virtual void OnEntityCollision(Entity& entity) = 0;
@@ -53,7 +56,7 @@ class Brick : public Entity
 	public:
 	Brick(const int x, const int y, AssetManager& assetManager);
 
-	void Update() override;
+	void Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
 	void OnPlayerCollision(Player& player) override;
 	void OnEntityCollision(Entity& entity) override;
@@ -67,7 +70,7 @@ class Coin : public Entity
 	public:
 	Coin(const int x, const int y, AssetManager& assetmanager);
 
-	void Update() override;
+	void Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
 	void OnPlayerCollision(Player& player) override;
 	void OnEntityCollision(Entity& entity) override;

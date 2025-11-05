@@ -1,6 +1,7 @@
 #include "level.h"
 #include "assetmanager.h"
 #include "entity.h"
+#include "powerup.h"
 #include "tile.h"
 #include "utils.h"
 
@@ -26,8 +27,8 @@
 //#define LOG_LEVEL_DATA
 #endif // !NDEBUG
 
-Level::Level(const std::string& filepath, AssetManager* am)
-	: am(am), sprites(am->groundTiles), entities(0)
+Level::Level(const std::string& filepath, AssetManager* am, float gravity)
+	: am(am), sprites(am->groundTiles), entities(0), gravity(gravity)
 {
 	namespace fs = std::filesystem;
 	using std::ios;
@@ -141,11 +142,18 @@ template <typename T> void Level::InsertAsBytes(vector<byte>& vec, T data)
 
 void Level::Update()
 {
+	vector<Rectangle> solidCols = this->GetSolidEntityColliders();
+	vector<Rectangle> levelCols = this->GetColliders();
+
+	solidCols.reserve(solidCols.size() + levelCols.size());
+
+	solidCols.insert(solidCols.end(), levelCols.begin(), levelCols.end());
+
 	for (const auto& entity : this->entities)
 	{
 		if (entity->IsActive())
 		{
-			entity->Update();
+			entity->Update(solidCols);
 		}
 	}
 }
@@ -575,6 +583,9 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 		break;
 	case (TileID::coin):
 		this->entities.push_back(std::make_unique<Coin>(x, y, *this->am));
+		break;
+	case (TileID::mushroom):
+		this->entities.push_back(std::make_unique<Mushroom>(x, y, *this->am, gravity));
 		break;
 	default:
 		break;
