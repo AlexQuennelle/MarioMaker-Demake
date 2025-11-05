@@ -10,13 +10,15 @@ enum class TileID : uint8_t
 	spikes,
 	itemBox,
 	coin,
+	toggleSwitch,
+	toggleBlock,
 	mushroom,
 };
 
 struct Tile
 {
 	TileID ID;
-	uint8_t flags;
+	uint16_t flags;
 
 	bool operator==(const Tile& other)
 	{

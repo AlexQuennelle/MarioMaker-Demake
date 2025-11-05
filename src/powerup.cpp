@@ -1,20 +1,21 @@
 #include "powerup.h"
 #include "assetmanager.h"
+#include "entity.h"
 #include "player.h"
 
 #include <raylib.h>
 #include <raymath.h>
 
-
-Mushroom::Mushroom(const int x, const int y, AssetManager& assetManager, float gravity)
-	: Entity(x, y, assetManager), sprite(assetManager.powerups), gravity(gravity)
+Mushroom::Mushroom(const int x, const int y, AssetManager& assetManager,
+				   float gravity)
+	: Entity(x, y, assetManager), sprite(assetManager.powerups),
+	  gravity(gravity)
 {
 	this->solid = false;
 	this->velocity.x = this->speed;
 }
 
-
-void Mushroom::Update(const vector<Rectangle>& colliders) 
+EntityReq Mushroom::Update(const vector<Rectangle>& colliders)
 {
 	this->velocity.y += gravity * GetFrameTime();
 
@@ -28,8 +29,8 @@ void Mushroom::Update(const vector<Rectangle>& colliders)
 			if (info.minDistX < info.minDistY)
 			{
 				this->position.x += copysignf(info.minDistX, info.delta.x);
-				if (!(info.delta.x > 0 && velocity.x > 0) &&
-					!(info.delta.x < 0 && velocity.x < 0))
+				if ((info.delta.x <= 0 || velocity.x <= 0) &&
+					(info.delta.x >= 0 || velocity.x >= 0))
 				{
 					this->velocity.x =
 						copysignf(this->speed, -this->velocity.x);
@@ -42,6 +43,7 @@ void Mushroom::Update(const vector<Rectangle>& colliders)
 			}
 		}
 	}
+	return {};
 }
 void Mushroom::Draw()
 {
@@ -49,15 +51,18 @@ void Mushroom::Draw()
 	DrawTextureRec(this->sprite, sourceRect,
 				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
 #ifdef DRAW_COLS
-	DrawRectangleLines(this->position.x, this->position.y, this->collider.width,
-					   this->collider.height, Fade(RED, 0.6f));
+	DrawRectangleLines(this->position.x * 16, this->position.y * 16,
+					   this->collider.width * 16, this->collider.height * 16,
+					   Fade(RED, 0.6f));
 #endif // DEBUG
 }
+void Mushroom::EditDraw() { this->Draw(); }
 
-void Mushroom::OnPlayerCollision(Player& player)
-{ 
-	player.GetBig(); 
+EntityReq Mushroom::OnPlayerCollision(Player& player)
+{
+	player.GetBig();
 	this->isActive = false;
+	return {};
 }
 
-void Mushroom::OnEntityCollision(Entity& entity) {}
+EntityReq Mushroom::OnEntityCollision(Entity& /*entity*/) { return {}; }

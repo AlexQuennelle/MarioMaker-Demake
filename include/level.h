@@ -11,7 +11,6 @@
 #include <raylib.h>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 using std::array;
 using std::vector;
@@ -45,11 +44,13 @@ class Level
 
 	void Update();
 	void Draw();
+	void EditDraw();
 	void DrawGrid(RenderTexture& tex);
 	/**
 	 * @brief Rebuilds the level from the tile grid. This respawns all entities.
 	 */
 	void Reset();
+	void HandleRequest(EntityReq request);
 
 	/**
 	 * @brief Sets a tile in the grid at position (x, y). If that position is
@@ -90,26 +91,27 @@ class Level
 	const std::string& GetName() const { return this->name; }
 	void SetName(const std::string& newName) { this->name = newName; }
 
-	const vector<Entity*> GetEntities()
+	vector<Entity*> GetEntities()
 	{
 		vector<Entity*> entities;
-		for (Entity_ptr& e : this->entities)
+		for (Entity_ptr& entity : this->entities)
 		{
-			if (e->IsActive())
+			if (entity->IsActive())
 			{
-				entities.push_back(e.get());
+				entities.push_back(entity.get());
 			}
 		}
 		return entities;
 	}
 
-	const vector<Rectangle> GetSolidEntityColliders() {
+	vector<Rectangle> GetSolidEntityColliders()
+	{
 		vector<Rectangle> solids;
-		for (Entity_ptr& e : this->entities)
+		for (Entity_ptr& entity : this->entities)
 		{
-			if (e->IsSolid() && e->IsActive())
+			if (entity->IsSolid() && entity->IsActive())
 			{
-				solids.push_back(e->GetCollider());
+				solids.push_back(entity->GetCollider());
 			}
 		}
 		return solids;
@@ -173,6 +175,7 @@ class Level
 	float gravity;
 	int32_t height;
 	int32_t length;
+	bool toggleState{false};
 	Image img;
 	Image sprites;
 	Texture tex;
@@ -183,4 +186,6 @@ class Level
 	vector<Tile> grid;
 	vector<Rectangle> colliders;
 	vector<Entity_ptr> entities;
+	vector<Entity_ptr> spawnQueue;
+	vector<ToggleBlock*> toggleBlocks;
 };

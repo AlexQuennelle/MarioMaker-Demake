@@ -1,9 +1,20 @@
 #pragma once
 
 #include "assetmanager.h"
-#include "raylib.h"
-#include "raymath.h"
+
+#include <memory>
+#include <raylib.h>
+#include <raymath.h>
+#include <variant>
 #include <vector>
+
+#ifndef NDEBUG
+//#define DRAW_COLS
+//#define LOG_LEVEL_DATA
+#ifdef LOG_LEVEL_DATA
+#include <format>
+#endif // LOG_LEVEL_DATA
+#endif // !NDEBUG
 
 using std::vector;
 
@@ -20,16 +31,27 @@ struct RecCollisionInfo
 
 RecCollisionInfo GetCollisionInfo(Rectangle, Rectangle);
 
+class Entity;
+struct SpawnEntityRequest
+{
+	std::unique_ptr<Entity> entity;
+};
+struct ToggleRequest
+{};
+using EntityReq =
+	std::variant<std::monostate, SpawnEntityRequest, ToggleRequest>;
+
 class Entity
 {
 	public:
 	Entity(const int x, const int y, AssetManager& assetManager);
 	virtual ~Entity() = default;
 
-	virtual void Update(const vector<Rectangle>& colliders) = 0;
+	virtual EntityReq Update(const vector<Rectangle>& colliders) = 0;
 	virtual void Draw() = 0;
-	virtual void OnPlayerCollision(Player& player) = 0;
-	virtual void OnEntityCollision(Entity& entity) = 0;
+	virtual void EditDraw() = 0;
+	virtual EntityReq OnPlayerCollision(Player& player) = 0;
+	virtual EntityReq OnEntityCollision(Entity& entity) = 0;
 
 	bool IsSolid() const { return this->solid; }
 	bool IsActive() const { return this->isActive; }
@@ -54,14 +76,54 @@ class Entity
 class Brick : public Entity
 {
 	public:
-	Brick(const int x, const int y, AssetManager& assetManager);
+	Brick(const int x, const int y, AssetManager& assetManager,
+		  const bool variant = false);
 
-	void Update(const vector<Rectangle>& colliders) override;
+	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
-	void OnPlayerCollision(Player& player) override;
-	void OnEntityCollision(Entity& entity) override;
+	void EditDraw() override;
+	EntityReq OnPlayerCollision(Player& player) override;
+	EntityReq OnEntityCollision(Entity& entity) override;
 
 	private:
+	bool isVariant;
+	Texture2D& sprite;
+};
+
+class Spike : public Entity
+{
+	public:
+	Spike(const int x, const int y, AssetManager& assetManager);
+
+	EntityReq Update(const vector<Rectangle>& colliders) override;
+	void Draw() override;
+	void EditDraw() override;
+	EntityReq OnPlayerCollision(Player& player) override;
+	EntityReq OnEntityCollision(Entity& entity) override;
+
+	private:
+	Texture2D& sprite;
+};
+
+class ItemBox : public Entity
+{
+	public:
+	ItemBox(const int x, const int y, AssetManager& assetManager,
+			const bool isBrick, const bool isHidden);
+
+	EntityReq Update(const vector<Rectangle>& colliders) override;
+	void Draw() override;
+	void EditDraw() override;
+	EntityReq OnPlayerCollision(Player& player) override;
+	EntityReq OnEntityCollision(Entity& entity) override;
+
+	private:
+	const bool isBrick;
+	const bool isHidden;
+	bool empty{false};
+	float accumulatedAnimTime{0};
+	float timeBetweenFrames{0.12f};
+	int curFrame{0};
 	Texture2D& sprite;
 };
 
@@ -70,14 +132,50 @@ class Coin : public Entity
 	public:
 	Coin(const int x, const int y, AssetManager& assetmanager);
 
-	void Update(const vector<Rectangle>& colliders) override;
+	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
-	void OnPlayerCollision(Player& player) override;
-	void OnEntityCollision(Entity& entity) override;
+	void EditDraw() override;
+	EntityReq OnPlayerCollision(Player& player) override;
+	EntityReq OnEntityCollision(Entity& entity) override;
 
 	private:
 	Texture2D& sprite;
 	float accumulatedAnimTime{0};
 	float timeBetweenFrames{0.12f};
 	int curFrame{0};
+};
+
+class ToggleSwitch : public Entity
+{
+	public:
+	ToggleSwitch(const int x, const int y, AssetManager& assetManager);
+
+	EntityReq Update(const vector<Rectangle>& colliders) override;
+	void Draw() override;
+	void EditDraw() override;
+	EntityReq OnPlayerCollision(Player& player) override;
+	EntityReq OnEntityCollision(Entity& entity) override;
+
+	private:
+	bool on{false};
+	Texture2D& sprite;
+};
+class ToggleBlock : public Entity
+{
+	public:
+	ToggleBlock(const int x, const int y, AssetManager& assetManager,
+				const bool startOn);
+
+	EntityReq Update(const vector<Rectangle>& colliders) override;
+	void Draw() override;
+	void EditDraw() override;
+	EntityReq OnPlayerCollision(Player& /*player*/) override { return {}; };
+	EntityReq OnEntityCollision(Entity& /*entity*/) override { return {}; };
+
+	void SetState(const bool newState) { this->on = newState; };
+
+	private:
+	const bool startOn;
+	bool on;
+	Texture2D& sprite;
 };

@@ -114,7 +114,7 @@ void Player::CheckCollisions()
 		Rectangle entityCol{e_ptr->GetCollider()};
 		if (CheckCollisionRecs(playerCol, entityCol))
 		{
-			e_ptr->OnPlayerCollision(*this);
+			this->level.HandleRequest(e_ptr->OnPlayerCollision(*this));
 		}
 	}
 

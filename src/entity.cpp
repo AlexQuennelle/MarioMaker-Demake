@@ -1,47 +1,8 @@
 #include "entity.h"
 #include "assetmanager.h"
-#include "player.h"
 
 #include <raylib.h>
 #include <raymath.h>
-
-Entity::Entity(const int x, const int y, AssetManager& assetManager)
-	: position(x, y), assetManager(assetManager)
-{}
-
-Brick::Brick(const int x, const int y, AssetManager& assetManager)
-	: Entity(x, y, assetManager), sprite(assetManager.staticEntities)
-{
-	// TODO: Proper initialization
-	this->solid = true;
-}
-void Brick::Update(const vector<Rectangle>& colliders) {}
-void Brick::Draw()
-{
-	Rectangle sourceRect{0.0f, 0.0f, 16.0f, 16.0f};
-	DrawTextureRec(this->sprite, sourceRect,
-				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
-#ifdef DRAW_COLS
-	DrawRectangleLines(this->position.x, this->position.y, this->collider.width,
-					   this->collider.height, Fade(RED, 0.6f));
-#endif // DEBUG
-}
-
-void Brick::OnPlayerCollision(Player& player)
-{
-	RecCollisionInfo info =
-		GetCollisionInfo(player.GetCollisionRect(), this->GetCollider());
-
-	if (player.IsBig() && info.minDistY < info.minDistX && info.delta.y > 0)
-	{
-		// head bonk
-		this->isActive = false;
-		player.SetVelocity({player.GetVelocity().x, 0});
-		player.CancelJump();
-	}
-}
-
-void Brick::OnEntityCollision(Entity& entity) {}
 
 RecCollisionInfo GetCollisionInfo(Rectangle col1, Rectangle col2)
 {
@@ -67,43 +28,6 @@ RecCollisionInfo GetCollisionInfo(Rectangle col1, Rectangle col2)
 	return {.delta = delta, .minDistX = minDistX, .minDistY = minDistY};
 };
 
-Coin::Coin(const int x, const int y, AssetManager& assetManager)
-	: Entity(x, y, assetManager), sprite(assetManager.staticEntities)
-{
-	this->solid = false;
-}
-
-void Coin::Update(const vector<Rectangle>& colliders) {}
-
-void Coin::Draw() {
-	
-
-	if (accumulatedAnimTime >= timeBetweenFrames)
-	{
-		accumulatedAnimTime = 0;
-		curFrame++;
-	}
-	if (curFrame > 3)
-	{
-		curFrame = 0;
-	}
-
-	accumulatedAnimTime += GetFrameTime();
-
-	Rectangle sourceRect{32.0f + (curFrame * 16.0f), 16.0f, 16.0f, 16.0f};
-
-	DrawTextureRec(this->sprite, sourceRect,
-				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
-#ifdef DRAW_COLS
-	DrawRectangleLines(this->position.x, this->position.y, this->collider.width,
-					   this->collider.height, Fade(RED, 0.6f));
-#endif // DEBUG
-}
-
-void Coin::OnPlayerCollision(Player& player)
-{ 
-	this->isActive = false;
-	player.GainCoin();
-}
-
-void Coin::OnEntityCollision(Entity& entity) {}
+Entity::Entity(const int x, const int y, AssetManager& assetManager)
+	: position(x, y), assetManager(assetManager)
+{}
