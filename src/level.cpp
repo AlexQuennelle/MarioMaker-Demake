@@ -153,6 +153,10 @@ void Level::Update()
 			HandleRequest(entity->Update());
 		}
 	}
+	for (auto* toggle : this->toggleBlocks)
+	{
+		toggle->SetState(this->toggleState);
+	}
 }
 void Level::Draw()
 {
@@ -600,8 +604,22 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 	case (coin):
 		this->entities.push_back(std::make_unique<Coin>(x, y, *this->am));
 		break;
+	case (toggleSwitch):
+		this->entities.push_back(
+			std::make_unique<ToggleSwitch>(x, y, *this->am));
+		break;
+	case (toggleBlock):
+		this->entities.push_back(std::make_unique<ToggleBlock>(
+			x, y, *this->am, static_cast<bool>(basis.flags & 1)));
+		break;
 	default:
 		break;
+	}
+	if (basis.ID == TileID::toggleBlock)
+	{
+		ToggleBlock* block{static_cast<ToggleBlock*>(
+			this->entities[this->entities.size() - 1].get())};
+		this->toggleBlocks.push_back(block);
 	}
 }
 

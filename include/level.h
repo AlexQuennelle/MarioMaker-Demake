@@ -186,4 +186,5 @@ class Level
 	vector<Rectangle> colliders;
 	vector<Entity_ptr> entities;
 	vector<Entity_ptr> spawnQueue;
+	vector<ToggleBlock*> toggleBlocks;
 };

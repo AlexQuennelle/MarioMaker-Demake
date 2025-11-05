@@ -136,8 +136,6 @@ EntityReq ItemBox::OnPlayerCollision(Player& player)
 
 	if (info.minDistY < info.minDistX && info.delta.y > 0)
 	{
-		// head bonk
-		//this->isActive = false;
 		player.SetVelocity({player.GetVelocity().x, 0});
 		player.CancelJump();
 
@@ -148,3 +146,70 @@ EntityReq ItemBox::OnPlayerCollision(Player& player)
 	return {};
 }
 EntityReq ItemBox::OnEntityCollision(Entity& /*entity*/) { return {}; }
+
+ToggleSwitch::ToggleSwitch(const int x, const int y, AssetManager& assetManager)
+	: Entity(x, y, assetManager), sprite(assetManager.staticEntities)
+{
+	this->solid = true;
+}
+EntityReq ToggleSwitch::Update() { return {}; }
+void ToggleSwitch::Draw()
+{
+	Rectangle sourceRect{0.0f, 48.0f, 16.0f, 16.0f};
+	if (this->on)
+		sourceRect.y += 16.0f;
+
+	DrawTextureRec(this->sprite, sourceRect,
+				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
+
+#ifdef DRAW_COLS
+	DrawRectangleLines(this->position.x, this->position.y, this->collider.width,
+					   this->collider.height, Fade(RED, 0.6f));
+#endif // DEBUG
+}
+EntityReq ToggleSwitch::OnPlayerCollision(Player& player)
+{
+	RecCollisionInfo info =
+		GetCollisionInfo(player.GetCollisionRect(), this->GetCollider());
+
+	if (info.minDistY < info.minDistX && info.delta.y > 0)
+	{
+		// head bonk
+		this->on = !this->on;
+		player.SetVelocity({player.GetVelocity().x, 0});
+		player.CancelJump();
+		return {ToggleRequest()};
+	}
+	return {};
+}
+EntityReq ToggleSwitch::OnEntityCollision(Entity& /*entity*/) { return {}; }
+
+ToggleBlock::ToggleBlock(const int x, const int y, AssetManager& assetManager,
+						 const bool startOn)
+	: Entity(x, y, assetManager), startOn(startOn), on(false),
+	  sprite(assetManager.staticEntities)
+{
+	if (!this->startOn)
+		this->solid = true;
+}
+EntityReq ToggleBlock::Update()
+{
+	this->solid = (!on) ^ this->startOn;
+	return {};
+}
+void ToggleBlock::Draw()
+{
+	Rectangle sourceRect{32.0f, 48.0f, 16.0f, 16.0f};
+	if (this->startOn)
+		sourceRect.y += 16.0f;
+	if ((this->on) ^ this->startOn)
+		sourceRect.x += 16.0f;
+
+	DrawTextureRec(this->sprite, sourceRect,
+				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
+
+#ifdef DRAW_COLS
+	DrawRectangleLines(this->position.x, this->position.y, this->collider.width,
+					   this->collider.height, Fade(RED, 0.6f));
+#endif // DEBUG
+}

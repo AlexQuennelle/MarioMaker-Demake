@@ -113,3 +113,36 @@ class ItemBox : public Entity
 	int curFrame{0};
 	Texture2D& sprite;
 };
+
+class ToggleSwitch : public Entity
+{
+	public:
+	ToggleSwitch(const int x, const int y, AssetManager& assetManager);
+
+	EntityReq Update() override;
+	void Draw() override;
+	EntityReq OnPlayerCollision(Player& player) override;
+	EntityReq OnEntityCollision(Entity& entity) override;
+
+	private:
+	bool on{false};
+	Texture2D& sprite;
+};
+class ToggleBlock : public Entity
+{
+	public:
+	ToggleBlock(const int x, const int y, AssetManager& assetManager,
+				const bool startOn);
+
+	EntityReq Update() override;
+	void Draw() override;
+	EntityReq OnPlayerCollision(Player& /*player*/) override { return {}; };
+	EntityReq OnEntityCollision(Entity& /*entity*/) override { return {}; };
+
+	void SetState(const bool newState) { this->on = newState; };
+
+	private:
+	const bool startOn;
+	bool on;
+	Texture2D& sprite;
+};

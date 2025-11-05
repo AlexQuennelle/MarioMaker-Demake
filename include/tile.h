@@ -10,6 +10,8 @@ enum class TileID : uint8_t
 	spikes,
 	itemBox,
 	coin,
+	toggleSwitch,
+	toggleBlock,
 };
 
 struct Tile
