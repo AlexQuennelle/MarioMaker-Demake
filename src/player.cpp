@@ -127,11 +127,16 @@ void Player::CheckCollisions()
 		return;
 
 	vector<Rectangle> solidCols = level.GetSolidEntityColliders();
+
+	// filter entity colliders by x-distance to mario
+
 	vector<Rectangle> levelCols = level.GetColliders();
 
 	solidCols.reserve(solidCols.size() + levelCols.size());
 
 	solidCols.insert(solidCols.end(), levelCols.begin(), levelCols.end());
+
+	// sort solid cols by xy distance to player (start with closest one)
 
 	for (const Rectangle col : solidCols)
 	{
@@ -346,7 +351,7 @@ void Player::AddForce(const Vector2 force)
 
 void Player::TemporaryDeathTest() { this->Die(); }
 
-void Player::Die(bool jumpUp = true)
+void Player::Die(bool jumpUp)
 {
 	if (this->dead)
 		return;
