@@ -44,6 +44,7 @@ class Level
 
 	void Update();
 	void Draw();
+	void EditDraw();
 	void DrawGrid(RenderTexture& tex);
 	/**
 	 * @brief Rebuilds the level from the tile grid. This respawns all entities.

@@ -184,6 +184,17 @@ void Level::Draw()
 	}
 #endif // DRAW_COLS
 }
+void Level::EditDraw()
+{
+	DrawTexture(this->tex, 0, 0, WHITE);
+	for (const auto& entity : this->entities)
+	{
+		if (entity->IsActive())
+		{
+			entity->EditDraw();
+		}
+	}
+}
 void Level::DrawGrid(RenderTexture& tex)
 {
 	BeginTextureMode(tex);
@@ -609,7 +620,9 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 		this->entities.push_back(std::make_unique<Spike>(x, y, *this->am));
 		break;
 	case (itemBox):
-		this->entities.push_back(std::make_unique<ItemBox>(x, y, *this->am));
+		this->entities.push_back(std::make_unique<ItemBox>(
+			x, y, *this->am, static_cast<bool>(basis.flags & 1),
+			static_cast<bool>((basis.flags >> 1) & 1)));
 		break;
 	case (coin):
 		this->entities.push_back(std::make_unique<Coin>(x, y, *this->am));
@@ -680,6 +693,7 @@ void Level::Reset()
 {
 	this->colliders.clear();
 	this->entities.clear();
+	this->toggleBlocks.clear();
 	this->PopulateLevel();
 	UnloadImage(this->img);
 	this->img = {

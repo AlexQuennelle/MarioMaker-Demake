@@ -9,7 +9,7 @@
 #include <vector>
 
 #ifndef NDEBUG
-#define DRAW_COLS
+//#define DRAW_COLS
 //#define LOG_LEVEL_DATA
 #ifdef LOG_LEVEL_DATA
 #include <format>
@@ -49,6 +49,7 @@ class Entity
 
 	virtual EntityReq Update(const vector<Rectangle>& colliders) = 0;
 	virtual void Draw() = 0;
+	virtual void EditDraw() = 0;
 	virtual EntityReq OnPlayerCollision(Player& player) = 0;
 	virtual EntityReq OnEntityCollision(Entity& entity) = 0;
 
@@ -80,6 +81,7 @@ class Brick : public Entity
 
 	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
+	void EditDraw() override;
 	EntityReq OnPlayerCollision(Player& player) override;
 	EntityReq OnEntityCollision(Entity& entity) override;
 
@@ -95,6 +97,7 @@ class Spike : public Entity
 
 	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
+	void EditDraw() override;
 	EntityReq OnPlayerCollision(Player& player) override;
 	EntityReq OnEntityCollision(Entity& entity) override;
 
@@ -105,16 +108,18 @@ class Spike : public Entity
 class ItemBox : public Entity
 {
 	public:
-	ItemBox(const int x, const int y, AssetManager& assetManager);
+	ItemBox(const int x, const int y, AssetManager& assetManager,
+			const bool isBrick, const bool isHidden);
 
 	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
+	void EditDraw() override;
 	EntityReq OnPlayerCollision(Player& player) override;
 	EntityReq OnEntityCollision(Entity& entity) override;
 
 	private:
-	const bool isBrick{false};
-	const bool isHidden{false};
+	const bool isBrick;
+	const bool isHidden;
 	bool empty{false};
 	float accumulatedAnimTime{0};
 	float timeBetweenFrames{0.12f};
@@ -129,6 +134,7 @@ class Coin : public Entity
 
 	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
+	void EditDraw() override;
 	EntityReq OnPlayerCollision(Player& player) override;
 	EntityReq OnEntityCollision(Entity& entity) override;
 
@@ -146,6 +152,7 @@ class ToggleSwitch : public Entity
 
 	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
+	void EditDraw() override;
 	EntityReq OnPlayerCollision(Player& player) override;
 	EntityReq OnEntityCollision(Entity& entity) override;
 
@@ -161,6 +168,7 @@ class ToggleBlock : public Entity
 
 	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
+	void EditDraw() override;
 	EntityReq OnPlayerCollision(Player& /*player*/) override { return {}; };
 	EntityReq OnEntityCollision(Entity& /*entity*/) override { return {}; };
 

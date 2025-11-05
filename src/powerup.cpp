@@ -56,6 +56,7 @@ void Mushroom::Draw()
 					   Fade(RED, 0.6f));
 #endif // DEBUG
 }
+void Mushroom::EditDraw() { this->Draw(); }
 
 EntityReq Mushroom::OnPlayerCollision(Player& player)
 {
