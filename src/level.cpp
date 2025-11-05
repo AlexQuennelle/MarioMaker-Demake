@@ -694,6 +694,7 @@ void Level::Reset()
 	this->colliders.clear();
 	this->entities.clear();
 	this->toggleBlocks.clear();
+	this->toggleState = false;
 	this->PopulateLevel();
 	UnloadImage(this->img);
 	this->img = {

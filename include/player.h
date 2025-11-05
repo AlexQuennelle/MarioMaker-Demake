@@ -19,6 +19,11 @@ class Player
 	void CancelJump() { this->cancelJump = true; }
 	void GainCoin() { this->coins++; }
 	void GetBig() { this->big = true; }
+	void GetFire()
+	{
+		this->big = true;
+		this->fire = true;
+	}
 	void TakeDamage();
 
 	//getters
@@ -53,6 +58,10 @@ class Player
 	bool luigi{false};
 	bool dead{false};
 	bool big{false};
+	bool fire{false};
+	bool star{false};
+	bool showSprite{true};
+	float iframetimer{0};
 	float accumulatedAnimTime{0};
 	float timeBetweenFrames{0.06f};
 	int curFrame{0};

@@ -97,6 +97,11 @@ void Player::Update()
 
 	// reset acceleration
 	acceleration = {.x = 0, .y = 0};
+	
+	if (iframetimer > 0)
+	{
+		iframetimer -= GetFrameTime();
+	}
 
 	CheckCollisions();
 }
@@ -117,6 +122,9 @@ void Player::CheckCollisions()
 			this->level.HandleRequest(e_ptr->OnPlayerCollision(*this));
 		}
 	}
+
+	if (this->dead)
+		return;
 
 	vector<Rectangle> solidCols = level.GetSolidEntityColliders();
 	vector<Rectangle> levelCols = level.GetColliders();
@@ -175,6 +183,18 @@ void Player::Draw()
 
 	Rectangle frameRec{0, 0, recWidth, 32};
 
+	// anim update
+	if (accumulatedAnimTime >= timeBetweenFrames)
+	{
+		accumulatedAnimTime = 0;
+		curFrame++;
+		showSprite = !showSprite;
+	}
+	if (curFrame > 2)
+	{
+		curFrame = 0;
+	}
+
 	if (dead)
 	{
 		//dead
@@ -200,17 +220,6 @@ void Player::Draw()
 		}
 		else if (fabsf(velocity.x) > 0.05f)
 		{
-			// anim update
-			if (accumulatedAnimTime >= timeBetweenFrames)
-			{
-				accumulatedAnimTime = 0;
-				curFrame++;
-			}
-			if (curFrame > 2)
-			{
-				curFrame = 0;
-			}
-
 			if (fabsf(velocity.x) > 0.15f)
 			{
 				//running
@@ -253,9 +262,13 @@ void Player::Draw()
 		frameRec.y += 64;
 	}
 
-	DrawTextureRec(assets.sprites, frameRec,
-				   {(position.x * 16.0f) - 16.0f, (position.y * 16.0f) - 32.0f},
-				   WHITE);
+	if (this->iframetimer <= 0 || showSprite)
+	{
+		DrawTextureRec(
+			assets.sprites, frameRec,
+			{(position.x * 16.0f) - 16.0f, (position.y * 16.0f) - 32.0f},
+			WHITE);
+	}
 
 	accumulatedAnimTime += GetFrameTime();
 
@@ -287,6 +300,9 @@ void Player::Reset(const Vector2 startPosition)
 {
 	this->position = startPosition;
 	this->dead = false;
+	this->big = false;
+	this->fire = false;
+	this->iframetimer = 0;
 }
 
 bool Player::Grounded()
@@ -340,6 +356,25 @@ void Player::Die()
 	this->velocity = {.x = 0, .y = -0.3f};
 }
 
-void Player::TakeDamage() {
+void Player::TakeDamage()
+{
+	if (iframetimer > 0)
+		return;
 
+	if (!this->big)
+	{
+		Die();
+		return;
+	}
+
+	iframetimer = 1;
+
+	if (this->fire)
+	{
+		this->fire = false;
+	}
+	else
+	{
+		this->big = false;
+	}
 }
