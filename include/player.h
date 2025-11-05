@@ -15,7 +15,7 @@ class Player
 	void AddForce(const Vector2 force);
 	// HACK: remove when death is possible via hazards
 	void TemporaryDeathTest();
-	void Die();
+	void Die(bool jumpUp = true);
 	void CancelJump() { this->cancelJump = true; }
 	void GainCoin() { this->coins++; }
 	void GetBig() { this->big = true; }

@@ -346,14 +346,17 @@ void Player::AddForce(const Vector2 force)
 
 void Player::TemporaryDeathTest() { this->Die(); }
 
-void Player::Die()
+void Player::Die(bool jumpUp = true)
 {
 	if (this->dead)
 		return;
 
 	this->dead = true;
 	this->lastInput = {.x = 0, .y = 0};
-	this->velocity = {.x = 0, .y = -0.3f};
+	if (jumpUp)
+	{
+		this->velocity = {.x = 0, .y = -0.3f};
+	}
 }
 
 void Player::TakeDamage()
