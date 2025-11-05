@@ -8,6 +8,14 @@
 #include <variant>
 #include <vector>
 
+#ifndef NDEBUG
+#define DRAW_COLS
+//#define LOG_LEVEL_DATA
+#ifdef LOG_LEVEL_DATA
+#include <format>
+#endif // LOG_LEVEL_DATA
+#endif // !NDEBUG
+
 using std::vector;
 
 class Player;
@@ -80,10 +88,10 @@ class Brick : public Entity
 	Texture2D& sprite;
 };
 
-class Coin : public Entity
+class Spike : public Entity
 {
 	public:
-	Coin(const int x, const int y, AssetManager& assetmanager);
+	Spike(const int x, const int y, AssetManager& assetManager);
 
 	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
@@ -92,9 +100,6 @@ class Coin : public Entity
 
 	private:
 	Texture2D& sprite;
-	float accumulatedAnimTime{0};
-	float timeBetweenFrames{0.12f};
-	int curFrame{0};
 };
 
 class ItemBox : public Entity
@@ -115,6 +120,23 @@ class ItemBox : public Entity
 	float timeBetweenFrames{0.12f};
 	int curFrame{0};
 	Texture2D& sprite;
+};
+
+class Coin : public Entity
+{
+	public:
+	Coin(const int x, const int y, AssetManager& assetmanager);
+
+	EntityReq Update(const vector<Rectangle>& colliders) override;
+	void Draw() override;
+	EntityReq OnPlayerCollision(Player& player) override;
+	EntityReq OnEntityCollision(Entity& entity) override;
+
+	private:
+	Texture2D& sprite;
+	float accumulatedAnimTime{0};
+	float timeBetweenFrames{0.12f};
+	int curFrame{0};
 };
 
 class ToggleSwitch : public Entity

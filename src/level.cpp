@@ -605,6 +605,9 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 		this->entities.push_back(std::make_unique<Brick>(
 			x, y, *this->am, static_cast<bool>(basis.flags & 1)));
 		break;
+	case (spikes):
+		this->entities.push_back(std::make_unique<Spike>(x, y, *this->am));
+		break;
 	case (itemBox):
 		this->entities.push_back(std::make_unique<ItemBox>(x, y, *this->am));
 		break;
