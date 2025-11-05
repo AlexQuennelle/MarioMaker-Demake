@@ -31,4 +31,3 @@ RecCollisionInfo GetCollisionInfo(Rectangle col1, Rectangle col2)
 Entity::Entity(const int x, const int y, AssetManager& assetManager)
 	: position(x, y), assetManager(assetManager)
 {}
-

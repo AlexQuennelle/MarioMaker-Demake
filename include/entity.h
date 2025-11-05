@@ -6,6 +6,9 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <variant>
+#include <vector>
+
+using std::vector;
 
 class Player;
 
@@ -36,7 +39,7 @@ class Entity
 	Entity(const int x, const int y, AssetManager& assetManager);
 	virtual ~Entity() = default;
 
-	virtual EntityReq Update() = 0;
+	virtual EntityReq Update(const vector<Rectangle>& colliders) = 0;
 	virtual void Draw() = 0;
 	virtual EntityReq OnPlayerCollision(Player& player) = 0;
 	virtual EntityReq OnEntityCollision(Entity& entity) = 0;
@@ -67,7 +70,7 @@ class Brick : public Entity
 	Brick(const int x, const int y, AssetManager& assetManager,
 		  const bool variant = false);
 
-	EntityReq Update() override;
+	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
 	EntityReq OnPlayerCollision(Player& player) override;
 	EntityReq OnEntityCollision(Entity& entity) override;
@@ -82,7 +85,7 @@ class Coin : public Entity
 	public:
 	Coin(const int x, const int y, AssetManager& assetmanager);
 
-	EntityReq Update() override;
+	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
 	EntityReq OnPlayerCollision(Player& player) override;
 	EntityReq OnEntityCollision(Entity& entity) override;
@@ -99,7 +102,7 @@ class ItemBox : public Entity
 	public:
 	ItemBox(const int x, const int y, AssetManager& assetManager);
 
-	EntityReq Update() override;
+	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
 	EntityReq OnPlayerCollision(Player& player) override;
 	EntityReq OnEntityCollision(Entity& entity) override;
@@ -119,7 +122,7 @@ class ToggleSwitch : public Entity
 	public:
 	ToggleSwitch(const int x, const int y, AssetManager& assetManager);
 
-	EntityReq Update() override;
+	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
 	EntityReq OnPlayerCollision(Player& player) override;
 	EntityReq OnEntityCollision(Entity& entity) override;
@@ -134,7 +137,7 @@ class ToggleBlock : public Entity
 	ToggleBlock(const int x, const int y, AssetManager& assetManager,
 				const bool startOn);
 
-	EntityReq Update() override;
+	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
 	EntityReq OnPlayerCollision(Player& /*player*/) override { return {}; };
 	EntityReq OnEntityCollision(Entity& /*entity*/) override { return {}; };

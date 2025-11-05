@@ -12,7 +12,7 @@ Brick::Brick(const int x, const int y, AssetManager& assetManager,
 {
 	this->solid = true;
 }
-EntityReq Brick::Update() { return {}; }
+EntityReq Brick::Update(const vector<Rectangle>& /*colliders*/) { return {}; }
 void Brick::Draw()
 {
 	Rectangle sourceRect{0.0f, 0.0f, 16.0f, 16.0f};
@@ -51,7 +51,7 @@ Coin::Coin(const int x, const int y, AssetManager& assetManager)
 {
 	this->solid = false;
 }
-EntityReq Coin::Update() { return {}; }
+EntityReq Coin::Update(const vector<Rectangle>& /*colliders*/) { return {}; }
 void Coin::Draw()
 {
 
@@ -89,7 +89,7 @@ ItemBox::ItemBox(const int x, const int y, AssetManager& assetManager)
 {
 	this->solid = true;
 }
-EntityReq ItemBox::Update() { return {}; }
+EntityReq ItemBox::Update(const vector<Rectangle>& /*colliders*/) { return {}; }
 void ItemBox::Draw()
 {
 	Rectangle sourceRect;
@@ -152,7 +152,10 @@ ToggleSwitch::ToggleSwitch(const int x, const int y, AssetManager& assetManager)
 {
 	this->solid = true;
 }
-EntityReq ToggleSwitch::Update() { return {}; }
+EntityReq ToggleSwitch::Update(const vector<Rectangle>& /*colliders*/)
+{
+	return {};
+}
 void ToggleSwitch::Draw()
 {
 	Rectangle sourceRect{0.0f, 48.0f, 16.0f, 16.0f};
@@ -192,7 +195,7 @@ ToggleBlock::ToggleBlock(const int x, const int y, AssetManager& assetManager,
 	if (!this->startOn)
 		this->solid = true;
 }
-EntityReq ToggleBlock::Update()
+EntityReq ToggleBlock::Update(const vector<Rectangle>& /*colliders*/)
 {
 	this->solid = (!on) ^ this->startOn;
 	return {};

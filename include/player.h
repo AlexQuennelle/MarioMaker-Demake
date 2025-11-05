@@ -18,6 +18,8 @@ class Player
 	void Die();
 	void CancelJump() { this->cancelJump = true; }
 	void GainCoin() { this->coins++; }
+	void GetBig() { this->big = true; }
+	void TakeDamage();
 
 	//getters
 	bool IsDead() const { return this->dead; }
