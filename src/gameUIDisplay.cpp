@@ -12,7 +12,7 @@ GameUIDisplay::~GameUIDisplay()
 	UnloadRenderTexture(renderTex); 
 }
 
-void GameUIDisplay::Draw(const float time)
+void GameUIDisplay::Draw(const float time, const int coins)
 {
 	BeginTextureMode(this->renderTex);
 	ClearBackground(BLANK);
@@ -20,6 +20,8 @@ void GameUIDisplay::Draw(const float time)
 			   {348, 8}, static_cast<float>(font.baseSize) / 4, 0, WHITE);
 	DrawTextEx(font, std::to_string(static_cast<int>(std::ceil(time))).c_str(), {348, 16},
 			   static_cast<float>(font.baseSize) / 4, 0, WHITE);
+	DrawTextEx(font, TextFormat("COINS: %02i", coins), {16, 8}, static_cast<float>(font.baseSize) / 4, 0,
+			   WHITE);
 	EndTextureMode();
 
 	// Draw scaled up render texture

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 #include <memory>
 #include <raylib.h>
 
@@ -14,6 +13,7 @@ class AssetManager
 	Font smallFont;
 	Image groundTiles;
 	Texture2D staticEntities;
+	Texture2D powerups;
 };
 
 struct PlayerAssets

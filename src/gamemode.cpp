@@ -64,7 +64,7 @@ void GameplayMode::Draw()
 }
 void GameplayMode::DrawUI() 
 { 
-	this->uiDisplay.Draw(this->time); 
+	this->uiDisplay.Draw(this->time, this->player.GetCoins()); 
 }
 
 void GameplayMode::Reset()
