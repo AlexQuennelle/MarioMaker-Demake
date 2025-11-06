@@ -16,17 +16,6 @@ using std::array;
 using std::vector;
 using Entity_ptr = std::unique_ptr<Entity>;
 
-struct Vector2Int
-{
-	int x{0};
-	int y{0};
-
-	bool operator==(const Vector2Int other)
-	{
-		return (this->x == other.x) && (this->y == other.y);
-	}
-};
-
 class Level
 {
 	public:

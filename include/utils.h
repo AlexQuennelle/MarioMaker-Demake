@@ -12,6 +12,21 @@ static constexpr Color INFO{200, 200, 100, 0};
 
 using byte = uint8_t;
 
+struct Vector2Int
+{
+	int x{0};
+	int y{0};
+
+	bool operator==(const Vector2Int other)
+	{
+		return (this->x == other.x) && (this->y == other.y);
+	}
+	operator Vector2() const
+	{
+		return {static_cast<float>(this->x), static_cast<float>(this->y)};
+	}
+};
+
 /** Resets all terminal styles and colours. */
 inline void ClearStyles() { std::cout << "\033[0m"; }
 

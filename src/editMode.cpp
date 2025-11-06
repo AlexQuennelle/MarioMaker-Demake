@@ -1,6 +1,7 @@
 #include "assetmanager.h"
 #include "gamemode.h"
 #include "tile.h"
+#include "utils.h"
 
 #include <array>
 #include <cstdint>
