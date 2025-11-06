@@ -81,7 +81,8 @@ void Game::SwitchMode(SwitchRequest newMode)
 	{
 	case SwitchRequest::GameplayMode:
 		this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
-											  this->assetManager.get(), GameplayMode::gravity);
+											  this->assetManager.get(),
+											  GameplayMode::gravity);
 
 		assert(this->level != nullptr);
 		this->gamemode = std::make_unique<GameplayMode>(this->level.get(),

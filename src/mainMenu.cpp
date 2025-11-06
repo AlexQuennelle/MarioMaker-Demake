@@ -1,3 +1,4 @@
+#include "mainMenu.h"
 #include "gamemode.h"
 
 #include <raylib.h>

@@ -76,6 +76,9 @@ class EditMode : public GamemodeInstance
 	private:
 	void DrawButtons();
 	void DrawPallette();
+
+	void ProcessInput();
+
 	void SaveLevel();
 #if !defined(PLATFORM_WEB)
 	void SaveLevelAs();
