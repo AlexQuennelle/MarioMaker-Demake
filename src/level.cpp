@@ -2,6 +2,7 @@
 #include "assetmanager.h"
 #include "entity.h"
 #include "powerup.h"
+#include "walkerEnemy.h"
 #include "tile.h"
 #include "utils.h"
 
@@ -635,9 +636,13 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 		this->entities.push_back(std::make_unique<ToggleBlock>(
 			x, y, *this->am, static_cast<bool>(basis.flags & 1)));
 		break;
-	case (TileID::mushroom):
+	case (mushroom):
 		this->entities.push_back(
 			std::make_unique<Mushroom>(x, y, *this->am, gravity));
+		break;
+	case (walkerEnemy):
+		this->entities.push_back(
+			std::make_unique<WalkerEnemy>(x, y, *this->am, gravity));
 		break;
 	default:
 		break;
