@@ -15,11 +15,21 @@ class Player
 	void AddForce(const Vector2 force);
 	// HACK: remove when death is possible via hazards
 	void TemporaryDeathTest();
-	void Die();
+	void Die(bool jumpUp = true);
 	void CancelJump() { this->cancelJump = true; }
+	void GainCoin() { this->coins++; }
+	void GetBig() { this->big = true; }
+	void GetFire()
+	{
+		this->big = true;
+		this->fire = true;
+	}
+	void TakeDamage();
 
 	//getters
 	bool IsDead() const { return this->dead; }
+	bool IsBig() const { return this->big; }
+	int GetCoins() const { return this->coins; }
 	Vector2 GetPosition() const { return this->position; }
 	Vector2 GetVelocity() const { return this->velocity; }
 	Rectangle GetCollisionRect();
@@ -47,9 +57,15 @@ class Player
 	bool facingRight{true};
 	bool luigi{false};
 	bool dead{false};
+	bool big{false};
+	bool fire{false};
+	bool star{false};
+	bool showSprite{true};
+	float iframetimer{0};
 	float accumulatedAnimTime{0};
 	float timeBetweenFrames{0.06f};
 	int curFrame{0};
+	int coins{0};
 	Vector2 lastInput{0, 0};
 	Level& level;
 	PlayerAssets assets;

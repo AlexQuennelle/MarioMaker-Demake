@@ -51,7 +51,8 @@ void EditMode::Update()
 		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
 			(IsMouseButtonDown(MOUSE_LEFT_BUTTON) && MouseMoved))
 		{
-			this->level->SetTileAtEditor(this->brush.ID, this->selectedTile);
+			this->level->SetTileAtEditor(this->brush.ID, this->selectedTile,
+										 this->brush.flags);
 		}
 		else if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) ||
 				 (IsMouseButtonDown(MOUSE_RIGHT_BUTTON) && MouseMoved))
@@ -91,7 +92,7 @@ void EditMode::Update()
 void EditMode::Draw()
 {
 	BeginMode2D(this->camera);
-	this->level->Draw();
+	this->level->EditDraw();
 	DrawTexture(this->tex.texture, 0, 0, WHITE);
 	EndMode2D();
 }
@@ -237,6 +238,28 @@ void EditMode::DrawPallette()
 			}
 		}
 		ImGui::EndCombo();
+	}
+	if (this->brush.ID == TileID::brick)
+	{
+		bool stone{static_cast<bool>(this->brush.flags & 1)};
+		ImGui::Checkbox("Stone", &stone);
+		this->brush.flags = static_cast<uint16_t>(stone);
+	}
+	else if (this->brush.ID == TileID::itemBox)
+	{
+		bool brick{static_cast<bool>(this->brush.flags & 1)};
+		bool hidden{static_cast<bool>((this->brush.flags >> 1) & 1)};
+		ImGui::Checkbox("Brick Sprite", &brick);
+		ImGui::SameLine();
+		ImGui::Checkbox("Hidden", &hidden);
+		this->brush.flags =
+			static_cast<uint16_t>(brick) | (static_cast<uint16_t>(hidden) << 1);
+	}
+	else if (this->brush.ID == TileID::toggleBlock)
+	{
+		bool off{static_cast<bool>(this->brush.flags & 1)};
+		ImGui::Checkbox("Off", &off);
+		this->brush.flags = static_cast<uint16_t>(off);
 	}
 }
 

@@ -1,6 +1,7 @@
 #include "level.h"
 #include "assetmanager.h"
 #include "entity.h"
+#include "powerup.h"
 #include "tile.h"
 #include "utils.h"
 
@@ -18,16 +19,19 @@
 #include <memory>
 #include <raylib.h>
 #include <string>
+#include <utility>
 #include <vector>
 
 #ifndef NDEBUG
-#include <format>
 //#define DRAW_COLS
 //#define LOG_LEVEL_DATA
+#ifdef LOG_LEVEL_DATA
+#include <format>
+#endif // LOG_LEVEL_DATA
 #endif // !NDEBUG
 
-Level::Level(const std::string& filepath, AssetManager* am)
-	: am(am), sprites(am->groundTiles), entities(0)
+Level::Level(const std::string& filepath, AssetManager* am, float gravity)
+	: am(am), sprites(am->groundTiles), entities(0), gravity(gravity)
 {
 	namespace fs = std::filesystem;
 	using std::ios;
@@ -114,8 +118,6 @@ vector<byte> Level::Serialize() const
 		{
 			InsertAsBytes(bytes, run);
 			InsertAsBytes(bytes, currTile);
-			bytes.push_back(0);
-			bytes.push_back(0);
 
 			currTile = this->grid[i];
 			run = 0;
@@ -124,8 +126,6 @@ vector<byte> Level::Serialize() const
 	}
 	InsertAsBytes(bytes, run);
 	InsertAsBytes(bytes, currTile);
-	bytes.push_back(0);
-	bytes.push_back(0);
 
 	return bytes;
 }
@@ -141,12 +141,28 @@ template <typename T> void Level::InsertAsBytes(vector<byte>& vec, T data)
 
 void Level::Update()
 {
+	for (auto& entity : this->spawnQueue)
+	{
+		this->entities.push_back(std::move(entity));
+	}
+	this->spawnQueue.clear();
+	vector<Rectangle> solidCols = this->GetSolidEntityColliders();
+	vector<Rectangle> levelCols = this->GetColliders();
+
+	solidCols.reserve(solidCols.size() + levelCols.size());
+
+	solidCols.insert(solidCols.end(), levelCols.begin(), levelCols.end());
+
 	for (const auto& entity : this->entities)
 	{
 		if (entity->IsActive())
 		{
-			entity->Update();
+			HandleRequest(entity->Update(solidCols));
 		}
+	}
+	for (auto* toggle : this->toggleBlocks)
+	{
+		toggle->SetState(this->toggleState);
 	}
 }
 void Level::Draw()
@@ -167,6 +183,17 @@ void Level::Draw()
 			{0, 200, 255, 170});
 	}
 #endif // DRAW_COLS
+}
+void Level::EditDraw()
+{
+	DrawTexture(this->tex, 0, 0, WHITE);
+	for (const auto& entity : this->entities)
+	{
+		if (entity->IsActive())
+		{
+			entity->EditDraw();
+		}
+	}
 }
 void Level::DrawGrid(RenderTexture& tex)
 {
@@ -259,6 +286,20 @@ Rectangle Level::GenCollisionRect(const int x, const int y,
 		static_cast<float>(rWidth),
 		static_cast<float>(rHeight),
 	};
+}
+void Level::HandleRequest(EntityReq request)
+{
+	switch (request.index())
+	{
+	case 1: // Spawn requested Entity
+		this->spawnQueue.push_back(std::move(std::get<1>(request).entity));
+		break;
+	case 2: // Toggle state of toggle tiles
+		this->toggleState = !this->toggleState;
+		break;
+	default:
+		break;
+	}
 }
 void Level::StitchTexture()
 {
@@ -360,7 +401,7 @@ void Level::ParseData(const vector<char>& data)
 		uint32_t runLength{0};
 		std::memcpy(&runLength, addr, 4);
 		Tile tile{.ID = TileID::air, .flags = 0};
-		std::memcpy(&tile, addr + 4, 2);
+		std::memcpy(&tile, addr + 4, 3);
 		for (int i{0}; i < runLength; i++)
 		{
 			this->grid.push_back(tile);
@@ -570,11 +611,42 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 {
 	switch (basis.ID)
 	{
-	case (TileID::brick):
-		this->entities.push_back(std::make_unique<Brick>(x, y, *this->am));
+		using enum TileID;
+	case (brick):
+		this->entities.push_back(std::make_unique<Brick>(
+			x, y, *this->am, static_cast<bool>(basis.flags & 1)));
+		break;
+	case (spikes):
+		this->entities.push_back(std::make_unique<Spike>(x, y, *this->am));
+		break;
+	case (itemBox):
+		this->entities.push_back(std::make_unique<ItemBox>(
+			x, y, *this->am, static_cast<bool>(basis.flags & 1),
+			static_cast<bool>((basis.flags >> 1) & 1)));
+		break;
+	case (coin):
+		this->entities.push_back(std::make_unique<Coin>(x, y, *this->am));
+		break;
+	case (toggleSwitch):
+		this->entities.push_back(
+			std::make_unique<ToggleSwitch>(x, y, *this->am));
+		break;
+	case (toggleBlock):
+		this->entities.push_back(std::make_unique<ToggleBlock>(
+			x, y, *this->am, static_cast<bool>(basis.flags & 1)));
+		break;
+	case (TileID::mushroom):
+		this->entities.push_back(
+			std::make_unique<Mushroom>(x, y, *this->am, gravity));
 		break;
 	default:
 		break;
+	}
+	if (basis.ID == TileID::toggleBlock)
+	{
+		ToggleBlock* block{static_cast<ToggleBlock*>(
+			this->entities[this->entities.size() - 1].get())};
+		this->toggleBlocks.push_back(block);
 	}
 }
 
@@ -621,6 +693,8 @@ void Level::Reset()
 {
 	this->colliders.clear();
 	this->entities.clear();
+	this->toggleBlocks.clear();
+	this->toggleState = false;
 	this->PopulateLevel();
 	UnloadImage(this->img);
 	this->img = {
