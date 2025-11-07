@@ -75,8 +75,8 @@ void MainMenu::HandleButtonResult(ButtonResult result)
 //UI functionality
 
 MenuButton::MenuButton(const Vector2Int pos, const Rectangle rect,
-					   ButtonEvent eventFunc)
-	: position(pos), clickableArea(rect), onClickEvent(std::move(eventFunc))
+					   ButtonEvent& eventFunc)
+	: position(pos), clickableArea(rect), onClickEvent(eventFunc)
 {}
 void MenuButton::Update(const Vector2 mousePos)
 {

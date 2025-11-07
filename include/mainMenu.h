@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "gamemode.h"
 #include "utils.h"
 
 #include <functional>
@@ -17,7 +16,7 @@ class MenuButton
 {
 	public:
 	MenuButton(const Vector2Int position, const Rectangle rect,
-			   ButtonEvent eventFunc);
+			   ButtonEvent& eventFunc);
 	MenuButton() = delete;
 
 	void Update(const Vector2 mousePos);
