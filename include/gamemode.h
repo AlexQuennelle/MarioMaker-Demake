@@ -1,15 +1,18 @@
 #pragma once
 
 #include "assetmanager.h"
-#include "imgui.h"
+#include "gameUIDisplay.h"
 #include "level.h"
+#include "mainMenu.h"
 #include "player.h"
 #include "playerInputHandler.h"
 #include "tile.h"
-#include "gameUIDisplay.h"
+#include "utils.h"
 
 #include <array>
 #include <cstdint>
+#include <imgui.h>
+#include <memory>
 #include <raylib.h>
 #include <string>
 
@@ -90,21 +93,15 @@ class EditMode : public GamemodeInstance
 	const ImGuiIO& imGuiIO;
 	Tile brush{.ID = TileID::ground, .flags = 0};
 	const std::array<std::string, 8> tileNames{
-		"Ground",
-		"Bricks",
-		"Spikes",
-		"Item Box", 
-		"Coin",
-		"Toggle Switch",
-		"Toggle Block",
-		"Mushroom",
+		"Ground", "Bricks",		   "Spikes",	   "Item Box",
+		"Coin",	  "Toggle Switch", "Toggle Block", "Mushroom",
 	};
 };
 
 class MainMenu : public GamemodeInstance
 {
 	public:
-	MainMenu(AssetManager& am);
+	MainMenu(AssetManager& am, std::unique_ptr<Level>& lvl);
 	~MainMenu() override = default;
 
 	void Update() override;
@@ -112,4 +109,8 @@ class MainMenu : public GamemodeInstance
 	void DrawUI() override;
 
 	private:
+	void HandleButtonResult(ButtonResult result);
+
+	std::unique_ptr<Level>& lvlPointer;
+	vector<std::unique_ptr<MenuButton>> mainScreenButtons;
 };

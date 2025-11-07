@@ -23,7 +23,8 @@ Game::Game()
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
 
-	this->gamemode = std::make_unique<MainMenu>(*this->assetManager);
+	this->gamemode =
+		std::make_unique<MainMenu>(*this->assetManager, this->level);
 
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";
@@ -90,8 +91,8 @@ void Game::SwitchMode(SwitchRequest newMode)
 		break;
 
 	case SwitchRequest::EditMode:
-		this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
-											  this->assetManager.get());
+		// this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
+		// 									  this->assetManager.get());
 
 		assert(this->level != nullptr);
 		this->gamemode = std::make_unique<EditMode>(
@@ -101,7 +102,8 @@ void Game::SwitchMode(SwitchRequest newMode)
 	case SwitchRequest::MainMenu:
 	default:
 		this->level.reset(nullptr);
-		this->gamemode = std::make_unique<MainMenu>(*this->assetManager);
+		this->gamemode =
+			std::make_unique<MainMenu>(*this->assetManager, this->level);
 		break;
 	}
 }
