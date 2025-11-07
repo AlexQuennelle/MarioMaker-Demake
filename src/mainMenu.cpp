@@ -153,7 +153,7 @@ void MainMenu::HandleButtonResult(ButtonResult result)
 
 MenuButton::MenuButton(const Vector2Int pos, const Rectangle rect,
 					   ButtonEvent eventFunc)
-	: position(pos), clickableArea(rect), onClickEvent(eventFunc)
+	: position(pos), clickableArea(rect), onClickEvent(std::move(eventFunc))
 {}
 void MenuButton::Update(const Vector2 mousePos)
 {
