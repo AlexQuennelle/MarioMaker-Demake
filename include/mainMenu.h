@@ -1,14 +1,20 @@
 #pragma once
 
-//#include "gamemode.h"
 #include "utils.h"
 
+#include <cstdint>
 #include <functional>
 #include <optional>
 #include <raylib.h>
 #include <utility>
 
 enum class SwitchRequest : uint8_t;
+
+enum class MenuScreen : uint8_t
+{
+	Title,
+	LevelSelect,
+};
 
 using ButtonResult = std::optional<std::pair<SwitchRequest, std::string>>;
 using ButtonEvent = std::function<ButtonResult()>;

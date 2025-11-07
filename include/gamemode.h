@@ -11,6 +11,7 @@
 
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <imgui.h>
 #include <memory>
 #include <raylib.h>
@@ -108,9 +109,21 @@ class MainMenu : public GamemodeInstance
 	void Draw() override;
 	void DrawUI() override;
 
+	std::function<ButtonResult(MenuScreen)> SwitchScreens;
+
 	private:
+	void InitTitleScreen();
+	void UpdateTitleScreen();
+	void DrawTitleScreen();
+
+	void InitLevelScreen();
+	void UpdateLevelScreen();
+	void DrawLevelScreen();
+
 	void HandleButtonResult(ButtonResult result);
 
+	MenuScreen currentScreen{MenuScreen::Title};
 	std::unique_ptr<Level>& lvlPointer;
-	vector<std::unique_ptr<MenuButton>> mainScreenButtons;
+	vector<std::unique_ptr<MenuButton>> titleScreenButtons;
+	vector<std::unique_ptr<MenuButton>> levelScreenButtons;
 };
