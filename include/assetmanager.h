@@ -14,6 +14,7 @@ class AssetManager
 	Image groundTiles;
 	Texture2D staticEntities;
 	Texture2D powerups;
+	Texture2D enemies;
 };
 
 struct PlayerAssets

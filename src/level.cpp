@@ -641,8 +641,8 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 			std::make_unique<Mushroom>(x, y, *this->am, gravity));
 		break;
 	case (walkerEnemy):
-		this->entities.push_back(
-			std::make_unique<WalkerEnemy>(x, y, *this->am, gravity));
+		this->entities.push_back(std::make_unique<WalkerEnemy>(
+			x, y, *this->am, gravity, static_cast<bool>(basis.flags & 1)));
 		break;
 	default:
 		break;

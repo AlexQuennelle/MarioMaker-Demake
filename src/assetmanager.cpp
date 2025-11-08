@@ -10,6 +10,7 @@ AssetManager::AssetManager()
 	groundTiles = LoadImage(RESOURCES_PATH "sprites/groundSprites.png");
 	staticEntities = LoadTexture(RESOURCES_PATH "sprites/staticEntities.png");
 	powerups = LoadTexture(RESOURCES_PATH "sprites/powerups.png");
+	enemies = LoadTexture(RESOURCES_PATH "sprites/enemies.png");
 }
 
 AssetManager::~AssetManager()
@@ -18,6 +19,7 @@ AssetManager::~AssetManager()
 	UnloadImage(this->groundTiles);
 	UnloadTexture(this->staticEntities);
 	UnloadTexture(this->powerups);
+	UnloadTexture(this->enemies);
 }
 
 PlayerAssets::PlayerAssets(Texture2D& tex) : sprites(tex) {}

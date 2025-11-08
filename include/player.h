@@ -29,6 +29,7 @@ class Player
 	//getters
 	bool IsDead() const { return this->dead; }
 	bool IsBig() const { return this->big; }
+	bool IsJumpPressed() const { return this->jumpPressed; }
 	int GetCoins() const { return this->coins; }
 	Vector2 GetPosition() const { return this->position; }
 	Vector2 GetVelocity() const { return this->velocity; }
