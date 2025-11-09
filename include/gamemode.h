@@ -109,21 +109,19 @@ class MainMenu : public GamemodeInstance
 	void Draw() override;
 	void DrawUI() override;
 
-	std::function<ButtonResult(MenuScreen)> SwitchScreens;
-
 	private:
 	void InitTitleScreen();
-	void UpdateTitleScreen();
-	void DrawTitleScreen();
-
 	void InitLevelScreen();
-	void UpdateLevelScreen();
-	void DrawLevelScreen();
+
+	void DrawLevelList();
 
 	void HandleButtonResult(ButtonResult result);
 
+	ButtonResult SwitchScreens(MenuScreen screen);
+
+	// Member variables
 	MenuScreen currentScreen{MenuScreen::Title};
 	std::unique_ptr<Level>& lvlPointer;
 	vector<std::unique_ptr<MenuButton>> titleScreenButtons;
-	vector<std::unique_ptr<MenuButton>> levelScreenButtons;
+	//vector<std::unique_ptr<MenuButton>> levelScreenButtons;
 };
