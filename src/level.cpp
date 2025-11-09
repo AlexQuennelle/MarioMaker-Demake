@@ -30,8 +30,8 @@
 #endif // LOG_LEVEL_DATA
 #endif // !NDEBUG
 
-Level::Level(const std::string& filepath, AssetManager* am, float gravity)
-	: am(am), sprites(am->groundTiles), entities(0), gravity(gravity)
+Level::Level(const std::string& filepath, AssetManager& am, float gravity)
+	: am(am), sprites(am.groundTiles), entities(0), gravity(gravity)
 {
 	namespace fs = std::filesystem;
 	using std::ios;
@@ -614,30 +614,30 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 		using enum TileID;
 	case (brick):
 		this->entities.push_back(std::make_unique<Brick>(
-			x, y, *this->am, static_cast<bool>(basis.flags & 1)));
+			x, y, this->am, static_cast<bool>(basis.flags & 1)));
 		break;
 	case (spikes):
-		this->entities.push_back(std::make_unique<Spike>(x, y, *this->am));
+		this->entities.push_back(std::make_unique<Spike>(x, y, this->am));
 		break;
 	case (itemBox):
 		this->entities.push_back(std::make_unique<ItemBox>(
-			x, y, *this->am, static_cast<bool>(basis.flags & 1),
+			x, y, this->am, static_cast<bool>(basis.flags & 1),
 			static_cast<bool>((basis.flags >> 1) & 1)));
 		break;
 	case (coin):
-		this->entities.push_back(std::make_unique<Coin>(x, y, *this->am));
+		this->entities.push_back(std::make_unique<Coin>(x, y, this->am));
 		break;
 	case (toggleSwitch):
 		this->entities.push_back(
-			std::make_unique<ToggleSwitch>(x, y, *this->am));
+			std::make_unique<ToggleSwitch>(x, y, this->am));
 		break;
 	case (toggleBlock):
 		this->entities.push_back(std::make_unique<ToggleBlock>(
-			x, y, *this->am, static_cast<bool>(basis.flags & 1)));
+			x, y, this->am, static_cast<bool>(basis.flags & 1)));
 		break;
 	case (TileID::mushroom):
 		this->entities.push_back(
-			std::make_unique<Mushroom>(x, y, *this->am, gravity));
+			std::make_unique<Mushroom>(x, y, this->am, gravity));
 		break;
 	default:
 		break;

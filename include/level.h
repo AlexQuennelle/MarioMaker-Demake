@@ -20,7 +20,7 @@ class Level
 {
 	public:
 	Level() = delete;
-	Level(const std::string& filepath, AssetManager* am, float gravity = 0);
+	Level(const std::string& filepath, AssetManager& am, float gravity = 0);
 	Level(const Level& other) = delete;
 	Level(Level&& other) = default;
 
@@ -168,7 +168,7 @@ class Level
 	Image img;
 	Image sprites;
 	Texture tex;
-	AssetManager* am{nullptr};
+	AssetManager& am;//{nullptr};
 	std::string name;
 	std::string filepath;
 	Vector2 playerStartPos;

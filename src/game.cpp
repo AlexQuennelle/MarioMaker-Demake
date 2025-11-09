@@ -82,7 +82,7 @@ void Game::SwitchMode(SwitchRequest newMode)
 	{
 	case SwitchRequest::GameplayMode:
 		this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
-											  this->assetManager.get(),
+											  *this->assetManager,
 											  GameplayMode::gravity);
 
 		assert(this->level != nullptr);
@@ -174,7 +174,7 @@ void Game::LoadLevel()
 	{
 		std::cout << outPath.get() << '\n';
 		this->level = std::make_unique<Level>(
-			Level{outPath.get(), this->assetManager.get()});
+			Level{outPath.get(), *this->assetManager});
 	}
 	else if (result == NFD_ERROR)
 	{

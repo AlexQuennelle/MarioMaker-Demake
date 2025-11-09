@@ -122,6 +122,6 @@ class MainMenu : public GamemodeInstance
 	// Member variables
 	MenuScreen currentScreen{MenuScreen::Title};
 	std::unique_ptr<Level>& lvlPointer;
-	vector<std::unique_ptr<MenuButton>> titleScreenButtons;
-	//vector<std::unique_ptr<MenuButton>> levelScreenButtons;
+	vector<std::unique_ptr<ButtonBase>> buttons;
+	vector<std::unique_ptr<ButtonBase>> levels;
 };
