@@ -87,6 +87,10 @@ void WalkerEnemy::EditDraw()
 
 EntityReq WalkerEnemy::OnPlayerCollision(Player& player)
 {
+	//Vector2 toMario = Vector2Normalize(player.GetPosition() - this->position);
+
+	//float dot = Vector2DotProduct(toMario, {0, 1});
+
 	if (player.GetPosition().y < this->position.y + 0.5f)
 	{
 		// squash
