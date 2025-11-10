@@ -13,4 +13,7 @@ class PlayerInputHandler
 	private:
 	Player& player;
 	bool paused{false};
+
+	void HandleGamepadInput();
+	void HandleKeyboardInput();
 };

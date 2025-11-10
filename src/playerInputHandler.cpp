@@ -4,6 +4,8 @@ PlayerInputHandler::PlayerInputHandler(Player& _player) : player(_player) {}
 
 void PlayerInputHandler::Update() 
 { 
+	if (IsGamepadAvailable())
+
 	// pausing
 	if (IsKeyPressed(KEY_P))
 	{

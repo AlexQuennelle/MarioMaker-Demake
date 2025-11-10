@@ -292,7 +292,7 @@ void Player::HandleMovement(const bool running, const Vector2 input)
 		return;
 
 	this->running = running;
-	this->lastInput = input;
+	this->lastInput = Vector2Clamp(input, {-1,-1}, {1,1});
 	if (input.x != 0)
 	{
 		this->facingRight = lastInput.x > 0;
