@@ -7,7 +7,7 @@
 #include <raymath.h>
 
 Mushroom::Mushroom(const int x, const int y, AssetManager& assetManager,
-				   float gravity)
+				   const float gravity)
 	: Entity(x, y, assetManager), sprite(assetManager.powerups),
 	  gravity(gravity)
 {
