@@ -20,8 +20,7 @@ MainMenu::MainMenu(AssetManager& am, std::unique_ptr<Level>& lvl)
 {
 	this->camera = Camera2D{{0.0f, 0.0f}, {0.0f, 0.0f}, 0.0f, 1.0f};
 
-	// this->SwitchScreens(MenuScreen::Title);
-	this->SwitchScreens(MenuScreen::LevelSelect);
+	this->SwitchScreens(MenuScreen::Title);
 }
 void MainMenu::Update()
 {
@@ -126,7 +125,6 @@ void MainMenu::InitLevelScreen()
 		{
 			this->levels.push_back(std::make_unique<LevelWidget>(
 				path, Vector2Int{.x = 192, .y = 30 + offset},
-				//RESOURCES_PATH "1-1.lvl", Vector2Int{.x = 192, .y = 108},
 				Rectangle{-75.0f, 0.0f, 150.0f, widgetHeight}, loadFunc));
 			offset += widgetHeight + 1;
 		}
@@ -135,8 +133,6 @@ void MainMenu::InitLevelScreen()
 	float levelsHeight{
 		(widgetHeight * this->levels.size()) + (this->levels.size() - 1.0f),
 	};
-	this->scrollBarHeight =
-		std::clamp((156.0f / levelsHeight) * 160.0f, 0.0f, 160.0f);
 	this->maxScrollOffset = -std::max(levelsHeight - 156.0f, 0.0f);
 }
 
@@ -146,18 +142,13 @@ void MainMenu::DrawLevelList()
 		{114.0f, 0.0f, 156.0f,
 		 60.0f + (30.0f * this->levels.size() + this->levels.size() - 1.0f)},
 		{100, 110, 140, 255});
+	DrawRectangleRec({114.0f, 0.0f, 156.0f, 216.0f}, {100, 110, 140, 255});
 	BeginMode2D(this->camera);
 	for (auto& widget : this->levels)
 	{
 		widget->Draw();
 	}
 	EndMode2D();
-	if (this->scrollBarHeight < 162.0f)
-	{
-		DrawRectangleRec({270.0f, 27.0f, 6.0f, 162.0f}, {30, 35, 45, 255});
-		DrawRectangleRec({271.0f, 28.0f, 4.0f, this->scrollBarHeight},
-						 {60, 72, 80, 255});
-	}
 	DrawRectangleRec({114.0f, 0.0f, 156.0f, 27.0f}, {130, 140, 160, 255});
 	DrawRectangleRec({114.0f, 189.0f, 156.0f, 27.0f}, {130, 140, 160, 255});
 }

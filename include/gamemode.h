@@ -11,7 +11,6 @@
 
 #include <array>
 #include <cstdint>
-#include <functional>
 #include <imgui.h>
 #include <memory>
 #include <raylib.h>
@@ -120,7 +119,6 @@ class MainMenu : public GamemodeInstance
 	ButtonResult SwitchScreens(MenuScreen screen);
 
 	// Member variables
-	float scrollBarHeight{0.0f};
 	float maxScrollOffset{0.0f};
 	MenuScreen currentScreen{MenuScreen::Title};
 	std::unique_ptr<Level>& lvlPointer;
