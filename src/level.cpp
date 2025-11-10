@@ -642,7 +642,7 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 		break;
 	case (walkerEnemy):
 		this->entities.push_back(std::make_unique<WalkerEnemy>(
-			x, y, *this->am, gravity, static_cast<bool>(basis.flags & 1)));
+			x, y, this->am, gravity, static_cast<bool>(basis.flags & 1)));
 		break;
 	default:
 		break;
