@@ -2,11 +2,11 @@
 
 #include "entity.h"
 
-class Mushroom : public Entity
+class WalkerEnemy : public Entity
 {
 	public:
-	Mushroom(const int x, const int y, AssetManager& assetManager,
-			 const float gravity);
+	WalkerEnemy(const int x, const int y, AssetManager& assetManager,
+				const float gravity, const bool variant = false);
 
 	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
@@ -16,7 +16,11 @@ class Mushroom : public Entity
 
 	private:
 	Texture2D& sprite;
-	Vector2 velocity{0, 0};
-	float speed{0.05f};
+	bool isVariant;
 	float gravity;
+	Vector2 velocity{0, 0};
+	float speed{0.03f};
+	float accumulatedAnimTime{0};
+	float timeBetweenFrames{0.18f};
+	int curFrame{0};
 };

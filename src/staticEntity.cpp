@@ -24,7 +24,7 @@ void Brick::Draw()
 
 #ifdef DRAW_COLS
 	DrawRectangleLines((this->position.x + this->collider.x) * 16,
-					   (this->position.y + this->collider.x) * 16,
+					   (this->position.y + this->collider.y) * 16,
 					   this->collider.width * 16, this->collider.height * 16,
 					   Fade(RED, 0.6f));
 #endif // DEBUG
@@ -67,7 +67,7 @@ void Spike::Draw()
 
 #ifdef DRAW_COLS
 	DrawRectangleLines((this->position.x + this->collider.x) * 16.0f,
-					   (this->position.y + this->collider.x) * 16.0f,
+					   (this->position.y + this->collider.y) * 16.0f,
 					   this->collider.width * 16, this->collider.height * 16,
 					   Fade(RED, 0.6f));
 #endif // DEBUG
@@ -129,7 +129,7 @@ void ItemBox::Draw()
 
 #ifdef DRAW_COLS
 	DrawRectangleLines((this->position.x + this->collider.x) * 16,
-					   (this->position.y + this->collider.x) * 16,
+					   (this->position.y + this->collider.y) * 16,
 					   this->collider.width * 16, this->collider.height * 16,
 					   Fade(RED, 0.6f));
 #endif // DEBUG
@@ -207,7 +207,7 @@ void Coin::Draw()
 				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
 #ifdef DRAW_COLS
 	DrawRectangleLines((this->position.x + this->collider.x) * 16,
-					   (this->position.y + this->collider.x) * 16,
+					   (this->position.y + this->collider.y) * 16,
 					   this->collider.width * 16, this->collider.height * 16,
 					   Fade(RED, 0.6f));
 #endif // DEBUG
@@ -247,7 +247,7 @@ void ToggleSwitch::Draw()
 
 #ifdef DRAW_COLS
 	DrawRectangleLines((this->position.x + this->collider.x) * 16,
-					   (this->position.y + this->collider.x) * 16,
+					   (this->position.y + this->collider.y) * 16,
 					   this->collider.width * 16, this->collider.height * 16,
 					   Fade(RED, 0.6f));
 #endif // DEBUG
@@ -296,7 +296,7 @@ void ToggleBlock::Draw()
 
 #ifdef DRAW_COLS
 	DrawRectangleLines((this->position.x + this->collider.x) * 16,
-					   (this->position.y + this->collider.x) * 16,
+					   (this->position.y + this->collider.y) * 16,
 					   this->collider.width * 16, this->collider.height * 16,
 					   Fade(RED, 0.6f));
 #endif // DEBUG
