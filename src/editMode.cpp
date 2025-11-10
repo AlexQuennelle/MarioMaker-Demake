@@ -236,6 +236,12 @@ void EditMode::DrawPallette()
 		ImGui::Checkbox("Off", &off);
 		this->brush.flags = static_cast<uint16_t>(off);
 	}
+	else if (this->brush.ID == TileID::walkerEnemy)
+	{
+		bool variant{static_cast<bool>(this->brush.flags & 1)};
+		ImGui::Checkbox("Variant", &variant);
+		this->brush.flags = static_cast<uint16_t>(variant);
+	}
 }
 
 void EditMode::ProcessInput()

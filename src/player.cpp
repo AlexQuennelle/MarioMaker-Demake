@@ -332,15 +332,6 @@ bool Player::Grounded()
 		[groundedBox](Rectangle col)
 		{ return CheckCollisionRecs(groundedBox, col); } //
 	);
-
-	//for (const Rectangle col : level.GetColliders())
-	//{
-	//	if (CheckCollisionRecs(col, groundedBox))
-	//	{
-	//		return true;
-	//	}
-	//}
-	//return false;
 }
 
 // Public method for applying forces to the player
