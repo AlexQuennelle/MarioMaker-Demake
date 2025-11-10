@@ -1,6 +1,7 @@
 #include "assetmanager.h"
 #include "gamemode.h"
 #include "tile.h"
+#include "utils.h"
 
 #include <array>
 #include <cstdint>
@@ -60,33 +61,7 @@ void EditMode::Update()
 			this->level->SetTileAtEditor(TileID::air, this->selectedTile);
 		}
 
-		float cameraSpeed{2.0f};
-		if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))
-		{
-			if (this->camera.offset.x < 0.0f)
-				this->camera.offset.x += cameraSpeed;
-		}
-		else if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))
-		{
-			if (this->camera.offset.x >
-				-((this->level->GetLength() * 16.0f) - 384))
-				this->camera.offset.x -= cameraSpeed;
-		}
-		if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))
-		{
-			if (this->camera.offset.y < 0.0f)
-				this->camera.offset.y += cameraSpeed;
-		}
-		else if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))
-		{
-			if (this->camera.offset.y >
-				-((this->level->GetHeight() * 16.0f) - 216))
-				this->camera.offset.y -= cameraSpeed;
-		}
-		else if (IsKeyDown(KEY_BACKSPACE))
-		{
-			this->switchReq = SwitchRequest::MainMenu;
-		}
+		this->ProcessInput();
 	}
 }
 void EditMode::Draw()
@@ -266,6 +241,35 @@ void EditMode::DrawPallette()
 		bool variant{static_cast<bool>(this->brush.flags & 1)};
 		ImGui::Checkbox("Variant", &variant);
 		this->brush.flags = static_cast<uint16_t>(variant);
+	}
+}
+
+void EditMode::ProcessInput()
+{
+	float cameraSpeed{2.0f};
+	if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))
+	{
+		if (this->camera.offset.x < 0.0f)
+			this->camera.offset.x += cameraSpeed;
+	}
+	else if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))
+	{
+		if (this->camera.offset.x > -((this->level->GetLength() * 16.0f) - 384))
+			this->camera.offset.x -= cameraSpeed;
+	}
+	if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))
+	{
+		if (this->camera.offset.y < 0.0f)
+			this->camera.offset.y += cameraSpeed;
+	}
+	else if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))
+	{
+		if (this->camera.offset.y > -((this->level->GetHeight() * 16.0f) - 216))
+			this->camera.offset.y -= cameraSpeed;
+	}
+	else if (IsKeyDown(KEY_BACKSPACE))
+	{
+		this->switchReq = SwitchRequest::MainMenu;
 	}
 }
 

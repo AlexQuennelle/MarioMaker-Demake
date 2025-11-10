@@ -16,22 +16,11 @@ using std::array;
 using std::vector;
 using Entity_ptr = std::unique_ptr<Entity>;
 
-struct Vector2Int
-{
-	int x{0};
-	int y{0};
-
-	bool operator==(const Vector2Int other)
-	{
-		return (this->x == other.x) && (this->y == other.y);
-	}
-};
-
 class Level
 {
 	public:
 	Level() = delete;
-	Level(const std::string& filepath, AssetManager* am, float gravity = 0);
+	Level(const std::string& filepath, AssetManager& am, float gravity = 0);
 	Level(const Level& other) = delete;
 	Level(Level&& other) = default;
 
@@ -179,7 +168,7 @@ class Level
 	Image img;
 	Image sprites;
 	Texture tex;
-	AssetManager* am{nullptr};
+	AssetManager& am;//{nullptr};
 	std::string name;
 	std::string filepath;
 	Vector2 playerStartPos;

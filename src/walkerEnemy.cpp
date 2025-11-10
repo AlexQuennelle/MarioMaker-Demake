@@ -1,12 +1,16 @@
 #include "walkerEnemy.h"
 #include "player.h"
 
-WalkerEnemy::WalkerEnemy(const int x, const int y, AssetManager& assetManager, const float gravity, const bool variant)
+#include <raylib.h>
+#include <raymath.h>
+
+WalkerEnemy::WalkerEnemy(const int x, const int y, AssetManager& assetManager,
+						 const float gravity, const bool variant)
 	: Entity(x, y, assetManager), sprite(assetManager.enemies),
 	  gravity(gravity), isVariant(variant)
 {
 	this->solid = false;
-	this->collider = {0.0f, 0.3f, 1.0f, 0.7f};
+	this->collider = {.x = 0.0f, .y = 0.3f, .width = 1.0f, .height = 0.7f};
 	this->velocity.x = -this->speed;
 }
 

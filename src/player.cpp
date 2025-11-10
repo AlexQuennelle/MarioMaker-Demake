@@ -97,7 +97,7 @@ void Player::Update()
 
 	// reset acceleration
 	acceleration = {.x = 0, .y = 0};
-	
+
 	if (iframetimer > 0)
 	{
 		iframetimer -= GetFrameTime();

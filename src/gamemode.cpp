@@ -49,7 +49,7 @@ void GameplayMode::Update()
 	}
 
 	time -= GetFrameTime();
-	
+
 	this->level->Update();
 
 	// Update camera target to player position
@@ -62,9 +62,9 @@ void GameplayMode::Draw()
 	this->player.Draw();
 	EndMode2D();
 }
-void GameplayMode::DrawUI() 
-{ 
-	this->uiDisplay.Draw(this->time, this->player.GetCoins()); 
+void GameplayMode::DrawUI()
+{
+	this->uiDisplay.Draw(this->time, this->player.GetCoins());
 }
 
 void GameplayMode::Reset()

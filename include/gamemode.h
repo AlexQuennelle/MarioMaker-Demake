@@ -1,15 +1,18 @@
 #pragma once
 
 #include "assetmanager.h"
-#include "imgui.h"
+#include "gameUIDisplay.h"
 #include "level.h"
+#include "mainMenu.h"
 #include "player.h"
 #include "playerInputHandler.h"
 #include "tile.h"
-#include "gameUIDisplay.h"
+#include "utils.h"
 
 #include <array>
 #include <cstdint>
+#include <imgui.h>
+#include <memory>
 #include <raylib.h>
 #include <string>
 
@@ -76,6 +79,9 @@ class EditMode : public GamemodeInstance
 	private:
 	void DrawButtons();
 	void DrawPallette();
+
+	void ProcessInput();
+
 	void SaveLevel();
 #if !defined(PLATFORM_WEB)
 	void SaveLevelAs();
@@ -90,19 +96,19 @@ class EditMode : public GamemodeInstance
 		"Ground",
 		"Bricks",
 		"Spikes",
-		"Item Box", 
+		"Item Box",
 		"Coin",
 		"Toggle Switch",
 		"Toggle Block",
-		"Mushroom", 
-		"Goomba"
+		"Mushroom",
+		"Goomba",
 	};
 };
 
 class MainMenu : public GamemodeInstance
 {
 	public:
-	MainMenu(AssetManager& am);
+	MainMenu(AssetManager& am, std::unique_ptr<Level>& lvl);
 	~MainMenu() override = default;
 
 	void Update() override;
@@ -110,4 +116,19 @@ class MainMenu : public GamemodeInstance
 	void DrawUI() override;
 
 	private:
+	void InitTitleScreen();
+	void InitLevelScreen();
+
+	void DrawLevelList();
+
+	void HandleButtonResult(ButtonResult result);
+
+	ButtonResult SwitchScreens(MenuScreen screen);
+
+	// Member variables
+	float maxScrollOffset{0.0f};
+	MenuScreen currentScreen{MenuScreen::Title};
+	std::unique_ptr<Level>& lvlPointer;
+	vector<std::unique_ptr<ButtonBase>> buttons;
+	vector<std::unique_ptr<ButtonBase>> levels;
 };
