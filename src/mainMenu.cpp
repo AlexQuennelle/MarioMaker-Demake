@@ -2,6 +2,7 @@
 #include "gamemode.h"
 #include "utils.h"
 
+#include <algorithm>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -26,11 +27,6 @@ void MainMenu::Update()
 {
 	float scaling{GetScreenWidth() / 384.0f};
 	Vector2 mousePos{GetMousePosition() / scaling};
-
-	if (IsKeyPressed(KEY_P))
-	{
-		this->switchReq = SwitchRequest::GameplayMode;
-	}
 
 	for (auto& button : this->buttons)
 	{
@@ -65,17 +61,25 @@ void MainMenu::Update()
 			}
 		}
 	}
+	if (this->currentScreen == MenuScreen::LevelSelect)
+	{
+		this->camera.offset.y =
+			std::clamp(this->camera.offset.y + (GetMouseWheelMove() * 5.0f),
+					   this->maxScrollOffset, 0.0f);
+	}
 }
 void MainMenu::Draw()
 {
 	if (this->currentScreen == MenuScreen::LevelSelect)
+	{
 		ClearBackground({130, 140, 160, 255});
+		this->DrawLevelList();
+	}
 
 	for (auto& button : this->buttons)
 	{
 		button->Draw();
 	}
-	this->DrawLevelList();
 }
 void MainMenu::DrawUI() {}
 
@@ -127,17 +131,33 @@ void MainMenu::InitLevelScreen()
 			offset += widgetHeight + 1;
 		}
 	}
+
+	float levelsHeight{
+		(widgetHeight * this->levels.size()) + (this->levels.size() - 1.0f),
+	};
+	this->scrollBarHeight =
+		std::clamp((156.0f / levelsHeight) * 160.0f, 0.0f, 160.0f);
+	this->maxScrollOffset = -std::max(levelsHeight - 156.0f, 0.0f);
 }
 
 void MainMenu::DrawLevelList()
 {
-	DrawRectangleRec({114.0f, 27.0f, 156.0f, 162.0f}, {100, 110, 140, 255});
+	DrawRectangleRec(
+		{114.0f, 0.0f, 156.0f,
+		 60.0f + (30.0f * this->levels.size() + this->levels.size() - 1.0f)},
+		{100, 110, 140, 255});
 	BeginMode2D(this->camera);
 	for (auto& widget : this->levels)
 	{
 		widget->Draw();
 	}
 	EndMode2D();
+	if (this->scrollBarHeight < 162.0f)
+	{
+		DrawRectangleRec({270.0f, 27.0f, 6.0f, 162.0f}, {30, 35, 45, 255});
+		DrawRectangleRec({271.0f, 28.0f, 4.0f, this->scrollBarHeight},
+						 {60, 72, 80, 255});
+	}
 	DrawRectangleRec({114.0f, 0.0f, 156.0f, 27.0f}, {130, 140, 160, 255});
 	DrawRectangleRec({114.0f, 189.0f, 156.0f, 27.0f}, {130, 140, 160, 255});
 }

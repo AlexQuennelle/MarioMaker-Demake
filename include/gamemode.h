@@ -120,6 +120,8 @@ class MainMenu : public GamemodeInstance
 	ButtonResult SwitchScreens(MenuScreen screen);
 
 	// Member variables
+	float scrollBarHeight{0.0f};
+	float maxScrollOffset{0.0f};
 	MenuScreen currentScreen{MenuScreen::Title};
 	std::unique_ptr<Level>& lvlPointer;
 	vector<std::unique_ptr<ButtonBase>> buttons;
