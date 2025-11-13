@@ -1,4 +1,5 @@
 #include "assetmanager.h"
+#include "constants.h"
 #include "gamemode.h"
 #include "tile.h"
 #include "utils.h"
@@ -36,7 +37,7 @@ EditMode::EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui)
 EditMode::~EditMode() { UnloadRenderTexture(this->tex); }
 void EditMode::Update()
 {
-	float cellSize{GetScreenWidth() / 24.0f};
+	float cellSize{SCREEN_WIDTH / 24.0f};
 	this->lvlMousePos = {(GetMousePosition() / cellSize) -
 						 this->camera.offset / 16.0f};
 
@@ -75,7 +76,7 @@ void EditMode::DrawUI()
 {
 	if (!this->imGuiIO.WantCaptureMouse)
 	{
-		float cellSize{GetScreenWidth() / 24.0f};
+		float cellSize{SCREEN_WIDTH / 24.0f};
 		DrawRectangle(
 			(this->selectedTile.x + (this->camera.offset.x / 16.0f)) * cellSize,
 			(this->selectedTile.y + (this->camera.offset.y / 16.0f)) * cellSize,

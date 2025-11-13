@@ -1,7 +1,12 @@
 #include "game.h"
+#include "constants.h"
 #include "gamemode.h"
 #include "level.h"
 #include "utils.h"
+#if defined(PLATFORM_WEB)
+#include "constants.h"
+#include "wasmUtils.h"
+#endif
 
 #include <cassert>
 #include <fstream>
@@ -66,8 +71,8 @@ void Game::Draw()
 				   {0.0f, 0.0f,
 					static_cast<float>(this->renderTex.texture.width),
 					-static_cast<float>(this->renderTex.texture.height)},
-				   {0.0f, 0.0f, -static_cast<float>(GetScreenWidth()),
-					static_cast<float>(GetScreenHeight())},
+				   {0.0f, 0.0f, -static_cast<float>(SCREEN_WIDTH),
+					static_cast<float>(SCREEN_HEIGHT)},
 				   {0.0f}, 0.0f, WHITE);
 
 	this->gamemode->DrawUI();
@@ -81,26 +86,26 @@ void Game::SwitchMode(SwitchRequest newMode)
 	switch (newMode)
 	{
 	case SwitchRequest::GameplayMode:
-		this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
-											  *this->assetManager,
-											  GameplayMode::gravity);
-
-		assert(this->level != nullptr);
+#if defined(PLATFORM_WEB)
+		requestSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+#endif
 		this->gamemode = std::make_unique<GameplayMode>(this->level.get(),
 														*this->assetManager);
 		break;
 
 	case SwitchRequest::EditMode:
-		// this->level = std::make_unique<Level>(RESOURCES_PATH "1-1.lvl",
-		// 									  this->assetManager.get());
-
-		assert(this->level != nullptr);
+#if defined(PLATFORM_WEB)
+		requestSize(SCREEN_WIDTH, SCREEN_HEIGHT + EDIT_PANEL_HEIGHT);
+#endif
 		this->gamemode = std::make_unique<EditMode>(
 			this->level.get(), *this->assetManager, this->imguiIO);
 		break;
 
 	case SwitchRequest::MainMenu:
 	default:
+#if defined(PLATFORM_WEB)
+		requestSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+#endif
 		this->level.reset(nullptr);
 		this->gamemode =
 			std::make_unique<MainMenu>(*this->assetManager, this->level);
@@ -173,8 +178,8 @@ void Game::LoadLevel()
 	if (result == NFD_OKAY)
 	{
 		std::cout << outPath.get() << '\n';
-		this->level = std::make_unique<Level>(
-			Level{outPath.get(), *this->assetManager});
+		this->level =
+			std::make_unique<Level>(Level{outPath.get(), *this->assetManager});
 	}
 	else if (result == NFD_ERROR)
 	{

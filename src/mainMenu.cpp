@@ -1,4 +1,5 @@
 #include "mainMenu.h"
+#include "constants.h"
 #include "gamemode.h"
 #include "utils.h"
 
@@ -24,7 +25,7 @@ MainMenu::MainMenu(AssetManager& am, std::unique_ptr<Level>& lvl)
 }
 void MainMenu::Update()
 {
-	float scaling{GetScreenWidth() / 384.0f};
+	float scaling{SCREEN_WIDTH / 384.0f};
 	Vector2 mousePos{GetMousePosition() / scaling};
 
 	for (auto& button : this->buttons)

@@ -4,6 +4,7 @@
 #include "gamemode.h"
 #include "level.h"
 
+#include <cstdint>
 #include <imgui.h>
 #include <memory>
 #include <raylib.h>
