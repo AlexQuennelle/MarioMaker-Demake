@@ -27,7 +27,7 @@ class Level
 	~Level();
 
 	Level& operator=(const Level& other) = delete;
-	Level& operator=(Level&& other) = default;
+	Level& operator=(Level&& other) = delete;
 
 	[[nodiscard]] vector<byte> Serialize() const;
 

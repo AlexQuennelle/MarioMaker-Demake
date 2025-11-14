@@ -95,6 +95,7 @@ void EditMode::DrawUI()
 	std::array<char, 256> nameBuf{};
 	strcpy(nameBuf.data(), this->level->GetName().c_str());
 
+#if !defined(PLATFORM_WEB)
 	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings |
 						   ImGuiWindowFlags_AlwaysAutoResize |
 						   ImGuiWindowFlags_NoCollapse};
@@ -111,9 +112,6 @@ void EditMode::DrawUI()
 		ImGui::SameLine();
 		ImGui::SliderFloat("##CamOffsetY", &camOffset.y, 0.0f,
 						   this->level->GetHeight() - 14.0f);
-		// Debug info
-		//ImGui::InputFloat2("Mouse position in level", &lvlMousePos.x);
-		//ImGui::InputInt2("Hovered cell", &this->selectedTile.x);
 
 		ImGui::Separator();
 		ImGuiTreeNodeFlags lvlInfo{ImGuiTreeNodeFlags_DefaultOpen};
@@ -146,6 +144,65 @@ void EditMode::DrawUI()
 		}
 	}
 	ImGui::End();
+#else
+	ImGuiWindowFlags flags{
+		ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize |
+		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse};
+	ImGui::SetNextWindowPos({0.0f, SCREEN_HEIGHT});
+	ImGui::SetNextWindowSize({SCREEN_WIDTH, EDIT_PANEL_HEIGHT});
+	if (ImGui::Begin("Menu", nullptr, flags))
+	{
+		this->DrawButtons();
+		this->DrawPallette();
+
+		ImGui::Separator();
+		ImGui::Text("CameraPosition:");
+		ImGui::SameLine();
+		ImGui::SliderFloat("##CamOffsetX", &camOffset.x, 0.0f,
+						   this->level->GetLength() - 24.0f);
+		ImGui::SameLine();
+		ImGui::SliderFloat("##CamOffsetY", &camOffset.y, 0.0f,
+						   this->level->GetHeight() - 14.0f);
+
+		ImGuiTableFlags tableFlags{ImGuiTableFlags_SizingStretchSame};
+		if (ImGui::BeginTable("##LayoutSeparator", 2))
+		{
+			ImGui::TableSetupColumn("Info");
+			ImGui::TableSetupColumn("Tools");
+			ImGui::TableHeadersRow();
+
+			// Info Column
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Level Name");
+			ImGui::SetNextItemWidth(-1.0f);
+			ImGui::InputText("##LevelName", nameBuf.data(), 255);
+			ImGui::Separator();
+			ImGui::Text("Level Size");
+			ImGui::Text("Width: ");
+			ImGui::SameLine();
+			ImGui::DragInt("##lvlDimsX", &lvlDims.x, 0.05f, 24, 500);
+			ImGui::SameLine();
+			if (ImGui::Button("+##lvlX"))
+				lvlDims.x++;
+			ImGui::SameLine();
+			if (ImGui::Button("-##lvlX"))
+				lvlDims.x--;
+			ImGui::Text("Height:");
+			ImGui::SameLine();
+			ImGui::DragInt("##lvlDimsY", &lvlDims.y, 0.05f, 14, 32);
+			ImGui::SameLine();
+			if (ImGui::Button("+##lvlY"))
+				lvlDims.y++;
+			ImGui::SameLine();
+			if (ImGui::Button("-##lvlY"))
+				lvlDims.y--;
+
+			ImGui::EndTable();
+		}
+	}
+	ImGui::End();
+#endif
 
 	std::string newName{nameBuf.data()};
 	if (newName != this->level->GetName())
@@ -244,6 +301,9 @@ void EditMode::DrawPallette()
 		this->brush.flags = static_cast<uint16_t>(variant);
 	}
 }
+
+void EditMode::DrawButtonsWeb() {}
+void EditMode::DrawPalletteWeb() {}
 
 void EditMode::ProcessInput()
 {

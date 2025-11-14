@@ -21,7 +21,7 @@ int main()
 	SetTargetFPS(60);
 	rlImGuiSetup(true);
 	game = std::make_unique<Game>();
-	requestSize(SCREEN_WIDTH, SCREEN_HEIGHT + EDIT_PANEL_HEIGHT);
+	requestSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	emscripten_set_main_loop(Update, 0, 1);
 #else
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, NAME);

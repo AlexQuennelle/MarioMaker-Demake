@@ -80,6 +80,9 @@ class EditMode : public GamemodeInstance
 	void DrawButtons();
 	void DrawPallette();
 
+	void DrawButtonsWeb();
+	void DrawPalletteWeb();
+
 	void ProcessInput();
 
 	void SaveLevel();

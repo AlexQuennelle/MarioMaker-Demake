@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+// #define PLATFORM_WEB
 #if defined(PLATFORM_WEB)
 constexpr uint32_t SCREEN_WIDTH = 768;
 constexpr uint32_t SCREEN_HEIGHT = 432;
