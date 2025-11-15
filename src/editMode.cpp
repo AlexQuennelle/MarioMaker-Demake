@@ -14,7 +14,6 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
-#include <vector>
 #if !defined(PLATFORM_WEB)
 #include <nfd.hpp>
 #endif

@@ -327,14 +327,12 @@ bool Player::Grounded()
 
 	solidCols.insert(solidCols.end(), levelCols.begin(), levelCols.end());
 
-	return std::ranges::any_of(
-		solidCols, //
-		[groundedBox](Rectangle col)
-		{ return CheckCollisionRecs(groundedBox, col); } //
-	);
+	return std::ranges::any_of(solidCols, [groundedBox](Rectangle col)
+	{
+		return CheckCollisionRecs(groundedBox, col);
+	});
 }
 
-// Public method for applying forces to the player
 void Player::AddForce(const Vector2 force)
 {
 	acceleration = Vector2Add(acceleration, force);

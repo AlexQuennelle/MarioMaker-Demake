@@ -164,16 +164,16 @@ class Level
 	static inline void InsertAsBytes(vector<byte>& vec, T data);
 
 	AssetManager& am;
-	Texture tex;
-	Image img;
-	Image sprites;
 	std::string name;
 	std::string filepath;
+	Image img;
+	Image sprites;
 	vector<Tile> grid;
 	vector<Rectangle> colliders;
 	vector<Entity_ptr> entities;
 	vector<Entity_ptr> spawnQueue;
 	vector<ToggleBlock*> toggleBlocks;
+	Texture tex;
 	Vector2 playerStartPos;
 	float gravity;
 	int32_t height;

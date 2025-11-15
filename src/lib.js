@@ -1,5 +1,5 @@
 addToLibrary({
-  requestSize: function(w, h) {
+  requestSize: function (w, h) {
     let canvas = document.getElementById("canvas").parentElement;
     canvas.width = w;
     canvas.height = h;

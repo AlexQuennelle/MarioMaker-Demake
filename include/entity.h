@@ -66,11 +66,11 @@ class Entity
 	};
 
 	protected:
-	bool isActive{true};
-	bool solid{false};
-	Vector2 position;
 	Rectangle collider{0.0f, 0.0f, 1.0f, 1.0f};
 	AssetManager& assetManager;
+	Vector2 position;
+	bool isActive{true};
+	bool solid{false};
 };
 
 class Brick : public Entity
@@ -118,13 +118,13 @@ class ItemBox : public Entity
 	EntityReq OnEntityCollision(Entity& entity) override;
 
 	private:
-	const bool isBrick;
-	const bool isHidden;
-	bool empty{false};
 	float accumulatedAnimTime{0};
 	float timeBetweenFrames{0.12f};
 	int curFrame{0};
 	Texture2D& sprite;
+	const bool isBrick;
+	const bool isHidden;
+	bool empty{false};
 };
 
 class Coin : public Entity

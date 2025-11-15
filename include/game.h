@@ -4,7 +4,6 @@
 #include "gamemode.h"
 #include "level.h"
 
-#include <cstdint>
 #include <imgui.h>
 #include <memory>
 #include <raylib.h>
@@ -35,10 +34,9 @@ class Game
 	void LoadLevel();
 #endif
 
+	RenderTexture2D renderTex;
 	std::unique_ptr<GamemodeInstance> gamemode;
 	std::unique_ptr<Level> level{nullptr};
-
 	ImGuiIO& imguiIO;
-	RenderTexture2D renderTex;
 	asset_ptr assetManager;
 };

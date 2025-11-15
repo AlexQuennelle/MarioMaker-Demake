@@ -33,8 +33,8 @@ class ButtonBase
 	virtual std::optional<ButtonEvent> OnClick() = 0;
 
 	protected:
-	Vector2Int position;
 	Rectangle clickableArea;
+	Vector2Int position;
 	bool hovered{false};
 };
 

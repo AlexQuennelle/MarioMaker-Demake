@@ -39,8 +39,6 @@ Level::Level(const std::string& filepath, AssetManager& am, float gravity)
 	namespace fs = std::filesystem;
 	using std::ios;
 
-	std::cout << "New Level Object\n";
-
 	std::srand(std::time({}));
 
 	std::ifstream file{filepath.c_str(), ios::binary | ios::ate};
