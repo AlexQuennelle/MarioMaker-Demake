@@ -14,6 +14,7 @@ enum class TileID : uint8_t
 	toggleBlock,
 	mushroom,
 	walkerEnemy,
+	fireFlower,
 };
 
 struct Tile

@@ -20,3 +20,24 @@ class Mushroom : public Entity
 	float speed{0.05f};
 	float gravity;
 };
+
+class FireFlower : public Entity
+{
+	public:
+	FireFlower(const int x, const int y, AssetManager& assetManager,
+			 const float gravity);
+
+	EntityReq Update(const vector<Rectangle>& colliders) override;
+	void Draw() override;
+	void EditDraw() override;
+	EntityReq OnPlayerCollision(Player& player) override;
+	EntityReq OnEntityCollision(Entity& entity) override;
+
+	private:
+	Texture2D& sprite;
+	Vector2 velocity{0, 0};
+	float gravity;
+	float accumulatedAnimTime{0};
+	float timeBetweenFrames{0.12f};
+	int curFrame{0};
+};
