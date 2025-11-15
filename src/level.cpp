@@ -2,9 +2,9 @@
 #include "assetmanager.h"
 #include "entity.h"
 #include "powerup.h"
-#include "walkerEnemy.h"
 #include "tile.h"
 #include "utils.h"
+#include "walkerEnemy.h"
 
 #include <algorithm>
 #include <array>
@@ -14,6 +14,7 @@
 #include <cstring>
 #include <ctime>
 #include <filesystem>
+#include <format>
 #include <fstream>
 #include <iosfwd>
 #include <iostream>
@@ -32,14 +33,15 @@
 #endif // !NDEBUG
 
 Level::Level(const std::string& filepath, AssetManager& am, float gravity)
-	: am(am), sprites(am.groundTiles), entities(0), gravity(gravity)
+	: am(am), sprites(am.groundTiles), entities(0), gravity(gravity),
+	  filepath(filepath), saved(true)
 {
 	namespace fs = std::filesystem;
 	using std::ios;
 
-	std::srand(std::time({}));
+	std::cout << "New Level Object\n";
 
-	this->filepath = std::string(filepath);
+	std::srand(std::time({}));
 
 	std::ifstream file{filepath.c_str(), ios::binary | ios::ate};
 
@@ -572,7 +574,10 @@ void Level::SetTileAt(const TileID tile, const int x, const int y,
 					  const uint8_t flags)
 {
 	if (x >= 0 && x <= this->length - 1 && y >= 0 && y <= this->height - 1)
+	{
+		this->saved = false;
 		grid[(y * this->length) + x] = Tile{.ID = tile, .flags = flags};
+	}
 #ifndef NDEBUG
 	else
 	{
@@ -664,6 +669,8 @@ void Level::SetLevelSize(const int length, const int height)
 #endif // !LOG_LEVEL_DATA
 		return;
 	}
+
+	this->saved = false;
 
 	int overlapX{std::min(this->length, length)};
 	int overlapY{std::min(this->height, height)};

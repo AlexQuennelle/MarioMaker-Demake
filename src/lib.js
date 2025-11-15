@@ -4,9 +4,6 @@ addToLibrary({
     canvas.width = w;
     canvas.height = h;
 
-    console.log(w);
-    console.log(h);
-
     let message = { width: w, height: h };
     parent.postMessage(message);
   },

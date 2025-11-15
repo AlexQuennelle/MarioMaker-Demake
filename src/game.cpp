@@ -4,7 +4,6 @@
 #include "level.h"
 #include "utils.h"
 #if defined(PLATFORM_WEB)
-#include "constants.h"
 #include "wasmUtils.h"
 #endif
 

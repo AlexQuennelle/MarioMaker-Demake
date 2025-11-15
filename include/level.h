@@ -68,7 +68,7 @@ class Level
 	void SpawnEntity(const int x, const int y, const Tile basis);
 	void SpawnEntityEditor(const int x, const int y, const Tile basis);
 
-	// getters
+	// Getters
 	Vector2 GetPlayerStartPos() const { return playerStartPos; }
 	const vector<Rectangle>& GetColliders() const { return colliders; }
 	bool HasFilepath() const { return !this->filepath.empty(); }
@@ -79,6 +79,8 @@ class Level
 	void SetLevelSize(const int length, const int height);
 	const std::string& GetName() const { return this->name; }
 	void SetName(const std::string& newName) { this->name = newName; }
+	bool IsSaved() const { return this->saved; }
+	void Save() { this->saved = true; }
 
 	vector<Entity*> GetEntities()
 	{
@@ -161,20 +163,21 @@ class Level
 	template <typename T>
 	static inline void InsertAsBytes(vector<byte>& vec, T data);
 
-	float gravity;
-	int32_t height;
-	int32_t length;
-	bool toggleState{false};
+	AssetManager& am;
+	Texture tex;
 	Image img;
 	Image sprites;
-	Texture tex;
-	AssetManager& am;//{nullptr};
 	std::string name;
 	std::string filepath;
-	Vector2 playerStartPos;
 	vector<Tile> grid;
 	vector<Rectangle> colliders;
 	vector<Entity_ptr> entities;
 	vector<Entity_ptr> spawnQueue;
 	vector<ToggleBlock*> toggleBlocks;
+	Vector2 playerStartPos;
+	float gravity;
+	int32_t height;
+	int32_t length;
+	bool toggleState{false};
+	bool saved{false};
 };
