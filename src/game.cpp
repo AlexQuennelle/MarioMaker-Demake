@@ -176,7 +176,6 @@ void Game::LoadLevel()
 	nfdresult_t result{NFD::OpenDialog(outPath, &filter, 1, RESOURCES_PATH)};
 	if (result == NFD_OKAY)
 	{
-		std::cout << outPath.get() << '\n';
 		this->level =
 			std::make_unique<Level>(Level{outPath.get(), *this->assetManager});
 	}

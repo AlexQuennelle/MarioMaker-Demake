@@ -68,6 +68,19 @@ class LevelWidget : public ButtonBase
 	LevelWidget() = delete;
 	~LevelWidget() override = default;
 
+	bool operator==(const LevelWidget& other)
+	{
+		return (this->filePath == other.filePath);
+	}
+	bool operator==(const std::string& other)
+	{
+		return (this->filePath == other);
+	}
+	bool operator==(const char* other)
+	{
+		return (this->filePath == other);
+	}
+
 	void Update(const Vector2 mousePos) override;
 	void Draw() override;
 	std::optional<ButtonEvent> OnClick() override;

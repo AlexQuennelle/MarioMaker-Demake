@@ -14,7 +14,6 @@
 #include <cstring>
 #include <ctime>
 #include <filesystem>
-#include <format>
 #include <fstream>
 #include <iosfwd>
 #include <iostream>
