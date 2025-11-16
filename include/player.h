@@ -2,6 +2,7 @@
 
 #include "assetmanager.h"
 #include "level.h"
+#include "fireball.h"
 
 class Player
 {
@@ -70,7 +71,9 @@ class Player
 	Vector2 lastInput{0, 0};
 	Level& level;
 	PlayerAssets assets;
+	std::vector<std::unique_ptr<Fireball>> fireballs;
 
 	bool Grounded();
 	void CheckCollisions();
+	void TryFireball();
 };

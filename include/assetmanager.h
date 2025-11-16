@@ -20,8 +20,9 @@ class AssetManager
 struct PlayerAssets
 {
 	public:
-	PlayerAssets(Texture2D&);
+	PlayerAssets(Texture2D&, Texture2D&);
 	Texture2D& sprites;
+	Texture2D& staticEntities;
 	float fireOffset{288};
 	float luigiOffset{128};
 };

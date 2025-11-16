@@ -23,4 +23,4 @@ AssetManager::~AssetManager()
 	UnloadTexture(this->enemies);
 }
 
-PlayerAssets::PlayerAssets(Texture2D& tex) : sprites(tex) {}
+PlayerAssets::PlayerAssets(Texture2D& tex, Texture2D& staticEntities) : sprites(tex), staticEntities(staticEntities) {}

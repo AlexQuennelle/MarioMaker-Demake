@@ -103,6 +103,14 @@ void Player::Update()
 		iframetimer -= GetFrameTime();
 	}
 
+	for (int i{0}; i < fireballs.size(); i++)
+	{
+		if (!fireballs[i]->IsActive())
+		{
+			fireballs.erase(fireballs.begin() + i);	
+		}
+	}
+
 	CheckCollisions();
 }
 
@@ -162,6 +170,11 @@ void Player::CheckCollisions()
 			}
 		}
 	}
+
+	for (auto& fireball : fireballs)
+	{
+		fireball->Update(level.GetEntities(), solidCols);
+	}
 }
 
 Rectangle Player::GetCollisionRect()
@@ -183,6 +196,11 @@ Rectangle Player::GetCollisionRect()
 
 void Player::Draw()
 {
+	for (auto& fireball : fireballs)
+	{
+		fireball->Draw();
+	}
+
 	// flip sprite
 	float recWidth = facingRight ? -32 : 32;
 
@@ -267,6 +285,11 @@ void Player::Draw()
 		frameRec.y += 64;
 	}
 
+	if (this->fire)
+	{
+		frameRec.x += assets.fireOffset;
+	}
+
 	if (this->iframetimer <= 0 || showSprite)
 	{
 		DrawTextureRec(
@@ -290,6 +313,11 @@ void Player::HandleMovement(const bool running, const Vector2 input)
 	// block input if dead
 	if (this->dead)
 		return;
+
+	if (!this->running && running)
+	{
+		this->TryFireball();
+	}
 
 	this->running = running;
 	this->lastInput = input;
@@ -375,5 +403,16 @@ void Player::TakeDamage()
 	else
 	{
 		this->big = false;
+	}
+}
+
+void Player::TryFireball()
+{
+	if (!this->fire)
+		return;
+
+	if (fireballs.size() < 2)
+	{
+		fireballs.push_back(std::make_unique<Fireball>(assets.staticEntities, this->facingRight, Vector2{this->position.x, this->position.y - 1.0f}));
 	}
 }
