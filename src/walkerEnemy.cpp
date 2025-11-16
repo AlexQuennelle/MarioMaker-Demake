@@ -112,3 +112,9 @@ EntityReq WalkerEnemy::OnPlayerCollision(Player& player)
 }
 
 EntityReq WalkerEnemy::OnEntityCollision(Entity& /*entity*/) { return {}; }
+
+bool WalkerEnemy::TakeDamage()
+{
+	this->isActive = false;
+	return true;
+}

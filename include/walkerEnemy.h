@@ -14,6 +14,8 @@ class WalkerEnemy : public Entity
 	EntityReq OnPlayerCollision(Player& player) override;
 	EntityReq OnEntityCollision(Entity& entity) override;
 
+	bool TakeDamage() override;
+
 	private:
 	Texture2D& sprite;
 	bool isVariant;

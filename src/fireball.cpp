@@ -19,6 +19,18 @@ void Fireball::Update(std::vector<Entity*> entities,
 
 	this->position = Vector2Add(this->position, this->velocity);
 
+	for (auto& entity : entities)
+	{
+		if (CheckCollisionRecs(this->GetCollider(), entity->GetCollider()))
+		{
+			if (entity->TakeDamage())
+			{
+				this->isActive = false;
+				return;
+			}
+		}
+	}
+
 	for (const Rectangle col : solidCols)
 	{
 		if (CheckCollisionRecs(this->GetCollider(), col))

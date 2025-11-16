@@ -53,6 +53,8 @@ class Entity
 	virtual EntityReq OnPlayerCollision(Player& player) = 0;
 	virtual EntityReq OnEntityCollision(Entity& entity) = 0;
 
+	virtual bool TakeDamage() { return false; };
+
 	bool IsSolid() const { return this->solid; }
 	bool IsActive() const { return this->isActive; }
 	Rectangle GetCollider() const
