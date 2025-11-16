@@ -141,6 +141,7 @@ template <typename T> void Level::InsertAsBytes(vector<byte>& vec, T data)
 
 void Level::Update()
 {
+	this->toggledThisFrame = false;
 	for (auto& entity : this->spawnQueue)
 	{
 		this->entities.push_back(std::move(entity));
@@ -295,7 +296,11 @@ void Level::HandleRequest(EntityReq request)
 		this->spawnQueue.push_back(std::move(std::get<1>(request).entity));
 		break;
 	case 2: // Toggle state of toggle tiles
-		this->toggleState = !this->toggleState;
+		if (!this->toggledThisFrame)
+		{
+			this->toggleState = !this->toggleState;
+			this->toggledThisFrame = true;
+		}
 		break;
 	default:
 		break;
@@ -616,7 +621,7 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 	{
 		using enum TileID;
 	case (brick):
-		this->entities.push_back(std::make_unique<Brick>(
+		this->entities.push_back(std::make_unique<Block>(
 			x, y, this->am, static_cast<bool>(basis.flags & 1)));
 		break;
 	case (spikes):
@@ -649,7 +654,7 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 	default:
 		break;
 	}
-	if (basis.ID == TileID::toggleBlock)
+	if (basis.ID == TileID::toggleBlock || basis.ID == TileID::toggleSwitch)
 	{
 		ToggleBlock* block{static_cast<ToggleBlock*>(
 			this->entities[this->entities.size() - 1].get())};
