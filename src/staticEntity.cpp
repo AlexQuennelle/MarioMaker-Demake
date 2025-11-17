@@ -5,15 +5,15 @@
 #include <raylib.h>
 #include <raymath.h>
 
-Brick::Brick(const int x, const int y, AssetManager& assetManager,
+Block::Block(const int x, const int y, AssetManager& assetManager,
 			 const bool variant)
 	: Entity(x, y, assetManager), isVariant(variant),
 	  sprite(assetManager.staticEntities)
 {
 	this->solid = true;
 }
-EntityReq Brick::Update(const vector<Rectangle>& /*colliders*/) { return {}; }
-void Brick::Draw()
+EntityReq Block::Update(const vector<Rectangle>& /*colliders*/) { return {}; }
+void Block::Draw()
 {
 	Rectangle sourceRect{0.0f, 0.0f, 16.0f, 16.0f};
 	if (this->isVariant)
@@ -29,8 +29,8 @@ void Brick::Draw()
 					   Fade(RED, 0.6f));
 #endif // DEBUG
 }
-void Brick::EditDraw() { this->Draw(); }
-EntityReq Brick::OnPlayerCollision(Player& player)
+void Block::EditDraw() { this->Draw(); }
+EntityReq Block::OnPlayerCollision(Player& player)
 {
 	if (this->isVariant)
 		return {};
@@ -47,7 +47,7 @@ EntityReq Brick::OnPlayerCollision(Player& player)
 	}
 	return {};
 }
-EntityReq Brick::OnEntityCollision(Entity& /*entity*/) { return {}; }
+EntityReq Block::OnEntityCollision(Entity& /*entity*/) { return {}; }
 
 Spike::Spike(const int x, const int y, AssetManager& assetManager)
 	: Entity(x, y, assetManager), sprite(assetManager.staticEntities)

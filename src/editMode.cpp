@@ -1,4 +1,5 @@
 #include "assetmanager.h"
+#include "constants.h"
 #include "gamemode.h"
 #include "tile.h"
 #include "utils.h"
@@ -36,7 +37,13 @@ EditMode::EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui)
 EditMode::~EditMode() { UnloadRenderTexture(this->tex); }
 void EditMode::Update()
 {
-	float cellSize{GetScreenWidth() / 24.0f};
+	if (IsMouseButtonUp(MOUSE_BUTTON_LEFT) &&
+		IsMouseButtonUp(MOUSE_BUTTON_RIGHT))
+	{
+		this->letGo = true;
+	}
+
+	float cellSize{SCREEN_WIDTH / 24.0f};
 	this->lvlMousePos = {(GetMousePosition() / cellSize) -
 						 this->camera.offset / 16.0f};
 
@@ -47,7 +54,7 @@ void EditMode::Update()
 	bool MouseMoved{newSelection != this->selectedTile};
 	this->selectedTile = newSelection;
 
-	if (!this->imGuiIO.WantCaptureMouse)
+	if (!this->imGuiIO.WantCaptureMouse && this->letGo)
 	{
 		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
 			(IsMouseButtonDown(MOUSE_LEFT_BUTTON) && MouseMoved))
@@ -75,7 +82,7 @@ void EditMode::DrawUI()
 {
 	if (!this->imGuiIO.WantCaptureMouse)
 	{
-		float cellSize{GetScreenWidth() / 24.0f};
+		float cellSize{SCREEN_WIDTH / 24.0f};
 		DrawRectangle(
 			(this->selectedTile.x + (this->camera.offset.x / 16.0f)) * cellSize,
 			(this->selectedTile.y + (this->camera.offset.y / 16.0f)) * cellSize,
@@ -94,6 +101,7 @@ void EditMode::DrawUI()
 	std::array<char, 256> nameBuf{};
 	strcpy(nameBuf.data(), this->level->GetName().c_str());
 
+#if !defined(PLATFORM_WEB)
 	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings |
 						   ImGuiWindowFlags_AlwaysAutoResize |
 						   ImGuiWindowFlags_NoCollapse};
@@ -110,9 +118,6 @@ void EditMode::DrawUI()
 		ImGui::SameLine();
 		ImGui::SliderFloat("##CamOffsetY", &camOffset.y, 0.0f,
 						   this->level->GetHeight() - 14.0f);
-		// Debug info
-		//ImGui::InputFloat2("Mouse position in level", &lvlMousePos.x);
-		//ImGui::InputInt2("Hovered cell", &this->selectedTile.x);
 
 		ImGui::Separator();
 		ImGuiTreeNodeFlags lvlInfo{ImGuiTreeNodeFlags_DefaultOpen};
@@ -145,6 +150,69 @@ void EditMode::DrawUI()
 		}
 	}
 	ImGui::End();
+#else
+	ImGuiWindowFlags flags{
+		ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize |
+		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse};
+	ImGui::SetNextWindowPos({0.0f, SCREEN_HEIGHT});
+	ImGui::SetNextWindowSize({SCREEN_WIDTH, EDIT_PANEL_HEIGHT});
+	if (ImGui::Begin("Menu", nullptr, flags))
+	{
+		this->DrawButtons();
+
+		ImGui::Separator();
+		ImGui::Text("CameraPosition:");
+		ImGui::SameLine();
+		ImGui::SliderFloat("##CamOffsetX", &camOffset.x, 0.0f,
+						   this->level->GetLength() - 24.0f);
+		ImGui::SameLine();
+		ImGui::SliderFloat("##CamOffsetY", &camOffset.y, 0.0f,
+						   this->level->GetHeight() - 14.0f);
+
+		ImGuiTableFlags tableFlags{ImGuiTableFlags_SizingStretchSame};
+		if (ImGui::BeginTable("##LayoutSeparator", 2))
+		{
+			ImGui::TableSetupColumn("Info");
+			ImGui::TableSetupColumn("Tools",
+									ImGuiTableColumnFlags_WidthStretch);
+			ImGui::TableHeadersRow();
+
+			// Info Column
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Level Name");
+			ImGui::SetNextItemWidth(-1.0f);
+			ImGui::InputText("##LevelName", nameBuf.data(), 255);
+			ImGui::Separator();
+			ImGui::Text("Level Size");
+			ImGui::Text("Width: ");
+			ImGui::SameLine();
+			ImGui::DragInt("##lvlDimsX", &lvlDims.x, 0.05f, 24, 500);
+			ImGui::SameLine();
+			if (ImGui::Button("+##lvlX"))
+				lvlDims.x++;
+			ImGui::SameLine();
+			if (ImGui::Button("-##lvlX"))
+				lvlDims.x--;
+			ImGui::Text("Height:");
+			ImGui::SameLine();
+			ImGui::DragInt("##lvlDimsY", &lvlDims.y, 0.05f, 14, 32);
+			ImGui::SameLine();
+			if (ImGui::Button("+##lvlY"))
+				lvlDims.y++;
+			ImGui::SameLine();
+			if (ImGui::Button("-##lvlY"))
+				lvlDims.y--;
+
+			// Tools Column
+			ImGui::TableSetColumnIndex(1);
+			this->DrawPallette();
+
+			ImGui::EndTable();
+		}
+	}
+	ImGui::End();
+#endif
 
 	std::string newName{nameBuf.data()};
 	if (newName != this->level->GetName())
@@ -180,17 +248,42 @@ void EditMode::DrawUI()
 
 void EditMode::DrawButtons()
 {
-	if (ImGui::Button("Save"))
+	if (ImGui::Button("Back", {60.0f, 0.0f}))
+	{
+		this->ExitMode();
+	}
+	ImGui::SameLine();
+	std::string saveText{"Save"};
+	if (!this->level->IsSaved())
+		saveText.push_back('*');
+
+	if (ImGui::Button(saveText.c_str(), {60.0f, 0.0f}))
 	{
 		this->SaveLevel();
 	}
 #if !defined(PLATFORM_WEB)
 	ImGui::SameLine();
-	if (ImGui::Button("Save As"))
+	if (ImGui::Button("Save As", {60.0f, 0.0f}))
 	{
 		this->SaveLevelAs();
 	}
 #endif
+	if (ImGui::BeginPopupModal("Save Level?"))
+	{
+		if (ImGui::Button("Save", {60.0f, 0.0f}))
+		{
+			this->SaveLevel();
+		}
+		if (ImGui::Button("Don't Save"))
+		{
+			this->switchReq = SwitchRequest::MainMenu;
+		}
+		if (ImGui::Button("Cancel"))
+		{
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
 }
 void EditMode::DrawPallette()
 {
@@ -244,6 +337,9 @@ void EditMode::DrawPallette()
 	}
 }
 
+void EditMode::DrawButtonsWeb() {}
+void EditMode::DrawPalletteWeb() {}
+
 void EditMode::ProcessInput()
 {
 	float cameraSpeed{2.0f};
@@ -267,9 +363,16 @@ void EditMode::ProcessInput()
 		if (this->camera.offset.y > -((this->level->GetHeight() * 16.0f) - 216))
 			this->camera.offset.y -= cameraSpeed;
 	}
-	else if (IsKeyDown(KEY_BACKSPACE))
+}
+void EditMode::ExitMode()
+{
+	if (this->level->IsSaved())
 	{
 		this->switchReq = SwitchRequest::MainMenu;
+	}
+	else
+	{
+		ImGui::OpenPopup("Save Level?");
 	}
 }
 
@@ -316,6 +419,7 @@ void EditMode::SaveLevel()
 		outFile.write(reinterpret_cast<const char*>(data.data()), data.size());
 
 		outFile.close();
+		this->level->Save();
 	}
 	else
 	{

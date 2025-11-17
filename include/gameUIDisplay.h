@@ -10,6 +10,6 @@ class GameUIDisplay
 	void Draw(const float, const int);
 
 	private:
-	Font& font;
 	RenderTexture2D renderTex;
+	Font& font;
 };

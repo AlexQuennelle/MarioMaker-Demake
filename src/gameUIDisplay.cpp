@@ -1,4 +1,6 @@
 #include "gameUIDisplay.h"
+#include "constants.h"
+
 #include <cmath>
 #include <string>
 
@@ -26,7 +28,7 @@ void GameUIDisplay::Draw(const float time, const int coins)
 				   {0.0f, 0.0f,
 					static_cast<float>(this->renderTex.texture.width),
 					-static_cast<float>(this->renderTex.texture.height)},
-				   {0.0f, 0.0f, -static_cast<float>(GetScreenWidth()),
-					static_cast<float>(GetScreenHeight())},
+				   {0.0f, 0.0f, -static_cast<float>(SCREEN_WIDTH),
+					static_cast<float>(SCREEN_HEIGHT)},
 				   {0.0f}, 0.0f, WHITE);
 }

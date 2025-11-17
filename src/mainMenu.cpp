@@ -1,5 +1,7 @@
 #include "mainMenu.h"
+#include "constants.h"
 #include "gamemode.h"
+#include "nfd.hpp"
 #include "utils.h"
 
 #include <algorithm>
@@ -24,7 +26,7 @@ MainMenu::MainMenu(AssetManager& am, std::unique_ptr<Level>& lvl)
 }
 void MainMenu::Update()
 {
-	float scaling{GetScreenWidth() / 384.0f};
+	float scaling{SCREEN_WIDTH / 384.0f};
 	Vector2 mousePos{GetMousePosition() / scaling};
 
 	for (auto& button : this->buttons)
@@ -96,6 +98,8 @@ void MainMenu::InitTitleScreen()
 }
 void MainMenu::InitLevelScreen()
 {
+	float widgetHeight{30};
+
 	ButtonEvent switchToTitle = [this]
 	{
 		return this->SwitchScreens(MenuScreen::Title);
@@ -109,14 +113,58 @@ void MainMenu::InitLevelScreen()
 	auto loadFunc =
 		[this](const SwitchRequest mode, const std::string& filePath)
 	{
-		//return this->LoadLevel(mode, filePath);
 		this->lvlPointer =
 			std::make_unique<Level>(filePath, this->assetManager);
 		this->switchReq = mode;
 		return std::nullopt;
 	};
+#if !defined(PLATFORM_WEB)
+	auto altLoad = [this, widgetHeight, loadFunc]
+	{
+		NFD::Guard nfdGuard;
+		NFD::UniquePath outPath;
+		nfdfilteritem_t filter{"Level Files", "lvl"};
+		nfdresult_t result{
+			NFD::OpenDialog(outPath, &filter, 1, RESOURCES_PATH)};
+		if (result == NFD_OKAY)
+		{
+			auto pred = [&outPath](auto& a)
+			{
+				return static_cast<LevelWidget&>(*a) == outPath.get();
+			};
+			if (std::ranges::any_of(this->levels, pred))
+				return std::nullopt;
+
+			float levelsHeight{
+				(widgetHeight * this->levels.size()) + (this->levels.size()),
+			};
+			this->levels.push_back(std::make_unique<LevelWidget>(
+				std::string(outPath.get()),
+				Vector2Int{.x = 192, .y = static_cast<int>(30 + levelsHeight)},
+				Rectangle{-75.0f, 0.0f, 150.0f, widgetHeight}, loadFunc));
+			levelsHeight += 30.0f;
+			this->maxScrollOffset = -std::max(levelsHeight - 156.0f, 0.0f);
+			return std::nullopt;
+		}
+		else if (result == NFD_ERROR)
+		{
+			std::cerr << NFD_GetError() << '\n';
+			return std::nullopt;
+		}
+		else if (result == NFD_CANCEL)
+		{
+			std::cout << "Load cancelled.\n";
+			return std::nullopt;
+		}
+		return std::nullopt;
+	};
+	this->buttons.push_back(std::make_unique<MenuButton>(
+		"Load from file", Vector2Int{.x = 384 - 80, .y = 20},
+		Rectangle{.x = -30.0f, .y = -7.0f, .width = 60.0f, .height = 14.0f},
+		altLoad));
+#endif
+
 	int offset{0};
-	float widgetHeight{30};
 	namespace fs = std::filesystem;
 	for (const auto& entry : fs::directory_iterator(RESOURCES_PATH))
 	{
