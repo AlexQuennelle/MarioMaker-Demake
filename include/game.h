@@ -8,8 +8,8 @@
 #include <memory>
 #include <raylib.h>
 
-/**
- * Class representing an instance of the program and encapsulating global state.
+/** @brief Class representing an instance of the program and encapsulating
+ *         global state.
  */
 class Game
 {
@@ -17,27 +17,23 @@ class Game
 	Game();
 	~Game();
 
-	/**
-	 * The game's main update loop. Should be called  from a loop in main().
+	/** @brief The game's main update loop. Should be called  from a loop in
+	 *         main().
 	 */
 	void Update();
 
 	private:
 	void Draw();
 
+	/** @brief Switches what game mode object is currently being used. Game mode
+	 *         objects are derived from the abstract @link GamemodeInstance
+	 *         @endlink class
+	 */
 	void SwitchMode(SwitchRequest newMode);
 
-	void Reset();
-	void SaveLevel();
-#if !defined(PLATFORM_WEB)
-	void SaveLevelAs();
-	void LoadLevel();
-#endif
-
+	RenderTexture2D renderTex;
 	std::unique_ptr<GamemodeInstance> gamemode;
 	std::unique_ptr<Level> level{nullptr};
-
 	ImGuiIO& imguiIO;
-	RenderTexture2D renderTex;
 	asset_ptr assetManager;
 };

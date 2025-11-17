@@ -88,6 +88,9 @@ if(EMSCRIPTEN)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}\
  --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/src/template.html"
     )
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}\
+ --js-library ${CMAKE_CURRENT_SOURCE_DIR}/src/lib.js"
+    )
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     set_target_properties(
         ${CMAKE_PROJECT_NAME} PROPERTIES LINK_FLAGS

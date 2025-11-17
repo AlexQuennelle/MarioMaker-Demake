@@ -2,9 +2,9 @@
 #include "assetmanager.h"
 #include "entity.h"
 #include "powerup.h"
-#include "walkerEnemy.h"
 #include "tile.h"
 #include "utils.h"
+#include "walkerEnemy.h"
 
 #include <algorithm>
 #include <array>
@@ -32,14 +32,13 @@
 #endif // !NDEBUG
 
 Level::Level(const std::string& filepath, AssetManager& am, float gravity)
-	: am(am), sprites(am.groundTiles), entities(0), gravity(gravity)
+	: am(am), sprites(am.groundTiles), entities(0), gravity(gravity),
+	  filepath(filepath), saved(true)
 {
 	namespace fs = std::filesystem;
 	using std::ios;
 
 	std::srand(std::time({}));
-
-	this->filepath = std::string(filepath);
 
 	std::ifstream file{filepath.c_str(), ios::binary | ios::ate};
 
@@ -142,6 +141,7 @@ template <typename T> void Level::InsertAsBytes(vector<byte>& vec, T data)
 
 void Level::Update()
 {
+	this->toggledThisFrame = false;
 	for (auto& entity : this->spawnQueue)
 	{
 		this->entities.push_back(std::move(entity));
@@ -296,7 +296,11 @@ void Level::HandleRequest(EntityReq request)
 		this->spawnQueue.push_back(std::move(std::get<1>(request).entity));
 		break;
 	case 2: // Toggle state of toggle tiles
-		this->toggleState = !this->toggleState;
+		if (!this->toggledThisFrame)
+		{
+			this->toggleState = !this->toggleState;
+			this->toggledThisFrame = true;
+		}
 		break;
 	default:
 		break;
@@ -572,7 +576,10 @@ void Level::SetTileAt(const TileID tile, const int x, const int y,
 					  const uint8_t flags)
 {
 	if (x >= 0 && x <= this->length - 1 && y >= 0 && y <= this->height - 1)
+	{
+		this->saved = false;
 		grid[(y * this->length) + x] = Tile{.ID = tile, .flags = flags};
+	}
 #ifndef NDEBUG
 	else
 	{
@@ -614,7 +621,7 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 	{
 		using enum TileID;
 	case (brick):
-		this->entities.push_back(std::make_unique<Brick>(
+		this->entities.push_back(std::make_unique<Block>(
 			x, y, this->am, static_cast<bool>(basis.flags & 1)));
 		break;
 	case (spikes):
@@ -647,7 +654,7 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 	default:
 		break;
 	}
-	if (basis.ID == TileID::toggleBlock)
+	if (basis.ID == TileID::toggleBlock || basis.ID == TileID::toggleSwitch)
 	{
 		ToggleBlock* block{static_cast<ToggleBlock*>(
 			this->entities[this->entities.size() - 1].get())};
@@ -664,6 +671,8 @@ void Level::SetLevelSize(const int length, const int height)
 #endif // !LOG_LEVEL_DATA
 		return;
 	}
+
+	this->saved = false;
 
 	int overlapX{std::min(this->length, length)};
 	int overlapY{std::min(this->height, height)};

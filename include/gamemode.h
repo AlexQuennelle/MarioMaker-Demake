@@ -40,9 +40,9 @@ class GamemodeInstance
 	Camera2D camera{0};
 
 	protected:
-	SwitchRequest switchReq{SwitchRequest::None};
-	Level* level;
 	AssetManager& assetManager;
+	Level* level;
+	SwitchRequest switchReq{SwitchRequest::None};
 };
 
 class GameplayMode : public GamemodeInstance
@@ -59,11 +59,11 @@ class GameplayMode : public GamemodeInstance
 	static constexpr float gravity{0.9f};
 
 	private:
+	Player player;
+	GameUIDisplay uiDisplay;
+	PlayerInputHandler inputHandler;
 	float timeDead{0};
 	float time{0};
-	Player player;
-	PlayerInputHandler inputHandler;
-	GameUIDisplay uiDisplay;
 };
 
 class EditMode : public GamemodeInstance
@@ -80,18 +80,17 @@ class EditMode : public GamemodeInstance
 	void DrawButtons();
 	void DrawPallette();
 
+	void DrawButtonsWeb();
+	void DrawPalletteWeb();
+
 	void ProcessInput();
+	void ExitMode();
 
 	void SaveLevel();
 #if !defined(PLATFORM_WEB)
 	void SaveLevelAs();
 #endif
 
-	RenderTexture tex;
-	Vector2Int selectedTile{.x = 0, .y = 0};
-	Vector2 lvlMousePos;
-	const ImGuiIO& imGuiIO;
-	Tile brush{.ID = TileID::ground, .flags = 0};
 	const std::array<std::string, 9> tileNames{
 		"Ground",
 		"Bricks",
@@ -103,6 +102,12 @@ class EditMode : public GamemodeInstance
 		"Mushroom",
 		"Goomba",
 	};
+	RenderTexture tex;
+	Tile brush{.ID = TileID::ground, .flags = 0};
+	const ImGuiIO& imGuiIO;
+	Vector2 lvlMousePos;
+	Vector2Int selectedTile{.x = 0, .y = 0};
+	bool letGo{false};
 };
 
 class MainMenu : public GamemodeInstance
@@ -126,9 +131,9 @@ class MainMenu : public GamemodeInstance
 	ButtonResult SwitchScreens(MenuScreen screen);
 
 	// Member variables
-	float maxScrollOffset{0.0f};
-	MenuScreen currentScreen{MenuScreen::Title};
-	std::unique_ptr<Level>& lvlPointer;
 	vector<std::unique_ptr<ButtonBase>> buttons;
 	vector<std::unique_ptr<ButtonBase>> levels;
+	std::unique_ptr<Level>& lvlPointer;
+	float maxScrollOffset{0.0f};
+	MenuScreen currentScreen{MenuScreen::Title};
 };

@@ -1,3 +1,4 @@
+#include "constants.h"
 #include "game.h"
 
 #include <imgui.h>
@@ -5,6 +6,7 @@
 #include <raylib.h>
 #include <rlImGui.h>
 #if defined(PLATFORM_WEB)
+#include "wasmUtils.h"
 #include <emscripten/emscripten.h>
 #endif
 
@@ -14,15 +16,15 @@ void Update();
 
 int main()
 {
-	SetConfigFlags(FLAG_MSAA_4X_HINT);
 #if defined(PLATFORM_WEB)
-	InitWindow(768, 432, NAME);
+	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT + EDIT_PANEL_HEIGHT, NAME);
 	SetTargetFPS(60);
 	rlImGuiSetup(true);
 	game = std::make_unique<Game>();
+	requestSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	emscripten_set_main_loop(Update, 0, 1);
 #else
-	InitWindow(1600, 900, NAME);
+	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, NAME);
 	SetTargetFPS(60);
 	rlImGuiSetup(true);
 	game = std::make_unique<Game>();

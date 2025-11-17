@@ -16,11 +16,11 @@ class WalkerEnemy : public Entity
 
 	private:
 	Texture2D& sprite;
-	bool isVariant;
-	float gravity;
 	Vector2 velocity{0, 0};
+	float gravity;
 	float speed{0.03f};
 	float accumulatedAnimTime{0};
 	float timeBetweenFrames{0.18f};
 	int curFrame{0};
+	bool isVariant;
 };
