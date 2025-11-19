@@ -2,11 +2,11 @@
 
 #include "entity.h"
 
-class WalkerEnemy : public Entity
+class JumpingFireEnemy : public Entity
 {
 	public:
-	WalkerEnemy(const int x, const int y, AssetManager& assetManager,
-				const float gravity, const bool variant = false);
+	JumpingFireEnemy(const int x, const int y, AssetManager& assetManager,
+					 const float levelBottom);
 
 	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;
@@ -14,15 +14,17 @@ class WalkerEnemy : public Entity
 	EntityReq OnPlayerCollision(Player& player) override;
 	EntityReq OnEntityCollision(Entity& entity) override;
 
-	bool TakeDamage() override;
-
 	private:
 	Texture2D& sprite;
-	Vector2 velocity{0, 0};
-	float gravity;
-	float speed{0.03f};
 	float accumulatedAnimTime{0};
 	float timeBetweenFrames{0.18f};
+	float jumpDestination;
 	int curFrame{0};
-	bool isVariant;
+	bool onScreen{true};
+	bool falling{true};
+	float timeBetweenJumps{1.0f};
+	float accumulatedOffscreenTime{0.0f};
+	float accumulatedJumpTime{0.0f};
+	float jumpDuration{1.0f};
+	float levelBottom;
 };

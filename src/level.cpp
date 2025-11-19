@@ -5,6 +5,7 @@
 #include "tile.h"
 #include "utils.h"
 #include "walkerEnemy.h"
+#include "jumpingFireEnemy.h"
 
 #include <algorithm>
 #include <array>
@@ -650,6 +651,14 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 	case (walkerEnemy):
 		this->entities.push_back(std::make_unique<WalkerEnemy>(
 			x, y, this->am, gravity, static_cast<bool>(basis.flags & 1)));
+		break;
+	case (fireFlower):
+		this->entities.push_back(
+			std::make_unique<FireFlower>(x, y, this->am, gravity));
+		break;
+	case (podoboo):
+		this->entities.push_back(
+			std::make_unique<JumpingFireEnemy>(x, y, this->am, this->height));
 		break;
 	default:
 		break;

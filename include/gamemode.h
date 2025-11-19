@@ -91,7 +91,7 @@ class EditMode : public GamemodeInstance
 	void SaveLevelAs();
 #endif
 
-	const std::array<std::string, 9> tileNames{
+	const std::array<std::string, 11> tileNames{
 		"Ground",
 		"Bricks",
 		"Spikes",
@@ -100,7 +100,9 @@ class EditMode : public GamemodeInstance
 		"Toggle Switch",
 		"Toggle Block",
 		"Mushroom",
-		"Goomba",
+		"Goomba",	 
+		"Fire Flower",	
+		"Podoboo",
 	};
 	RenderTexture tex;
 	Tile brush{.ID = TileID::ground, .flags = 0};

@@ -6,7 +6,7 @@
 
 GameplayMode::GameplayMode(Level* lvl, AssetManager& am)
 	: GamemodeInstance(lvl, am),
-	  player(*lvl, {this->assetManager.playerSprites}),
+	  player(*lvl, {this->assetManager.playerSprites, this->assetManager.staticEntities}),
 	  inputHandler(this->player), uiDisplay(this->assetManager.smallFont)
 {
 	this->camera = Camera2D{0};
@@ -32,6 +32,21 @@ void GameplayMode::Update()
 
 	player.AddForce({0, gravity * GetFrameTime()});
 	player.Update();
+
+	// auauguyhh
+	if (player.GetPosition().x < 12)
+	{
+		this->camera.offset.x = 192.0f - (12 - player.GetPosition().x) * 16;
+	}
+	else if (player.GetPosition().x > level->GetLength() - 12)
+	{
+		this->camera.offset.x =
+			192.0f + ((player.GetPosition().x - level->GetLength() + 12) * 16);
+	}
+	if (player.GetPosition().y > level->GetHeight() - 12)
+	{
+		this->camera.offset.y = 108.0f - (7 - player.GetPosition().y) * 16;
+	}
 
 	if (player.IsDead())
 	{

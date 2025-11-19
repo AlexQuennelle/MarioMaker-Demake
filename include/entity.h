@@ -94,6 +94,8 @@ class Entity
 	 */
 	virtual EntityReq OnEntityCollision(Entity& entity) = 0;
 
+	virtual bool TakeDamage() { return false; };
+
 	bool IsSolid() const { return this->solid; }
 	/** Should this entity be considered an active part of the game
 	 */
