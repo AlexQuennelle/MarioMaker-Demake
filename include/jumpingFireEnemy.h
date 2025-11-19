@@ -16,14 +16,15 @@ class JumpingFireEnemy : public Entity
 
 	private:
 	Texture2D& sprite;
-	Vector2 velocity{0, 0};
-	// tweakable gravity because it doesnt interact with the world like everything else
-	float gravity{0.6f};
 	float accumulatedAnimTime{0};
 	float timeBetweenFrames{0.18f};
+	float jumpDestination;
 	int curFrame{0};
 	bool onScreen{true};
+	bool falling{true};
 	float timeBetweenJumps{1.0f};
 	float accumulatedOffscreenTime{0.0f};
+	float accumulatedJumpTime{0.0f};
+	float jumpDuration{1.0f};
 	float levelBottom;
 };
