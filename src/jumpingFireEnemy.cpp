@@ -26,7 +26,7 @@ EntityReq JumpingFireEnemy::Update(const vector<Rectangle>& colliders)
 		accumulatedOffscreenTime = 0;
 		accumulatedJumpTime = 0;
 		onScreen = true;
-		this->position.y -= 0.1f;
+		this->position.y -= 0.02f;
 	}
 	else
 	{

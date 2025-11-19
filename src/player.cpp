@@ -111,6 +111,19 @@ void Player::Update()
 		}
 	}
 
+	float xClamp = Clamp(this->position.x, 0.0f + GetCollisionRect().width / 2,
+						 level.GetLength() - GetCollisionRect().width / 2);
+	if (this->position.x != xClamp)
+	{
+		this->position.x = xClamp;
+		this->velocity.x = 0;
+	}
+
+	if (this->position.y >= level.GetHeight() + GetCollisionRect().height)
+	{
+		Die(false);
+	}
+
 	CheckCollisions();
 }
 
