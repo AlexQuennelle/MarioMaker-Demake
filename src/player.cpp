@@ -107,12 +107,13 @@ void Player::Update()
 	{
 		if (!fireballs[i]->IsActive())
 		{
-			fireballs.erase(fireballs.begin() + i);	
+			fireballs.erase(fireballs.begin() + i);
 		}
 	}
 
-	float xClamp = Clamp(this->position.x, 0.0f + GetCollisionRect().width / 2,
-						 level.GetLength() - GetCollisionRect().width / 2);
+	float xClamp =
+		Clamp(this->position.x, 0.0f + (GetCollisionRect().width / 2),
+			  level.GetLength() - (GetCollisionRect().width / 2));
 	if (this->position.x != xClamp)
 	{
 		this->position.x = xClamp;
@@ -424,6 +425,8 @@ void Player::TryFireball()
 
 	if (fireballs.size() < 2)
 	{
-		fireballs.push_back(std::make_unique<Fireball>(assets.staticEntities, this->facingRight, Vector2{this->position.x, this->position.y - 1.0f}));
+		fireballs.push_back(std::make_unique<Fireball>(
+			assets.staticEntities, this->facingRight,
+			Vector2{this->position.x, this->position.y - 1.0f}));
 	}
 }

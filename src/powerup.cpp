@@ -132,7 +132,7 @@ void FireFlower::EditDraw()
 	DrawRectangleLines(this->position.x * 16, this->position.y * 16,
 					   this->collider.width * 16, this->collider.height * 16,
 					   Fade(RED, 0.6f));
-#endif // DEBUG 
+#endif // DEBUG
 }
 
 EntityReq FireFlower::OnPlayerCollision(Player& player)

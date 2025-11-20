@@ -100,8 +100,8 @@ class EditMode : public GamemodeInstance
 		"Toggle Switch",
 		"Toggle Block",
 		"Mushroom",
-		"Goomba",	 
-		"Fire Flower",	
+		"Goomba",
+		"Fire Flower",
 		"Podoboo",
 	};
 	RenderTexture tex;

@@ -1,11 +1,11 @@
 #include "level.h"
 #include "assetmanager.h"
 #include "entity.h"
+#include "jumpingFireEnemy.h"
 #include "powerup.h"
 #include "tile.h"
 #include "utils.h"
 #include "walkerEnemy.h"
-#include "jumpingFireEnemy.h"
 
 #include <algorithm>
 #include <array>

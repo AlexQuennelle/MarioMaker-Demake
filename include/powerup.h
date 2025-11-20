@@ -25,7 +25,7 @@ class FireFlower : public Entity
 {
 	public:
 	FireFlower(const int x, const int y, AssetManager& assetManager,
-			 const float gravity);
+			   const float gravity);
 
 	EntityReq Update(const vector<Rectangle>& colliders) override;
 	void Draw() override;

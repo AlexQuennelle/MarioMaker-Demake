@@ -2,21 +2,24 @@
 
 #include "player.h"
 
+#include <cmath>
 #include <raylib.h>
 #include <raymath.h>
-#include <cmath>
-#include <math.h>
 
-JumpingFireEnemy::JumpingFireEnemy(const int x, const int y, AssetManager& assetManager, const float levelBottom)
-	: Entity(x, y, assetManager), sprite(assetManager.enemies), levelBottom(levelBottom)
+JumpingFireEnemy::JumpingFireEnemy(const int x, const int y,
+								   AssetManager& assetManager,
+								   const float levelBottom)
+	: Entity(x, y, assetManager), sprite(assetManager.enemies),
+	  levelBottom(levelBottom)
 {
 	this->solid = false;
 	this->jumpDestination = this->position.y;
 }
 
-EntityReq JumpingFireEnemy::Update(const vector<Rectangle>& colliders)
+EntityReq JumpingFireEnemy::Update(const vector<Rectangle>& /*colliders*/)
 {
-	if (this->position.y >= levelBottom && accumulatedOffscreenTime < timeBetweenJumps)
+	if (this->position.y >= levelBottom &&
+		accumulatedOffscreenTime < timeBetweenJumps)
 	{
 		accumulatedOffscreenTime += GetFrameTime();
 		onScreen = false;

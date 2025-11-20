@@ -10,7 +10,7 @@ Fireball::Fireball(Texture2D& sprite, bool facingRight, Vector2 startingPos)
 }
 
 void Fireball::Update(std::vector<Entity*> entities,
-	std::vector<Rectangle> solidCols)
+					  std::vector<Rectangle> solidCols)
 {
 	if (!this->isActive)
 		return;
@@ -54,7 +54,7 @@ void Fireball::Update(std::vector<Entity*> entities,
 	this->isActive = this->lifetime > 0;
 }
 
-void Fireball::Draw() 
+void Fireball::Draw()
 {
 	if (accumulatedAnimTime >= timeBetweenFrames)
 	{

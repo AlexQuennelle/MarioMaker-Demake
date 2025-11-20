@@ -9,7 +9,8 @@ class Fireball
 {
 	public:
 	Fireball(Texture2D& sprite, bool facingRight, Vector2 startingPos);
-	void Update(std::vector<Entity*> entities, std::vector<Rectangle> solidCols);
+	void Update(std::vector<Entity*> entities,
+				std::vector<Rectangle> solidCols);
 	void Draw();
 	bool IsActive() const { return this->isActive; }
 	Rectangle GetCollider() const

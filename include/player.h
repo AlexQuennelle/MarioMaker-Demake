@@ -1,8 +1,8 @@
 #pragma once
 
 #include "assetmanager.h"
-#include "level.h"
 #include "fireball.h"
+#include "level.h"
 
 class Player
 {

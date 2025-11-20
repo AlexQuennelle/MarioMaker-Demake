@@ -113,8 +113,8 @@ void MainMenu::InitLevelScreen()
 	auto loadFunc =
 		[this](const SwitchRequest mode, const std::string& filePath)
 	{
-		this->lvlPointer =
-			std::make_unique<Level>(filePath, this->assetManager, GameplayMode::gravity);
+		this->lvlPointer = std::make_unique<Level>(filePath, this->assetManager,
+												   GameplayMode::gravity);
 		this->switchReq = mode;
 		return std::nullopt;
 	};

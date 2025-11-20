@@ -6,7 +6,8 @@
 
 GameplayMode::GameplayMode(Level* lvl, AssetManager& am)
 	: GamemodeInstance(lvl, am),
-	  player(*lvl, {this->assetManager.playerSprites, this->assetManager.staticEntities}),
+	  player(*lvl, {this->assetManager.playerSprites,
+					this->assetManager.staticEntities}),
 	  inputHandler(this->player), uiDisplay(this->assetManager.smallFont)
 {
 	this->camera = Camera2D{0};
