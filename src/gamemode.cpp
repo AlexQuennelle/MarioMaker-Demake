@@ -37,7 +37,7 @@ void GameplayMode::Update()
 	// auauguyhh
 	if (player.GetPosition().x < 12)
 	{
-		this->camera.offset.x = 192.0f - (12 - player.GetPosition().x) * 16;
+		this->camera.offset.x = 192.0f - ((12 - player.GetPosition().x) * 16);
 	}
 	else if (player.GetPosition().x > level->GetLength() - 12)
 	{
@@ -46,7 +46,7 @@ void GameplayMode::Update()
 	}
 	if (player.GetPosition().y > level->GetHeight() - 12)
 	{
-		this->camera.offset.y = 108.0f - (7 - player.GetPosition().y) * 16;
+		this->camera.offset.y = 108.0f - ((7 - player.GetPosition().y) * 16);
 	}
 
 	if (player.IsDead())

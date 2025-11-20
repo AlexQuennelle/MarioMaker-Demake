@@ -128,9 +128,9 @@ void MainMenu::InitLevelScreen()
 			NFD::OpenDialog(outPath, &filter, 1, RESOURCES_PATH)};
 		if (result == NFD_OKAY)
 		{
-			auto pred = [&outPath](auto& a)
+			auto pred = [&outPath](auto& widget)
 			{
-				return static_cast<LevelWidget&>(*a) == outPath.get();
+				return static_cast<LevelWidget&>(*widget) == outPath.get();
 			};
 			if (std::ranges::any_of(this->levels, pred))
 				return std::nullopt;

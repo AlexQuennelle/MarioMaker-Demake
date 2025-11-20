@@ -1,7 +1,9 @@
 #include "fireball.h"
 
-#include <iostream>
 #include <raymath.h>
+#include <vector>
+
+using std::vector;
 
 Fireball::Fireball(Texture2D& sprite, bool facingRight, Vector2 startingPos)
 	: sprite(sprite), position(startingPos)
@@ -9,8 +11,8 @@ Fireball::Fireball(Texture2D& sprite, bool facingRight, Vector2 startingPos)
 	this->velocity.x = facingRight ? speed : -speed;
 }
 
-void Fireball::Update(std::vector<Entity*> entities,
-					  std::vector<Rectangle> solidCols)
+void Fireball::Update(const vector<Entity*>& entities,
+					  const vector<Rectangle>& solidCols)
 {
 	if (!this->isActive)
 		return;
@@ -19,7 +21,7 @@ void Fireball::Update(std::vector<Entity*> entities,
 
 	this->position = Vector2Add(this->position, this->velocity);
 
-	for (auto& entity : entities)
+	for (const auto& entity : entities)
 	{
 		if (CheckCollisionRecs(this->GetCollider(), entity->GetCollider()))
 		{

@@ -31,7 +31,7 @@ FormatStyle:     file
 
 CheckOptions:
   - key: readability-identifier-length.IgnoredVariableNames
-    value: 'x|y|z|i|j'
+    value: 'x|y|z|i|j|t'
   - key: readability-identifier-length.IgnoredParameterNames
     value: 'x|y|z|am'
   - key: readability-identifier-length.MinimumLoopCounterNameLength

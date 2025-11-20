@@ -5,12 +5,14 @@
 #include <raylib.h>
 #include <vector>
 
+using std::vector;
+
 class Fireball
 {
 	public:
 	Fireball(Texture2D& sprite, bool facingRight, Vector2 startingPos);
-	void Update(std::vector<Entity*> entities,
-				std::vector<Rectangle> solidCols);
+	void Update(const vector<Entity*>& entities,
+				const vector<Rectangle>& solidCols);
 	void Draw();
 	bool IsActive() const { return this->isActive; }
 	Rectangle GetCollider() const
