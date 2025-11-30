@@ -1,6 +1,7 @@
 #include "mainMenu.h"
 #include "constants.h"
 #include "gamemode.h"
+#include "level.h"
 #include "nfd.hpp"
 #include "utils.h"
 
@@ -159,10 +160,21 @@ void MainMenu::InitLevelScreen()
 		return std::nullopt;
 	};
 	this->buttons.push_back(std::make_unique<MenuButton>(
-		"Load from file", Vector2Int{.x = 384 - 80, .y = 20},
+		"Load Level", Vector2Int(384 - 80, 20),
 		Rectangle{.x = -30.0f, .y = -7.0f, .width = 60.0f, .height = 14.0f},
 		altLoad));
 #endif
+	auto newLevel = [this]
+	{
+		this->lvlPointer =
+			std::make_unique<Level>(this->assetManager, "");
+		this->switchReq = SwitchRequest::EditMode;
+		return std::nullopt;
+	};
+	this->buttons.push_back(std::make_unique<MenuButton>(
+		"New Level", Vector2Int(384 - 80, 36),
+		Rectangle{.x = -30.0f, .y = -7.0f, .width = 60.0f, .height = 14.0f},
+		newLevel));
 
 	int offset{0};
 	namespace fs = std::filesystem;

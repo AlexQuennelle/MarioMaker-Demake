@@ -23,6 +23,7 @@ class Level
 	public:
 	Level() = delete;
 	Level(const std::string& filepath, AssetManager& am, float gravity = 0);
+	Level(AssetManager& am, std::string name, float gravity = 0);
 	Level(const Level& other) = delete;
 	Level(Level&& other) = default;
 
@@ -178,3 +179,5 @@ class Level
 	bool toggledThisFrame{false};
 	bool saved{false};
 };
+
+Level CreateNewLevel(AssetManager& am);

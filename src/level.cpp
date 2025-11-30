@@ -1,5 +1,6 @@
 #include "level.h"
 #include "assetmanager.h"
+#include "constants.h"
 #include "entity.h"
 #include "jumpingFireEnemy.h"
 #include "powerup.h"
@@ -10,6 +11,7 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <csignal>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -36,6 +38,11 @@ Level::Level(const std::string& filepath, AssetManager& am, float gravity)
 	: am(am), sprites(am.groundTiles), entities(0), gravity(gravity),
 	  filepath(filepath), saved(true)
 {
+#ifndef NDEBUG
+	SetTextColor(INFO);
+	std::cout << "New level from file\n";
+	ClearStyles();
+#endif // !NDEBUG
 	namespace fs = std::filesystem;
 	using std::ios;
 
@@ -76,8 +83,38 @@ Level::Level(const std::string& filepath, AssetManager& am, float gravity)
 		ClearStyles();
 	}
 }
+Level::Level(AssetManager& am, std::string name, float gravity)
+	: am(am), sprites(am.groundTiles), entities(0), name(std::move(name)),
+	  length(DEFAULT_LEVEL_LENGTH), height(DEFAULT_LEVEL_HEIGHT),
+	  gravity(gravity)
+{
+#ifndef NDEBUG
+	SetTextColor(INFO);
+	std::cout << "New level\n";
+	ClearStyles();
+#endif
+	std::srand(std::time({}));
+
+	this->grid.resize(this->length * this->height);
+	for (int x{0}; x < this->length; x++)
+	{
+		for (int y{0}; y < this->height; y++)
+		{
+			if (y >= this->height - 2)
+				this->SetTileAt(TileID::ground, x, y);
+		}
+	}
+
+	this->PopulateLevel();
+	this->StitchTexture();
+}
 Level::~Level()
 {
+#ifndef NDEBUG
+	SetTextColor(INFO);
+	std::cout << "Deleted Level\n";
+	ClearStyles();
+#endif
 	UnloadImage(this->img);
 	this->img = {
 		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
@@ -673,6 +710,7 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 
 void Level::SetLevelSize(const int length, const int height)
 {
+	// BUG: Resizing level clears top row
 	if ((this->length == length) && (this->height == height))
 	{
 #ifdef LOG_LEVEL_DATA
