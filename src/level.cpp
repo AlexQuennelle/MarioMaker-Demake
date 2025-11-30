@@ -34,9 +34,13 @@
 #endif // LOG_LEVEL_DATA
 #endif // !NDEBUG
 
-Level::Level(const std::string& filepath, AssetManager& am, float gravity)
-	: am(am), sprites(am.groundTiles), entities(0), gravity(gravity),
-	  filepath(filepath), saved(true)
+Level::Level(const std::string& filepath, AssetManager& am, float gravity) :
+	am(am),
+	sprites(am.groundTiles),
+	entities(0),
+	gravity(gravity),
+	filepath(filepath),
+	saved(true)
 {
 #ifndef NDEBUG
 	SetTextColor(INFO);
@@ -83,10 +87,17 @@ Level::Level(const std::string& filepath, AssetManager& am, float gravity)
 		ClearStyles();
 	}
 }
-Level::Level(AssetManager& am, std::string name, float gravity)
-	: am(am), sprites(am.groundTiles), entities(0), name(std::move(name)),
-	  length(DEFAULT_LEVEL_LENGTH), height(DEFAULT_LEVEL_HEIGHT),
-	  gravity(gravity)
+Level::Level(AssetManager& am, std::string name, float gravity) :
+	am(am),
+	name(std::move(name)),
+	img(nullptr),
+	sprites(am.groundTiles),
+	grid(DEFAULT_LEVEL_LENGTH * DEFAULT_LEVEL_HEIGHT),
+	tex(0),
+	playerStartPos({.x = 2.0f, .y = DEFAULT_LEVEL_HEIGHT - 2.0f}),
+	length(DEFAULT_LEVEL_LENGTH),
+	height(DEFAULT_LEVEL_HEIGHT),
+	gravity(gravity)
 {
 #ifndef NDEBUG
 	SetTextColor(INFO);
@@ -95,7 +106,7 @@ Level::Level(AssetManager& am, std::string name, float gravity)
 #endif
 	std::srand(std::time({}));
 
-	this->grid.resize(this->length * this->height);
+	// this->grid.resize(this->length * this->height);
 	for (int x{0}; x < this->length; x++)
 	{
 		for (int y{0}; y < this->height; y++)
@@ -116,8 +127,8 @@ Level::~Level()
 	ClearStyles();
 #endif
 	UnloadImage(this->img);
-	this->img = {
-		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
+	this->img
+		= {.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	UnloadTexture(this->tex);
 	this->tex.id = 0;
 }
@@ -346,8 +357,8 @@ void Level::HandleRequest(EntityReq request)
 }
 void Level::StitchTexture()
 {
-	this->img = {
-		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
+	this->img
+		= {.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
 	for (int y{0}; y < this->height; y++)
 	{
@@ -394,8 +405,8 @@ byte Level::MarchSquares(const int x, const int y)
 				continue;
 
 			auto val{
-				static_cast<byte>(this->TileAt(x + i, y + j).ID ==
-								  TileID::ground),
+				static_cast<byte>(this->TileAt(x + i, y + j).ID
+								  == TileID::ground),
 			};
 			mask |= std::rotl(val, shift);
 			shift++;
@@ -758,8 +769,8 @@ void Level::Reset()
 	this->toggleState = false;
 	this->PopulateLevel();
 	UnloadImage(this->img);
-	this->img = {
-		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
+	this->img
+		= {.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	UnloadTexture(this->tex);
 	this->tex = {.id = 0, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	this->StitchTexture();

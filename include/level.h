@@ -179,5 +179,3 @@ class Level
 	bool toggledThisFrame{false};
 	bool saved{false};
 };
-
-Level CreateNewLevel(AssetManager& am);
