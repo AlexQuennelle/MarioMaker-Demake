@@ -6,7 +6,7 @@
 #include <raymath.h>
 
 Player::Player(Level& level, PlayerAssets assets) : level(level), assets(assets)
-{}
+{ }
 
 void Player::Update()
 {
@@ -14,8 +14,8 @@ void Player::Update()
 	if (!crouching || !Grounded())
 	{
 		// add base acceleration
-		float horizAcceleration =
-			lastInput.x * baseAcceleration * GetFrameTime();
+		float horizAcceleration
+			= lastInput.x * baseAcceleration * GetFrameTime();
 
 		// apply run speed bonus if not crouching
 		if (running && !crouching)
@@ -23,15 +23,17 @@ void Player::Update()
 			horizAcceleration *= runAccelerationMult;
 
 			// less acceleration when turning
-			if (Grounded() && ((velocity.x > 0 && lastInput.x < 0) ||
-							   (velocity.x < 0 && lastInput.x > 0)))
+			if (Grounded()
+				&& ((velocity.x > 0 && lastInput.x < 0)
+					|| (velocity.x < 0 && lastInput.x > 0)))
 			{
 				horizAcceleration *= 0.5f;
 			}
 
 			// full sprint after charge
-			if (Grounded() && ((velocity.x >= 0.15f && lastInput.x > 0) ||
-							   (velocity.x <= -0.15f && lastInput.x < 0)))
+			if (Grounded()
+				&& ((velocity.x >= 0.15f && lastInput.x > 0)
+					|| (velocity.x <= -0.15f && lastInput.x < 0)))
 			{
 				velocity.x = copysignf(maxRunSpeed, lastInput.x);
 			}
@@ -111,9 +113,9 @@ void Player::Update()
 		}
 	}
 
-	float xClamp =
-		Clamp(this->position.x, 0.0f + (GetCollisionRect().width / 2),
-			  level.GetLength() - (GetCollisionRect().width / 2));
+	float xClamp
+		= Clamp(this->position.x, 0.0f + (GetCollisionRect().width / 2),
+				level.GetLength() - (GetCollisionRect().width / 2));
 	if (this->position.x != xClamp)
 	{
 		this->position.x = xClamp;
@@ -249,8 +251,8 @@ void Player::Draw()
 			// look up
 			frameRec = {.x = 32, .y = 0, .width = recWidth, .height = 32};
 		}
-		else if ((velocity.x > 0 && lastInput.x < 0) ||
-				 (velocity.x < 0 && lastInput.x > 0))
+		else if ((velocity.x > 0 && lastInput.x < 0)
+				 || (velocity.x < 0 && lastInput.x > 0))
 		{
 			// skid
 			frameRec = {.x = 0, .y = 32, .width = recWidth, .height = 32};
@@ -345,6 +347,7 @@ void Player::HandleJump(const bool jump) { this->jumpPressed = jump; }
 
 void Player::Reset(const Vector2 startPosition)
 {
+	this->velocity = {.x = 0.0f, .y = 0.0f};
 	this->position = startPosition;
 	this->dead = false;
 	this->big = false;
@@ -369,10 +372,9 @@ bool Player::Grounded()
 
 	solidCols.insert(solidCols.end(), levelCols.begin(), levelCols.end());
 
-	return std::ranges::any_of(solidCols, [groundedBox](Rectangle col)
-	{
-		return CheckCollisionRecs(groundedBox, col);
-	});
+	return std::ranges::any_of(
+		solidCols, [groundedBox](Rectangle col)
+		{ return CheckCollisionRecs(groundedBox, col); });
 }
 
 void Player::AddForce(const Vector2 force)
@@ -389,6 +391,7 @@ void Player::Die(bool jumpUp)
 
 	this->dead = true;
 	this->lastInput = {.x = 0, .y = 0};
+	this->velocity.x = 0;
 	if (jumpUp)
 	{
 		this->velocity = {.x = 0, .y = -0.3f};
