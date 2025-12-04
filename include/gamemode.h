@@ -27,8 +27,8 @@ enum class SwitchRequest : uint8_t
 class GamemodeInstance
 {
 	public:
-	GamemodeInstance(Level* lvl, AssetManager& am)
-		: level(lvl), assetManager(am) {};
+	GamemodeInstance(Level* lvl, AssetManager& am) :
+		level(lvl), assetManager(am) { };
 	virtual ~GamemodeInstance() = default;
 
 	virtual void Update() = 0;
@@ -92,17 +92,9 @@ class EditMode : public GamemodeInstance
 #endif
 
 	const std::array<std::string, 11> tileNames{
-		"Ground",
-		"Bricks",
-		"Spikes",
-		"Item Box",
-		"Coin",
-		"Toggle Switch",
-		"Toggle Block",
-		"Mushroom",
-		"Goomba",
-		"Fire Flower",
-		"Podoboo",
+		"Ground", "Bricks",		   "Spikes",	   "Item Box",
+		"Coin",	  "Toggle Switch", "Toggle Block", "Mushroom",
+		"Goomba", "Fire Flower",   "Podoboo",
 	};
 	RenderTexture tex;
 	Tile brush{.ID = TileID::ground, .flags = 0};

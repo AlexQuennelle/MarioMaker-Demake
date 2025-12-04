@@ -144,6 +144,8 @@ class Block : public Entity
 	EntityReq OnEntityCollision(Entity& entity) override;
 
 	private:
+	float bonkTimer{0.0f};
+	static constexpr float totalBonkTime{0.15f};
 	bool isVariant;
 	Texture2D& sprite;
 };
@@ -196,8 +198,10 @@ class ItemBox : public Entity
 	EntityReq OnEntityCollision(Entity& entity) override;
 
 	private:
-	float accumulatedAnimTime{0};
+	float accumulatedAnimTime{0.0f};
 	float timeBetweenFrames{0.12f};
+	float bonkTimer{0.0f};
+	static constexpr float totalBonkTime{0.15f};
 	int curFrame{0};
 	Texture2D& sprite;
 	const bool isBrick;
@@ -268,6 +272,8 @@ class ToggleSwitch : public Entity, public IToggleable
 	void SetState(const bool newState) override { this->on = newState; };
 
 	private:
+	float bonkTimer{0.0f};
+	static constexpr float totalBonkTime{0.15f};
 	bool on{false};
 	Texture2D& sprite;
 };

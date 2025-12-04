@@ -33,8 +33,8 @@ using ButtonEvent = std::function<ButtonResult()>;
 class ButtonBase
 {
 	public:
-	ButtonBase(const Vector2Int pos, const Rectangle rect)
-		: clickableArea(rect), position(pos) {};
+	ButtonBase(const Vector2Int pos, const Rectangle rect) :
+		clickableArea(rect), position(pos) { };
 	virtual ~ButtonBase() = default;
 
 	/** @brief This method performs non-drawing related logic and should be
@@ -90,8 +90,8 @@ class MenuButton : public ButtonBase
 
 class LevelWidget : public ButtonBase
 {
-	using LoadFunc =
-		std::function<ButtonResult(const SwitchRequest, const std::string&)>;
+	using LoadFunc
+		= std::function<ButtonResult(const SwitchRequest, const std::string&)>;
 
 	public:
 	LevelWidget(const std::string& filePath, const Vector2Int pos,

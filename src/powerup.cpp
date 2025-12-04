@@ -7,9 +7,8 @@
 #include <raymath.h>
 
 Mushroom::Mushroom(const int x, const int y, AssetManager& assetManager,
-				   const float gravity)
-	: Entity(x, y, assetManager), sprite(assetManager.powerups),
-	  gravity(gravity)
+				   const float gravity) :
+	Entity(x, y, assetManager), sprite(assetManager.powerups), gravity(gravity)
 {
 	this->solid = false;
 	this->velocity.x = this->speed;
@@ -29,11 +28,11 @@ EntityReq Mushroom::Update(const vector<Rectangle>& colliders)
 			if (info.minDistX < info.minDistY)
 			{
 				this->position.x += copysignf(info.minDistX, info.delta.x);
-				if ((info.delta.x <= 0 || velocity.x <= 0) &&
-					(info.delta.x >= 0 || velocity.x >= 0))
+				if ((info.delta.x <= 0 || velocity.x <= 0)
+					&& (info.delta.x >= 0 || velocity.x >= 0))
 				{
-					this->velocity.x =
-						copysignf(this->speed, -this->velocity.x);
+					this->velocity.x
+						= copysignf(this->speed, -this->velocity.x);
 				}
 			}
 			else
@@ -68,9 +67,8 @@ EntityReq Mushroom::OnPlayerCollision(Player& player)
 EntityReq Mushroom::OnEntityCollision(Entity& /*entity*/) { return {}; }
 
 FireFlower::FireFlower(const int x, const int y, AssetManager& assetManager,
-					   const float gravity)
-	: Entity(x, y, assetManager), sprite(assetManager.powerups),
-	  gravity(gravity)
+					   const float gravity) :
+	Entity(x, y, assetManager), sprite(assetManager.powerups), gravity(gravity)
 {
 	this->solid = false;
 }

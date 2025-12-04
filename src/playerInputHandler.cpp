@@ -1,6 +1,6 @@
 #include "playerInputHandler.h"
 
-PlayerInputHandler::PlayerInputHandler(Player& _player) : player(_player) {}
+PlayerInputHandler::PlayerInputHandler(Player& _player) : player(_player) { }
 
 void PlayerInputHandler::Update()
 {

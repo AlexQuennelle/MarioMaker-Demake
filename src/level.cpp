@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <array>
 #include <bit>
-#include <csignal>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
