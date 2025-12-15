@@ -10,7 +10,7 @@
 #include <emscripten/emscripten.h>
 #endif
 
-std::unique_ptr<Game> game{nullptr};
+std::unique_ptr<Game> game{nullptr}; // NOLINT
 
 void Update();
 

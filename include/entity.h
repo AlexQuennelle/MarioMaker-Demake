@@ -39,19 +39,19 @@ struct SpawnEntityRequest
 	std::unique_ptr<Entity> entity;
 };
 struct ToggleRequest
-{};
+{ };
 /** @brief Request from an @link Entity @endlink to the @link Game @endlink
  *
  *  @note This is an alias for @link std::variant @endlink, and empty requests
  *        are represented by @link std::monostate @endlink
  */
-using EntityReq =
-	std::variant<std::monostate, SpawnEntityRequest, ToggleRequest>;
+using EntityReq
+	= std::variant<std::monostate, SpawnEntityRequest, ToggleRequest>;
 
 /** @brief Base entity class. This class is abstract and should never be
  *         instantiated on its own.
  */
-class Entity
+class Entity // NOLINT
 {
 	public:
 	Entity(const int x, const int y, AssetManager& assetManager);
@@ -237,13 +237,15 @@ class Coin : public Entity
 	int curFrame{0};
 };
 
-class IToggleable
+class IToggleable // NOLINT
 {
+	public:
+	virtual ~IToggleable() = default;
+
 	/** @brief Sets the current state of the block. This should match some
 	 *         'global' state stored in @link Game @endlink to keep all toggle
 	 *         blocks synchronized
 	 */
-	public:
 	virtual void SetState(const bool newState) = 0;
 };
 class ToggleSwitch : public Entity, public IToggleable

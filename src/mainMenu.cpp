@@ -299,10 +299,8 @@ std::optional<ButtonEvent> MenuButton::OnClick()
 
 LevelWidget::LevelWidget(const std::string& filePath, const Vector2Int pos,
 						 const Rectangle rect, const LoadFunc& func) :
-	ButtonBase(pos, rect), filePath(filePath)
+	ButtonBase(pos, rect), filePath(filePath), isValid(this->ParseHeader())
 {
-	this->isValid = this->ParseHeader();
-
 	auto play = [func, filePath]
 	{
 		return func(SwitchRequest::GameplayMode, filePath);
@@ -358,9 +356,9 @@ std::optional<ButtonEvent> LevelWidget::OnClick()
 	std::optional<ButtonEvent> editFunc{this->playButton->OnClick()};
 
 	if (playFunc.has_value())
-		return playFunc.value();
+		return playFunc;
 	else if (editFunc.has_value())
-		return editFunc.value();
+		return editFunc;
 	else
 		return std::nullopt;
 }

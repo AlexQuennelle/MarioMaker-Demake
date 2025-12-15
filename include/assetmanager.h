@@ -3,7 +3,7 @@
 #include <memory>
 #include <raylib.h>
 
-class AssetManager
+class AssetManager // NOLINT
 {
 	public:
 	AssetManager();
@@ -24,8 +24,8 @@ struct PlayerAssets
 
 	Texture2D& sprites;
 	Texture2D& staticEntities;
-	float fireOffset{288};
-	float luigiOffset{128};
+	float fireOffset{288.0f};
+	float luigiOffset{128.0f};
 };
 
 using asset_ptr = std::unique_ptr<AssetManager>;

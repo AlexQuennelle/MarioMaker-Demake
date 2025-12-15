@@ -5,6 +5,7 @@
 #include "utils.h"
 
 #include <array>
+#include <bit>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
@@ -19,7 +20,10 @@
 #endif
 
 EditMode::EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui) :
-	GamemodeInstance(lvl, am), imGuiIO(imgui)
+	GamemodeInstance(lvl, am),
+	tex(LoadRenderTexture(this->level->GetLength() * 16,
+						  this->level->GetHeight() * 16)),
+	imGuiIO(imgui)
 {
 	this->camera = Camera2D{0};
 	this->camera.target = {.x = 0.0f, .y = 0.0f};
@@ -30,8 +34,8 @@ EditMode::EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui) :
 	this->camera.rotation = 0.0f;
 	this->camera.zoom = 1.0f;
 
-	this->tex = LoadRenderTexture(this->level->GetLength() * 16,
-								  this->level->GetHeight() * 16);
+	// this->tex = LoadRenderTexture(this->level->GetLength() * 16,
+	// 							  this->level->GetHeight() * 16);
 	this->level->DrawGrid(this->tex);
 }
 EditMode::~EditMode() { UnloadRenderTexture(this->tex); }
@@ -111,7 +115,7 @@ void EditMode::DrawUI()
 		this->DrawPallette();
 
 		ImGui::Separator();
-		ImGui::Text("CameraPosition:");
+		ImGui::Text("CameraPosition:"); // NOLINT
 		ImGui::SameLine();
 		ImGui::SliderFloat("##CamOffsetX", &camOffset.x, 0.0f,
 						   this->level->GetLength() - 24.0f);
@@ -123,13 +127,13 @@ void EditMode::DrawUI()
 		ImGuiTreeNodeFlags lvlInfo{ImGuiTreeNodeFlags_DefaultOpen};
 		if (ImGui::CollapsingHeader("LevelInfo", nullptr, lvlInfo))
 		{
-			ImGui::Text("Level Name");
+			ImGui::Text("Level Name"); // NOLINT
 			ImGui::InputText("##LevelName", nameBuf.data(), 255);
 
 			ImGui::Separator();
 
-			ImGui::Text("Level Size");
-			ImGui::Text("Width: ");
+			ImGui::Text("Level Size"); // NOLINT
+			ImGui::Text("Width: ");	   // NOLINT
 			ImGui::SameLine();
 			ImGui::DragInt("##lvlDimsX", &lvlDims.x, 0.05f, 24, 500);
 			ImGui::SameLine();
@@ -138,7 +142,7 @@ void EditMode::DrawUI()
 			ImGui::SameLine();
 			if (ImGui::Button("-##lvlX"))
 				lvlDims.x--;
-			ImGui::Text("Height:");
+			ImGui::Text("Height:"); // NOLINT
 			ImGui::SameLine();
 			ImGui::DragInt("##lvlDimsY", &lvlDims.y, 0.05f, 14, 32);
 			ImGui::SameLine();
@@ -288,6 +292,7 @@ void EditMode::DrawButtons()
 }
 void EditMode::DrawPallette()
 {
+	// NOLINTBEGIN Subscript is bounded
 	const char* prev{
 		this->tileNames[static_cast<uint8_t>(this->brush.ID) - 1].data()};
 	if (ImGui::BeginCombo("Tile", prev))
@@ -308,6 +313,8 @@ void EditMode::DrawPallette()
 		}
 		ImGui::EndCombo();
 	}
+	// NOLINTEND
+
 	if (this->brush.ID == TileID::brick)
 	{
 		bool stone{static_cast<bool>(this->brush.flags & 1)};
@@ -417,7 +424,7 @@ void EditMode::SaveLevel()
 	{
 		const vector<byte> data{this->level->Serialize()};
 
-		outFile.write(reinterpret_cast<const char*>(data.data()), data.size());
+		outFile.write(std::bit_cast<const char*>(data.data()), data.size());
 
 		outFile.close();
 		this->level->Save();

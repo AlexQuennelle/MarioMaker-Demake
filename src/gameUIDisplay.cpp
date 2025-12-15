@@ -4,10 +4,9 @@
 #include <cmath>
 #include <string>
 
-GameUIDisplay::GameUIDisplay(Font& font) : font(font)
-{
-	renderTex = LoadRenderTexture(384, 216);
-}
+GameUIDisplay::GameUIDisplay(Font& font) :
+	renderTex(LoadRenderTexture(384, 216)), font(font)
+{ }
 
 GameUIDisplay::~GameUIDisplay() { UnloadRenderTexture(renderTex); }
 
@@ -19,7 +18,7 @@ void GameUIDisplay::Draw(const float time, const int coins)
 			   WHITE);
 	DrawTextEx(font, std::to_string(static_cast<int>(std::ceil(time))).c_str(),
 			   {348, 16}, static_cast<float>(font.baseSize) / 4, 0, WHITE);
-	DrawTextEx(font, TextFormat("COINS: %02i", coins), {16, 8},
+	DrawTextEx(font, TextFormat("COINS: %02i", coins), {16, 8}, // NOLINT
 			   static_cast<float>(font.baseSize) / 4, 0, WHITE);
 	EndTextureMode();
 

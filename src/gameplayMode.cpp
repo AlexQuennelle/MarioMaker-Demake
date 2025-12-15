@@ -1,7 +1,6 @@
 #include "assetmanager.h"
 #include "gamemode.h"
 
-#include <format>
 #include <raylib.h>
 #include <raymath.h>
 
