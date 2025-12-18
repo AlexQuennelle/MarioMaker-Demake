@@ -43,8 +43,8 @@ FormatStyle:     file
 
 CheckOptions:
   - key: readability-identifier-length.IgnoredVariableNames
-    value: 'x|y|z|i|t'
+    value: 'x|y|z|i|j|t'
   - key: readability-identifier-length.IgnoredParameterNames
-    value: 'x|y|z|i|a|b|c'
+    value: 'x|y|z|i|j|a|b|c'
   - key: readability-identifier-length.MinimumLoopCounterNameLength
     value: '1'
