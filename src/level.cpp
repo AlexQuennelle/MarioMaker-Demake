@@ -720,14 +720,8 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 
 void Level::SetLevelSize(const int length, const int height)
 {
-	// BUG: Resizing level clears top row
 	if ((this->length == length) && (this->height == height))
-	{
-#ifdef LOG_LEVEL_DATA
-		std::cout << "Early out.\n";
-#endif // !LOG_LEVEL_DATA
 		return;
-	}
 
 	this->saved = false;
 
@@ -745,7 +739,7 @@ void Level::SetLevelSize(const int length, const int height)
 
 	for (int x{0}; x < overlapX; x++)
 	{
-		for (int y{0}; y < overlapY; y++)
+		for (int y{0}; y <= overlapY; y++)
 		{
 			int i{((this->height - y) * this->length) + x};
 			int j{((height - y) * length) + x};
