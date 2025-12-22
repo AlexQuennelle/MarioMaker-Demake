@@ -5,8 +5,8 @@
 
 using std::vector;
 
-Fireball::Fireball(Texture2D& sprite, bool facingRight, Vector2 startingPos)
-	: sprite(sprite), position(startingPos)
+Fireball::Fireball(Texture2D& sprite, bool facingRight, Vector2 startingPos) :
+	sprite(sprite), position(startingPos)
 {
 	this->velocity.x = facingRight ? speed : -speed;
 }

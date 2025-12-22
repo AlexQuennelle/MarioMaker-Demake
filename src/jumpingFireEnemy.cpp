@@ -8,18 +8,21 @@
 
 JumpingFireEnemy::JumpingFireEnemy(const int x, const int y,
 								   AssetManager& assetManager,
-								   const float levelBottom)
-	: Entity(x, y, assetManager), sprite(assetManager.enemies),
-	  levelBottom(levelBottom)
+								   const float levelBottom) :
+	Entity(x, y, assetManager),
+	sprite(assetManager.enemies),
+	jumpDestination(this->position.y),
+	levelBottom(levelBottom)
 {
 	this->solid = false;
-	this->jumpDestination = this->position.y;
 }
 
 EntityReq JumpingFireEnemy::Update(const vector<Rectangle>& /*colliders*/)
 {
-	if (this->position.y >= levelBottom &&
-		accumulatedOffscreenTime < timeBetweenJumps)
+	if (this->position.y
+		>= levelBottom
+		&& accumulatedOffscreenTime
+		< timeBetweenJumps)
 	{
 		accumulatedOffscreenTime += GetFrameTime();
 		onScreen = false;

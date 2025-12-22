@@ -24,11 +24,11 @@ enum class SwitchRequest : uint8_t
 	EditMode,
 };
 
-class GamemodeInstance
+class GamemodeInstance // NOLINT
 {
 	public:
-	GamemodeInstance(Level* lvl, AssetManager& am)
-		: level(lvl), assetManager(am) {};
+	GamemodeInstance(Level* lvl, AssetManager& am) :
+		level(lvl), assetManager(am) { };
 	virtual ~GamemodeInstance() = default;
 
 	virtual void Update() = 0;
@@ -45,7 +45,7 @@ class GamemodeInstance
 	SwitchRequest switchReq{SwitchRequest::None};
 };
 
-class GameplayMode : public GamemodeInstance
+class GameplayMode : public GamemodeInstance // NOLINT
 {
 	public:
 	GameplayMode(Level* lvl, AssetManager& am);
@@ -66,7 +66,7 @@ class GameplayMode : public GamemodeInstance
 	float time{0};
 };
 
-class EditMode : public GamemodeInstance
+class EditMode : public GamemodeInstance // NOLINT
 {
 	public:
 	EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui);
@@ -92,27 +92,19 @@ class EditMode : public GamemodeInstance
 #endif
 
 	const std::array<std::string, 11> tileNames{
-		"Ground",
-		"Bricks",
-		"Spikes",
-		"Item Box",
-		"Coin",
-		"Toggle Switch",
-		"Toggle Block",
-		"Mushroom",
-		"Goomba",
-		"Fire Flower",
-		"Podoboo",
+		"Ground", "Bricks",		   "Spikes",	   "Item Box",
+		"Coin",	  "Toggle Switch", "Toggle Block", "Mushroom",
+		"Goomba", "Fire Flower",   "Podoboo",
 	};
 	RenderTexture tex;
 	Tile brush{.ID = TileID::ground, .flags = 0};
 	const ImGuiIO& imGuiIO;
-	Vector2 lvlMousePos;
+	Vector2 lvlMousePos{0.0f, 0.0f};
 	Vector2Int selectedTile{.x = 0, .y = 0};
 	bool letGo{false};
 };
 
-class MainMenu : public GamemodeInstance
+class MainMenu : public GamemodeInstance // NOLINT
 {
 	public:
 	MainMenu(AssetManager& am, std::unique_ptr<Level>& lvl);

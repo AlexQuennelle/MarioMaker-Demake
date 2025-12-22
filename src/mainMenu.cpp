@@ -1,6 +1,7 @@
 #include "mainMenu.h"
 #include "constants.h"
 #include "gamemode.h"
+#include "level.h"
 #include "nfd.hpp"
 #include "utils.h"
 
@@ -17,8 +18,8 @@
 #include <string>
 #include <utility>
 
-MainMenu::MainMenu(AssetManager& am, std::unique_ptr<Level>& lvl)
-	: GamemodeInstance(nullptr, am), lvlPointer(lvl)
+MainMenu::MainMenu(AssetManager& am, std::unique_ptr<Level>& lvl) :
+	GamemodeInstance(nullptr, am), lvlPointer(lvl)
 {
 	this->camera = Camera2D{{0.0f, 0.0f}, {0.0f, 0.0f}, 0.0f, 1.0f};
 
@@ -64,9 +65,9 @@ void MainMenu::Update()
 	}
 	if (this->currentScreen == MenuScreen::LevelSelect)
 	{
-		this->camera.offset.y =
-			std::clamp(this->camera.offset.y + (GetMouseWheelMove() * 5.0f),
-					   this->maxScrollOffset, 0.0f);
+		this->camera.offset.y
+			= std::clamp(this->camera.offset.y + (GetMouseWheelMove() * 5.0f),
+						 this->maxScrollOffset, 0.0f);
 	}
 }
 void MainMenu::Draw()
@@ -82,7 +83,7 @@ void MainMenu::Draw()
 		button->Draw();
 	}
 }
-void MainMenu::DrawUI() {}
+void MainMenu::DrawUI() { }
 
 void MainMenu::InitTitleScreen()
 {
@@ -110,8 +111,8 @@ void MainMenu::InitLevelScreen()
 		Rectangle{.x = -20.0f, .y = -7.0f, .width = 40.0f, .height = 14.0f},
 		switchToTitle));
 
-	auto loadFunc =
-		[this](const SwitchRequest mode, const std::string& filePath)
+	auto loadFunc
+		= [this](const SwitchRequest mode, const std::string& filePath)
 	{
 		this->lvlPointer = std::make_unique<Level>(filePath, this->assetManager,
 												   GameplayMode::gravity);
@@ -159,10 +160,20 @@ void MainMenu::InitLevelScreen()
 		return std::nullopt;
 	};
 	this->buttons.push_back(std::make_unique<MenuButton>(
-		"Load from file", Vector2Int{.x = 384 - 80, .y = 20},
+		"Load Level", Vector2Int(384 - 80, 20),
 		Rectangle{.x = -30.0f, .y = -7.0f, .width = 60.0f, .height = 14.0f},
 		altLoad));
 #endif
+	auto newLevel = [this]
+	{
+		this->lvlPointer = std::make_unique<Level>(this->assetManager, "");
+		this->switchReq = SwitchRequest::EditMode;
+		return std::nullopt;
+	};
+	this->buttons.push_back(std::make_unique<MenuButton>(
+		"New Level", Vector2Int(384 - 80, 36),
+		Rectangle{.x = -30.0f, .y = -7.0f, .width = 60.0f, .height = 14.0f},
+		newLevel));
 
 	int offset{0};
 	namespace fs = std::filesystem;
@@ -203,8 +214,8 @@ void MainMenu::DrawLevelList()
 
 void MainMenu::HandleButtonResult(ButtonResult result)
 {
-	this->lvlPointer =
-		std::make_unique<Level>(result->second, this->assetManager);
+	this->lvlPointer
+		= std::make_unique<Level>(result->second, this->assetManager);
 	this->switchReq = result->first;
 }
 
@@ -235,23 +246,27 @@ ButtonResult MainMenu::SwitchScreens(MenuScreen screen)
 
 MenuButton::MenuButton(std::string text, const Vector2Int pos,
 					   const Rectangle rect, ButtonEvent eventFunc,
-					   const int fontSize)
-	: ButtonBase(pos, rect), text(std::move(text)),
-	  onClickEvent(std::move(eventFunc)), fontSize(fontSize)
-{}
+					   const int fontSize) :
+	ButtonBase(pos, rect),
+	text(std::move(text)),
+	onClickEvent(std::move(eventFunc)),
+	fontSize(fontSize)
+{ }
 void MenuButton::Update(const Vector2 mousePos)
 {
 	Vector2 relativeMousePos = mousePos - this->position;
-	this->hovered =
-		CheckCollisionPointRec(relativeMousePos, this->clickableArea);
+	this->hovered
+		= CheckCollisionPointRec(relativeMousePos, this->clickableArea);
 }
 void MenuButton::Draw()
 {
 	Vector2 center{
-		this->position.x + this->clickableArea.x +
-			(this->clickableArea.width / 2.0f),
-		this->position.y + this->clickableArea.y +
-			(this->clickableArea.height / 2.0f),
+		this->position.x
+			+ this->clickableArea.x
+			+ (this->clickableArea.width / 2.0f),
+		this->position.y
+			+ this->clickableArea.y
+			+ (this->clickableArea.height / 2.0f),
 	};
 	Vector2 topLeft{
 		this->position.x + this->clickableArea.x,
@@ -283,11 +298,9 @@ std::optional<ButtonEvent> MenuButton::OnClick()
 }
 
 LevelWidget::LevelWidget(const std::string& filePath, const Vector2Int pos,
-						 const Rectangle rect, const LoadFunc& func)
-	: ButtonBase(pos, rect), filePath(filePath)
+						 const Rectangle rect, const LoadFunc& func) :
+	ButtonBase(pos, rect), filePath(filePath), isValid(this->ParseHeader())
 {
-	this->isValid = this->ParseHeader();
-
 	auto play = [func, filePath]
 	{
 		return func(SwitchRequest::GameplayMode, filePath);
@@ -343,9 +356,9 @@ std::optional<ButtonEvent> LevelWidget::OnClick()
 	std::optional<ButtonEvent> editFunc{this->playButton->OnClick()};
 
 	if (playFunc.has_value())
-		return playFunc.value();
+		return playFunc;
 	else if (editFunc.has_value())
-		return editFunc.value();
+		return editFunc;
 	else
 		return std::nullopt;
 }
@@ -376,8 +389,10 @@ bool LevelWidget::ParseHeader()
 		else
 		{
 			SetTextColor(ERROR);
-			std::cerr << "ERROR: " << this->filePath
-					  << " is not a valid level file\n";
+			std::cerr
+				<< "ERROR: "
+				<< this->filePath
+				<< " is not a valid level file\n";
 			ClearStyles();
 			return false;
 		}

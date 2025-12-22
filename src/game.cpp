@@ -17,15 +17,16 @@
 #include <nfd.hpp>
 #endif
 
-Game::Game()
-	: imguiIO(ImGui::GetIO()), renderTex(LoadRenderTexture(384, 216)),
-	  assetManager(std::make_unique<AssetManager>())
+Game::Game() :
+	imguiIO(ImGui::GetIO()),
+	renderTex(LoadRenderTexture(384, 216)),
+	assetManager(std::make_unique<AssetManager>())
 {
 	SetTextColor(INFO);
 	std::cout << "Initializing...\n";
 
-	this->gamemode =
-		std::make_unique<MainMenu>(*this->assetManager, this->level);
+	this->gamemode
+		= std::make_unique<MainMenu>(*this->assetManager, this->level);
 
 	imguiIO.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	std::cout << "Done!\n";
@@ -103,8 +104,8 @@ void Game::SwitchMode(SwitchRequest newMode)
 		requestSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 #endif
 		this->level.reset(nullptr);
-		this->gamemode =
-			std::make_unique<MainMenu>(*this->assetManager, this->level);
+		this->gamemode
+			= std::make_unique<MainMenu>(*this->assetManager, this->level);
 		break;
 	}
 }

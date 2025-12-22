@@ -7,10 +7,10 @@
 RecCollisionInfo GetCollisionInfo(Rectangle col1, Rectangle col2)
 {
 	// Calculation of centers of rectangles
-	const Vector2 center1 = {col1.x + (col1.width / 2),
-							 col1.y + (col1.height / 2)};
-	const Vector2 center2 = {col2.x + (col2.width / 2),
-							 col2.y + (col2.height / 2)};
+	const Vector2 center1
+		= {col1.x + (col1.width / 2), col1.y + (col1.height / 2)};
+	const Vector2 center2
+		= {col2.x + (col2.width / 2), col2.y + (col2.height / 2)};
 
 	// Calculation of the distance vector between the centers of the
 	// rectangles
@@ -28,6 +28,6 @@ RecCollisionInfo GetCollisionInfo(Rectangle col1, Rectangle col2)
 	return {.delta = delta, .minDistX = minDistX, .minDistY = minDistY};
 };
 
-Entity::Entity(const int x, const int y, AssetManager& assetManager)
-	: position(x, y), assetManager(assetManager)
-{}
+Entity::Entity(const int x, const int y, AssetManager& assetManager) :
+	position(x, y), assetManager(assetManager)
+{ }

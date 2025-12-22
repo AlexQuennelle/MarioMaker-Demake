@@ -2,25 +2,47 @@
 #include "entity.h"
 #include "player.h"
 
+#include <cmath>
 #include <raylib.h>
 #include <raymath.h>
 
 Block::Block(const int x, const int y, AssetManager& assetManager,
-			 const bool variant)
-	: Entity(x, y, assetManager), isVariant(variant),
-	  sprite(assetManager.staticEntities)
+			 const bool variant) :
+	Entity(x, y, assetManager),
+	isVariant(variant),
+	sprite(assetManager.staticEntities)
 {
 	this->solid = true;
 }
-EntityReq Block::Update(const vector<Rectangle>& /*colliders*/) { return {}; }
+EntityReq Block::Update(const vector<Rectangle>& /*colliders*/)
+{
+	if (this->bonkTimer > 0.0f)
+	{
+		bonkTimer -= GetFrameTime();
+	}
+	else
+	{
+		bonkTimer = 0.0f;
+	}
+	return {};
+}
 void Block::Draw()
 {
 	Rectangle sourceRect{0.0f, 0.0f, 16.0f, 16.0f};
 	if (this->isVariant)
 		sourceRect.y += 16.0f;
 
+	auto bonkOffset{std::sqrt(
+		1.0f
+		- std::pow(
+			(0.5f - std::pow(this->bonkTimer / this->totalBonkTime, 1.5f))
+				* 2.0f,
+			2.0f))};
+	bonkOffset = this->bonkTimer > 0.0f ? bonkOffset : 0.0f;
 	DrawTextureRec(this->sprite, sourceRect,
-				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
+				   {this->position.x * 16.0f,
+					(this->position.y * 16.0f) - (bonkOffset * 4.0f)},
+				   WHITE);
 
 #ifdef DRAW_COLS
 	DrawRectangleLines((this->position.x + this->collider.x) * 16,
@@ -35,26 +57,29 @@ EntityReq Block::OnPlayerCollision(Player& player)
 	if (this->isVariant)
 		return {};
 
-	RecCollisionInfo info =
-		GetCollisionInfo(player.GetCollisionRect(), this->GetCollider());
+	RecCollisionInfo info
+		= GetCollisionInfo(player.GetCollisionRect(), this->GetCollider());
 
-	if (player.IsBig() && info.minDistY < info.minDistX && info.delta.y > 0)
+	if (info.minDistY < info.minDistX && info.delta.y > 0)
 	{
 		// head bonk
-		this->isActive = false;
+		if (player.IsBig())
+			this->isActive = false;
+
 		player.SetVelocity({player.GetVelocity().x, 0});
 		player.CancelJump();
+		this->bonkTimer = this->totalBonkTime;
 	}
 	return {};
 }
 EntityReq Block::OnEntityCollision(Entity& /*entity*/) { return {}; }
 
-Spike::Spike(const int x, const int y, AssetManager& assetManager)
-	: Entity(x, y, assetManager), sprite(assetManager.staticEntities)
+Spike::Spike(const int x, const int y, AssetManager& assetManager) :
+	Entity(x, y, assetManager), sprite(assetManager.staticEntities)
 {
 	this->solid = true;
-	this->collider = {
-		.x = 0.125f, .y = 0.125f, .width = 0.75f, .height = 0.75f};
+	this->collider
+		= {.x = 0.125f, .y = 0.125f, .width = 0.75f, .height = 0.75f};
 }
 EntityReq Spike::Update(const vector<Rectangle>& /*colliders*/) { return {}; }
 void Spike::Draw()
@@ -81,14 +106,27 @@ EntityReq Spike::OnPlayerCollision(Player& player)
 EntityReq Spike::OnEntityCollision(Entity& /*entity*/) { return {}; }
 
 ItemBox::ItemBox(const int x, const int y, AssetManager& assetManager,
-				 const bool isBrick, const bool isHidden)
-	: Entity(x, y, assetManager), sprite(assetManager.staticEntities),
-	  isBrick(isBrick), isHidden(isHidden)
+				 const bool isBrick, const bool isHidden) :
+	Entity(x, y, assetManager),
+	sprite(assetManager.staticEntities),
+	isBrick(isBrick),
+	isHidden(isHidden)
 {
 	if (!this->isHidden)
 		this->solid = true;
 }
-EntityReq ItemBox::Update(const vector<Rectangle>& /*colliders*/) { return {}; }
+EntityReq ItemBox::Update(const vector<Rectangle>& /*colliders*/)
+{
+	if (this->bonkTimer > 0.0f)
+	{
+		bonkTimer -= GetFrameTime();
+	}
+	else
+	{
+		bonkTimer = 0.0f;
+	}
+	return {};
+}
 void ItemBox::Draw()
 {
 	if (!this->empty && this->isHidden)
@@ -124,8 +162,17 @@ void ItemBox::Draw()
 		sourceRect = {.x = 0.0f, .y = 32.0f, .width = 16.0f, .height = 16.0f};
 	}
 
+	auto bonkOffset{std::sqrt(
+		1.0f
+		- std::pow(
+			(0.5f - std::pow(this->bonkTimer / this->totalBonkTime, 1.5f))
+				* 2.0f,
+			2.0f))};
+	bonkOffset = this->bonkTimer > 0.0f ? bonkOffset : 0.0f;
 	DrawTextureRec(this->sprite, sourceRect,
-				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
+				   {this->position.x * 16.0f,
+					(this->position.y * 16.0f) - (bonkOffset * 4.0f)},
+				   WHITE);
 
 #ifdef DRAW_COLS
 	DrawRectangleLines((this->position.x + this->collider.x) * 16,
@@ -162,11 +209,15 @@ EntityReq ItemBox::OnPlayerCollision(Player& player)
 	if (this->empty)
 		return {};
 
-	RecCollisionInfo info =
-		GetCollisionInfo(player.GetCollisionRect(), this->GetCollider());
+	RecCollisionInfo info
+		= GetCollisionInfo(player.GetCollisionRect(), this->GetCollider());
 
-	if (info.minDistY < info.minDistX && info.delta.y > 0 &&
-		player.GetVelocity().y < 0.0f)
+	if (info.minDistY
+		< info.minDistX
+		&& info.delta.y
+		> 0
+		&& player.GetVelocity().y
+		< 0.0f)
 	{
 		player.SetVelocity({player.GetVelocity().x, 0});
 		player.CancelJump();
@@ -175,13 +226,14 @@ EntityReq ItemBox::OnPlayerCollision(Player& player)
 		player.GainCoin();
 		this->empty = true;
 		this->solid = true;
+		this->bonkTimer = this->totalBonkTime;
 	}
 	return {};
 }
 EntityReq ItemBox::OnEntityCollision(Entity& /*entity*/) { return {}; }
 
-Coin::Coin(const int x, const int y, AssetManager& assetManager)
-	: Entity(x, y, assetManager), sprite(assetManager.staticEntities)
+Coin::Coin(const int x, const int y, AssetManager& assetManager) :
+	Entity(x, y, assetManager), sprite(assetManager.staticEntities)
 {
 	this->solid = false;
 }
@@ -227,13 +279,22 @@ EntityReq Coin::OnPlayerCollision(Player& player)
 }
 EntityReq Coin::OnEntityCollision(Entity& /*entity*/) { return {}; }
 
-ToggleSwitch::ToggleSwitch(const int x, const int y, AssetManager& assetManager)
-	: Entity(x, y, assetManager), sprite(assetManager.staticEntities)
+ToggleSwitch::ToggleSwitch(const int x, const int y,
+						   AssetManager& assetManager) :
+	Entity(x, y, assetManager), sprite(assetManager.staticEntities)
 {
 	this->solid = true;
 }
 EntityReq ToggleSwitch::Update(const vector<Rectangle>& /*colliders*/)
 {
+	if (this->bonkTimer > 0.0f)
+	{
+		bonkTimer -= GetFrameTime();
+	}
+	else
+	{
+		bonkTimer = 0.0f;
+	}
 	return {};
 }
 void ToggleSwitch::Draw()
@@ -242,8 +303,17 @@ void ToggleSwitch::Draw()
 	if (this->on)
 		sourceRect.y += 16.0f;
 
+	auto bonkOffset{std::sqrt(
+		1.0f
+		- std::pow(
+			(0.5f - std::pow(this->bonkTimer / this->totalBonkTime, 1.5f))
+				* 2.0f,
+			2.0f))};
+	bonkOffset = this->bonkTimer > 0.0f ? bonkOffset : 0.0f;
 	DrawTextureRec(this->sprite, sourceRect,
-				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
+				   {this->position.x * 16.0f,
+					(this->position.y * 16.0f) - (bonkOffset * 4.0f)},
+				   WHITE);
 
 #ifdef DRAW_COLS
 	DrawRectangleLines((this->position.x + this->collider.x) * 16,
@@ -255,8 +325,8 @@ void ToggleSwitch::Draw()
 void ToggleSwitch::EditDraw() { this->Draw(); }
 EntityReq ToggleSwitch::OnPlayerCollision(Player& player)
 {
-	RecCollisionInfo info =
-		GetCollisionInfo(player.GetCollisionRect(), this->GetCollider());
+	RecCollisionInfo info
+		= GetCollisionInfo(player.GetCollisionRect(), this->GetCollider());
 
 	if (info.minDistY < info.minDistX && info.delta.y > 0)
 	{
@@ -264,6 +334,7 @@ EntityReq ToggleSwitch::OnPlayerCollision(Player& player)
 		this->on = !this->on;
 		player.SetVelocity({player.GetVelocity().x, 0});
 		player.CancelJump();
+		this->bonkTimer = this->totalBonkTime;
 		return {ToggleRequest()};
 	}
 	return {};
@@ -271,9 +342,11 @@ EntityReq ToggleSwitch::OnPlayerCollision(Player& player)
 EntityReq ToggleSwitch::OnEntityCollision(Entity& /*entity*/) { return {}; }
 
 ToggleBlock::ToggleBlock(const int x, const int y, AssetManager& assetManager,
-						 const bool startOn)
-	: Entity(x, y, assetManager), startOn(startOn), on(false),
-	  sprite(assetManager.staticEntities)
+						 const bool startOn) :
+	Entity(x, y, assetManager),
+	startOn(startOn),
+	on(false),
+	sprite(assetManager.staticEntities)
 {
 	if (!this->startOn)
 		this->solid = true;

@@ -30,11 +30,11 @@ using ButtonEvent = std::function<ButtonResult()>;
 
 /** @brief Abstract base button class for interactive UI.
  */
-class ButtonBase
+class ButtonBase // NOLINT
 {
 	public:
-	ButtonBase(const Vector2Int pos, const Rectangle rect)
-		: clickableArea(rect), position(pos) {};
+	ButtonBase(const Vector2Int pos, const Rectangle rect) :
+		clickableArea(rect), position(pos) { };
 	virtual ~ButtonBase() = default;
 
 	/** @brief This method performs non-drawing related logic and should be
@@ -63,7 +63,7 @@ class ButtonBase
 	bool hovered{false};
 };
 
-class MenuButton : public ButtonBase
+class MenuButton : public ButtonBase // NOLINT
 {
 	public:
 	MenuButton(std::string text, const Vector2Int position,
@@ -88,10 +88,10 @@ class MenuButton : public ButtonBase
 	const ButtonEvent onClickEvent;
 };
 
-class LevelWidget : public ButtonBase
+class LevelWidget : public ButtonBase // NOLINT
 {
-	using LoadFunc =
-		std::function<ButtonResult(const SwitchRequest, const std::string&)>;
+	using LoadFunc
+		= std::function<ButtonResult(const SwitchRequest, const std::string&)>;
 
 	public:
 	LevelWidget(const std::string& filePath, const Vector2Int pos,
@@ -137,9 +137,9 @@ class LevelWidget : public ButtonBase
 	 */
 	bool ParseHeader();
 
-	bool isValid{false};
-	std::string levelName;
 	const std::string filePath;
+	std::string levelName;
 	std::unique_ptr<MenuButton> playButton;
 	std::unique_ptr<MenuButton> editButton;
+	bool isValid{false};
 };

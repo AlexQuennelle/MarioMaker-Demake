@@ -2,7 +2,7 @@
 
 #include <raylib.h>
 
-class GameUIDisplay
+class GameUIDisplay // NOLINT
 {
 	public:
 	GameUIDisplay(Font& font);

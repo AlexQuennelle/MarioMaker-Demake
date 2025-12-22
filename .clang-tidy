@@ -1,9 +1,18 @@
 ---
 Checks: "-*,
+        bugprone-*,
+        -bugprone-easily-swappable-parameters,
+        -bugprone-implicit-widening-of-multiplication-result,
+        -bugprone-narrowing-conversions,
+
+        cert-*,
+        -cert-dcl16-c,
+        -cert-msc32-c,
+        -cert-msc51-cpp,
+
         modernize-*,
-        -modernize-use-trailing-return-type,
-        -modernize-return-braced-init-list,
         -modernize-use-nodiscard,
+        -modernize-use-trailing-return-type,
 
         readability-*,
         -readability-make-member-function-const,
@@ -17,9 +26,12 @@ Checks: "-*,
         portability-*,
 
         performance-*,
-        -performance-no-int-to-ptr,
 
+        cppcoreguidelines-*,
         -cppcoreguidelines-non-private-member-variables-in-classes,
+        -cppcoreguidelines-avoid-magic-numbers,
+        -cppcoreguidelines-avoid-const-or-ref-data-members,
+        -cppcoreguidelines-narrowing-conversions,
 
         misc-*,
         -misc-use-internal-linkage,
@@ -33,6 +45,6 @@ CheckOptions:
   - key: readability-identifier-length.IgnoredVariableNames
     value: 'x|y|z|i|j|t'
   - key: readability-identifier-length.IgnoredParameterNames
-    value: 'x|y|z|am'
+    value: 'x|y|z|i|j|a|b|c'
   - key: readability-identifier-length.MinimumLoopCounterNameLength
     value: '1'

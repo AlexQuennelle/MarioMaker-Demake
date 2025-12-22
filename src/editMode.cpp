@@ -5,6 +5,7 @@
 #include "utils.h"
 
 #include <array>
+#include <bit>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
@@ -18,8 +19,11 @@
 #include <nfd.hpp>
 #endif
 
-EditMode::EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui)
-	: GamemodeInstance(lvl, am), imGuiIO(imgui)
+EditMode::EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui) :
+	GamemodeInstance(lvl, am),
+	tex(LoadRenderTexture(this->level->GetLength() * 16,
+						  this->level->GetHeight() * 16)),
+	imGuiIO(imgui)
 {
 	this->camera = Camera2D{0};
 	this->camera.target = {.x = 0.0f, .y = 0.0f};
@@ -30,22 +34,22 @@ EditMode::EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui)
 	this->camera.rotation = 0.0f;
 	this->camera.zoom = 1.0f;
 
-	this->tex = LoadRenderTexture(this->level->GetLength() * 16,
-								  this->level->GetHeight() * 16);
+	// this->tex = LoadRenderTexture(this->level->GetLength() * 16,
+	// 							  this->level->GetHeight() * 16);
 	this->level->DrawGrid(this->tex);
 }
 EditMode::~EditMode() { UnloadRenderTexture(this->tex); }
 void EditMode::Update()
 {
-	if (IsMouseButtonUp(MOUSE_BUTTON_LEFT) &&
-		IsMouseButtonUp(MOUSE_BUTTON_RIGHT))
+	if (IsMouseButtonUp(MOUSE_BUTTON_LEFT)
+		&& IsMouseButtonUp(MOUSE_BUTTON_RIGHT))
 	{
 		this->letGo = true;
 	}
 
 	float cellSize{SCREEN_WIDTH / 24.0f};
-	this->lvlMousePos = {(GetMousePosition() / cellSize) -
-						 this->camera.offset / 16.0f};
+	this->lvlMousePos
+		= {(GetMousePosition() / cellSize) - this->camera.offset / 16.0f};
 
 	Vector2Int newSelection{
 		.x = static_cast<int>(lvlMousePos.x),
@@ -56,14 +60,14 @@ void EditMode::Update()
 
 	if (!this->imGuiIO.WantCaptureMouse && this->letGo)
 	{
-		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) ||
-			(IsMouseButtonDown(MOUSE_LEFT_BUTTON) && MouseMoved))
+		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)
+			|| (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && MouseMoved))
 		{
 			this->level->SetTileAtEditor(this->brush.ID, this->selectedTile,
 										 this->brush.flags);
 		}
-		else if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) ||
-				 (IsMouseButtonDown(MOUSE_RIGHT_BUTTON) && MouseMoved))
+		else if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)
+				 || (IsMouseButtonDown(MOUSE_RIGHT_BUTTON) && MouseMoved))
 		{
 			this->level->SetTileAtEditor(TileID::air, this->selectedTile);
 		}
@@ -102,16 +106,16 @@ void EditMode::DrawUI()
 	strcpy(nameBuf.data(), this->level->GetName().c_str());
 
 #if !defined(PLATFORM_WEB)
-	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings |
-						   ImGuiWindowFlags_AlwaysAutoResize |
-						   ImGuiWindowFlags_NoCollapse};
+	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings
+						   | ImGuiWindowFlags_AlwaysAutoResize
+						   | ImGuiWindowFlags_NoCollapse};
 	if (ImGui::Begin("Menu", nullptr, flags))
 	{
 		this->DrawButtons();
 		this->DrawPallette();
 
 		ImGui::Separator();
-		ImGui::Text("CameraPosition:");
+		ImGui::Text("CameraPosition:"); // NOLINT
 		ImGui::SameLine();
 		ImGui::SliderFloat("##CamOffsetX", &camOffset.x, 0.0f,
 						   this->level->GetLength() - 24.0f);
@@ -123,13 +127,13 @@ void EditMode::DrawUI()
 		ImGuiTreeNodeFlags lvlInfo{ImGuiTreeNodeFlags_DefaultOpen};
 		if (ImGui::CollapsingHeader("LevelInfo", nullptr, lvlInfo))
 		{
-			ImGui::Text("Level Name");
+			ImGui::Text("Level Name"); // NOLINT
 			ImGui::InputText("##LevelName", nameBuf.data(), 255);
 
 			ImGui::Separator();
 
-			ImGui::Text("Level Size");
-			ImGui::Text("Width: ");
+			ImGui::Text("Level Size"); // NOLINT
+			ImGui::Text("Width: ");	   // NOLINT
 			ImGui::SameLine();
 			ImGui::DragInt("##lvlDimsX", &lvlDims.x, 0.05f, 24, 500);
 			ImGui::SameLine();
@@ -138,7 +142,7 @@ void EditMode::DrawUI()
 			ImGui::SameLine();
 			if (ImGui::Button("-##lvlX"))
 				lvlDims.x--;
-			ImGui::Text("Height:");
+			ImGui::Text("Height:"); // NOLINT
 			ImGui::SameLine();
 			ImGui::DragInt("##lvlDimsY", &lvlDims.y, 0.05f, 14, 32);
 			ImGui::SameLine();
@@ -151,9 +155,10 @@ void EditMode::DrawUI()
 	}
 	ImGui::End();
 #else
-	ImGuiWindowFlags flags{
-		ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_AlwaysAutoResize |
-		ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse};
+	ImGuiWindowFlags flags{ImGuiWindowFlags_NoSavedSettings
+						   | ImGuiWindowFlags_AlwaysAutoResize
+						   | ImGuiWindowFlags_NoTitleBar
+						   | ImGuiWindowFlags_NoCollapse};
 	ImGui::SetNextWindowPos({0.0f, SCREEN_HEIGHT});
 	ImGui::SetNextWindowSize({SCREEN_WIDTH, EDIT_PANEL_HEIGHT});
 	if (ImGui::Begin("Menu", nullptr, flags))
@@ -222,8 +227,8 @@ void EditMode::DrawUI()
 
 	lvlDims.x = (lvlDims.x >= 24) ? lvlDims.x : this->level->GetLength();
 	lvlDims.y = (lvlDims.y >= 14) ? lvlDims.y : this->level->GetHeight();
-	if ((this->level->GetLength() != lvlDims.x) ||
-		(this->level->GetHeight() != lvlDims.y))
+	if ((this->level->GetLength() != lvlDims.x)
+		|| (this->level->GetHeight() != lvlDims.y))
 	{
 		this->level->SetLevelSize(lvlDims.x, lvlDims.y);
 		// FIX: Potential problem here with texture loading
@@ -287,6 +292,7 @@ void EditMode::DrawButtons()
 }
 void EditMode::DrawPallette()
 {
+	// NOLINTBEGIN Subscript is bounded
 	const char* prev{
 		this->tileNames[static_cast<uint8_t>(this->brush.ID) - 1].data()};
 	if (ImGui::BeginCombo("Tile", prev))
@@ -307,6 +313,8 @@ void EditMode::DrawPallette()
 		}
 		ImGui::EndCombo();
 	}
+	// NOLINTEND
+
 	if (this->brush.ID == TileID::brick)
 	{
 		bool stone{static_cast<bool>(this->brush.flags & 1)};
@@ -320,8 +328,8 @@ void EditMode::DrawPallette()
 		ImGui::Checkbox("Brick Sprite", &brick);
 		ImGui::SameLine();
 		ImGui::Checkbox("Hidden", &hidden);
-		this->brush.flags =
-			static_cast<uint16_t>(brick) | (static_cast<uint16_t>(hidden) << 1);
+		this->brush.flags = static_cast<uint16_t>(brick)
+							| (static_cast<uint16_t>(hidden) << 1);
 	}
 	else if (this->brush.ID == TileID::toggleBlock)
 	{
@@ -337,8 +345,8 @@ void EditMode::DrawPallette()
 	}
 }
 
-void EditMode::DrawButtonsWeb() {}
-void EditMode::DrawPalletteWeb() {}
+void EditMode::DrawButtonsWeb() { }
+void EditMode::DrawPalletteWeb() { }
 
 void EditMode::ProcessInput()
 {
@@ -382,8 +390,8 @@ void EditMode::SaveLevel()
 	using std::ios;
 	if (this->level->HasFilepath())
 	{
-		outFile =
-			std::ofstream(this->level->GetFilepath(), ios::out | ios::binary);
+		outFile
+			= std::ofstream(this->level->GetFilepath(), ios::out | ios::binary);
 	}
 	else
 	{
@@ -396,8 +404,8 @@ void EditMode::SaveLevel()
 		if (result == NFD_OKAY)
 		{
 			this->level->SetFilepath(outPath.get());
-			outFile =
-				std::ofstream(outPath.get(), std::ios::out | std::ios::binary);
+			outFile = std::ofstream(outPath.get(),
+									std::ios::out | std::ios::binary);
 		}
 		else if (result == NFD_ERROR)
 		{
@@ -416,7 +424,7 @@ void EditMode::SaveLevel()
 	{
 		const vector<byte> data{this->level->Serialize()};
 
-		outFile.write(reinterpret_cast<const char*>(data.data()), data.size());
+		outFile.write(std::bit_cast<const char*>(data.data()), data.size());
 
 		outFile.close();
 		this->level->Save();

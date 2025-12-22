@@ -1,5 +1,6 @@
 #include "level.h"
 #include "assetmanager.h"
+#include "constants.h"
 #include "entity.h"
 #include "jumpingFireEnemy.h"
 #include "powerup.h"
@@ -19,7 +20,10 @@
 #include <iosfwd>
 #include <iostream>
 #include <memory>
+#include <random>
+#include <ranges>
 #include <raylib.h>
+#include <span>
 #include <string>
 #include <utility>
 #include <vector>
@@ -32,10 +36,21 @@
 #endif // LOG_LEVEL_DATA
 #endif // !NDEBUG
 
-Level::Level(const std::string& filepath, AssetManager& am, float gravity)
-	: am(am), sprites(am.groundTiles), entities(0), gravity(gravity),
-	  filepath(filepath), saved(true)
+Level::Level(const std::string& filepath, AssetManager& am, float gravity) :
+	am(am),
+	img(),
+	sprites(am.groundTiles),
+	entities(0),
+	tex(),
+	gravity(gravity),
+	filepath(filepath),
+	saved(true)
 {
+#ifndef NDEBUG
+	SetTextColor(INFO);
+	std::cout << "New level from file\n";
+	ClearStyles();
+#endif // !NDEBUG
 	namespace fs = std::filesystem;
 	using std::ios;
 
@@ -76,11 +91,48 @@ Level::Level(const std::string& filepath, AssetManager& am, float gravity)
 		ClearStyles();
 	}
 }
+Level::Level(AssetManager& am, std::string name, float gravity) :
+	am(am),
+	name(std::move(name)),
+	img(nullptr),
+	sprites(am.groundTiles),
+	grid(DEFAULT_LEVEL_LENGTH * DEFAULT_LEVEL_HEIGHT),
+	tex(0),
+	playerStartPos({.x = 2.0f, .y = DEFAULT_LEVEL_HEIGHT - 2.0f}),
+	length(DEFAULT_LEVEL_LENGTH),
+	height(DEFAULT_LEVEL_HEIGHT),
+	gravity(gravity)
+{
+#ifndef NDEBUG
+	SetTextColor(INFO);
+	std::cout << "New level\n";
+	ClearStyles();
+#endif
+	std::srand(std::time({}));
+
+	// this->grid.resize(this->length * this->height);
+	for (int x{0}; x < this->length; x++)
+	{
+		for (int y{0}; y < this->height; y++)
+		{
+			if (y >= this->height - 2)
+				this->SetTileAt(TileID::ground, x, y);
+		}
+	}
+
+	this->PopulateLevel();
+	this->StitchTexture();
+}
 Level::~Level()
 {
+#ifndef NDEBUG
+	SetTextColor(INFO);
+	std::cout << "Deleted Level\n";
+	ClearStyles();
+#endif
 	UnloadImage(this->img);
-	this->img = {
-		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
+	this->img
+		= {.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	UnloadTexture(this->tex);
 	this->tex.id = 0;
 }
@@ -309,8 +361,8 @@ void Level::HandleRequest(EntityReq request)
 }
 void Level::StitchTexture()
 {
-	this->img = {
-		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
+	this->img
+		= {.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
 	for (int y{0}; y < this->height; y++)
 	{
@@ -325,10 +377,11 @@ void Level::StitchTexture()
 				{
 					Rectangle dest{
 						(x * 16.0f) + ((i % 2) * 8.0f),
-						(y * 16.0f) + ((i / 2) * 8.0f),
+						(y * 16.0f) + (std::floor(i / 2.0f) * 8.0f),
 						8.0f,
 						8.0f,
 					};
+					// NOLINTNEXTLINE
 					ImageDraw(&this->img, this->sprites, rects[i], dest, WHITE);
 				}
 			}
@@ -357,8 +410,8 @@ byte Level::MarchSquares(const int x, const int y)
 				continue;
 
 			auto val{
-				static_cast<byte>(this->TileAt(x + i, y + j).ID ==
-								  TileID::ground),
+				static_cast<byte>(this->TileAt(x + i, y + j).ID
+								  == TileID::ground),
 			};
 			mask |= std::rotl(val, shift);
 			shift++;
@@ -398,26 +451,38 @@ void Level::ParseData(const vector<char>& data)
 	std::cout << "Level name: " << this->name << '\n';
 #endif // !LOG_LEVEL_DATA
 
-	const char* addr{&data[24 + (((nameLen / 4) + 1) * 4)]};
-	const char* endAddr{data.data() + data.size() - 1};
-
-	this->grid.reserve(this->length * this->height);
-	while (addr < endAddr)
+	struct DataBlock
 	{
-		uint32_t runLength{0};
-		std::memcpy(&runLength, addr, 4);
-		Tile tile{.ID = TileID::air, .flags = 0};
-		std::memcpy(&tile, addr + 4, 3);
-		for (int i{0}; i < runLength; i++)
-		{
-			this->grid.push_back(tile);
-		}
-		addr += 8;
-	}
+		uint32_t num;
+		Tile dat;
+	};
+
+	auto beg(data.begin() + (24 + (((nameLen / 4) + 1) * 4)));
+	std::span<const char> span(beg, data.end());
+	namespace r = std::ranges;
+	namespace rv = std::ranges::views;
+	auto fuse = [](auto range) -> DataBlock
+	{
+		DataBlock block{};
+		std::memcpy(&block, range.data(), 8);
+		return block;
+	};
+	this->grid.reserve(this->length * this->height);
+	this->grid
+		= rv::chunk(span, 8)
+		  | rv::transform(fuse)
+		  | rv::transform([](auto blk) { return rv::repeat(blk.dat, blk.num); })
+		  | rv::join
+		  | r::to<vector<Tile>>();
 }
 
 array<Rectangle, 4> Level::GetRects(const byte mask)
 {
+	std::random_device randomDev{};
+	std::seed_seq seeds({randomDev(), randomDev()});
+	std::mt19937 mt(seeds);
+	std::uniform_int_distribution<> rand2(0, 1);
+	std::uniform_int_distribution<> rand4(0, 3);
 	// Top left
 	Rectangle topL;
 	if ((mask & 10) == 0)
@@ -428,7 +493,8 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		topL = {
 			.x = 16.0f,
-			.y = static_cast<float>((std::rand() % 2) * 8),
+			.y = static_cast<float>(rand2(mt) * 8),
+			// .y = static_cast<float>(rand(mt) * 8),
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -437,7 +503,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		topL = {
 			.x = 24.0f,
-			.y = static_cast<float>((std::rand() % 2) * 8),
+			.y = static_cast<float>(rand2(mt) * 8),
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -450,7 +516,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		topL = {
 			.x = 32.0f,
-			.y = static_cast<float>((std::rand() % 4) * 8),
+			.y = static_cast<float>(rand2(mt) * 8),
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -466,7 +532,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		topR = {
 			.x = 16.0f,
-			.y = static_cast<float>((std::rand() % 2) * 8),
+			.y = static_cast<float>(rand2(mt) * 8),
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -475,7 +541,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		topR = {
 			.x = 24.0f,
-			.y = static_cast<float>((std::rand() % 2) * 8) + 16.0f,
+			.y = static_cast<float>(rand2(mt) * 8) + 16.0f,
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -488,7 +554,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		topR = {
 			.x = 32.0f,
-			.y = static_cast<float>((std::rand() % 4) * 8),
+			.y = static_cast<float>(rand4(mt) * 8),
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -504,7 +570,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		botL = {
 			.x = 16.0f,
-			.y = static_cast<float>((std::rand() % 2) * 8) + 16,
+			.y = static_cast<float>(rand2(mt) * 8) + 16,
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -513,7 +579,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		botL = {
 			.x = 24.0f,
-			.y = static_cast<float>((std::rand() % 2) * 8),
+			.y = static_cast<float>(rand2(mt) * 8),
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -526,7 +592,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		botL = {
 			.x = 32.0f,
-			.y = static_cast<float>((std::rand() % 4) * 8),
+			.y = static_cast<float>(rand4(mt) * 8),
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -542,7 +608,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		botR = {
 			.x = 16.0f,
-			.y = static_cast<float>((std::rand() % 2) * 8) + 16.0f,
+			.y = static_cast<float>(rand2(mt) * 8) + 16.0f,
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -551,7 +617,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		botR = {
 			.x = 24.0f,
-			.y = static_cast<float>((std::rand() % 2) * 8) + 16.0f,
+			.y = static_cast<float>(rand2(mt) * 8) + 16.0f,
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -564,7 +630,7 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	{
 		botR = {
 			.x = 32.0f,
-			.y = static_cast<float>((std::rand() % 4) * 8),
+			.y = static_cast<float>(rand4(mt) * 8),
 			.width = 8.0f,
 			.height = 8.0f,
 		};
@@ -665,7 +731,7 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 	}
 	if (basis.ID == TileID::toggleBlock || basis.ID == TileID::toggleSwitch)
 	{
-		ToggleBlock* block{static_cast<ToggleBlock*>(
+		ToggleBlock* block{dynamic_cast<ToggleBlock*>(
 			this->entities[this->entities.size() - 1].get())};
 		this->toggleBlocks.push_back(block);
 	}
@@ -674,12 +740,7 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 void Level::SetLevelSize(const int length, const int height)
 {
 	if ((this->length == length) && (this->height == height))
-	{
-#ifdef LOG_LEVEL_DATA
-		std::cout << "Early out.\n";
-#endif // !LOG_LEVEL_DATA
 		return;
-	}
 
 	this->saved = false;
 
@@ -697,7 +758,7 @@ void Level::SetLevelSize(const int length, const int height)
 
 	for (int x{0}; x < overlapX; x++)
 	{
-		for (int y{0}; y < overlapY; y++)
+		for (int y{0}; y <= overlapY; y++)
 		{
 			int i{((this->height - y) * this->length) + x};
 			int j{((height - y) * length) + x};
@@ -720,8 +781,8 @@ void Level::Reset()
 	this->toggleState = false;
 	this->PopulateLevel();
 	UnloadImage(this->img);
-	this->img = {
-		.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
+	this->img
+		= {.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	UnloadTexture(this->tex);
 	this->tex = {.id = 0, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	this->StitchTexture();

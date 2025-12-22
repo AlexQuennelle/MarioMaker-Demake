@@ -11,7 +11,7 @@
 /** @brief Class representing an instance of the program and encapsulating
  *         global state.
  */
-class Game
+class Game // NOLINT
 {
 	public:
 	Game();

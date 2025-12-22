@@ -6,126 +6,133 @@
 #include <raymath.h>
 
 Player::Player(Level& level, PlayerAssets assets) : level(level), assets(assets)
-{}
+{ }
 
 void Player::Update()
 {
 	// only move if not crouching unless airborne
-	if (!crouching || !Grounded())
+	if (!this->crouching || !this->Grounded())
 	{
 		// add base acceleration
-		float horizAcceleration =
-			lastInput.x * baseAcceleration * GetFrameTime();
+		float horizAcceleration
+			= lastInput.x * baseAcceleration * GetFrameTime();
 
 		// apply run speed bonus if not crouching
-		if (running && !crouching)
+		if (this->running && !this->crouching)
 		{
-			horizAcceleration *= runAccelerationMult;
+			horizAcceleration *= this->runAccelerationMult;
 
 			// less acceleration when turning
-			if (Grounded() && ((velocity.x > 0 && lastInput.x < 0) ||
-							   (velocity.x < 0 && lastInput.x > 0)))
+			if (this->Grounded()
+				&& ((this->velocity.x > 0.0f && this->lastInput.x < 0.0f)
+					|| (this->velocity.x < 0.0f && this->lastInput.x > 0.0f)))
 			{
 				horizAcceleration *= 0.5f;
 			}
 
 			// full sprint after charge
-			if (Grounded() && ((velocity.x >= 0.15f && lastInput.x > 0) ||
-							   (velocity.x <= -0.15f && lastInput.x < 0)))
+			// TODO: Maybe extract to local bool
+			if (((this->velocity.x >= 0.15f && this->lastInput.x > 0.0f)
+				 || (this->velocity.x <= -0.15f && this->lastInput.x < 0.0f))
+				&& Grounded())
 			{
-				velocity.x = copysignf(maxRunSpeed, lastInput.x);
+				velocity.x = copysignf(this->maxRunSpeed, this->lastInput.x);
 			}
 		}
 		// apply movement force to acceleration
-		acceleration.x += horizAcceleration;
+		this->acceleration.x += horizAcceleration;
 	}
 
 	velocity = Vector2Add(velocity, acceleration);
 
 	// constrain horizontal movement speed
-	if (running && !crouching)
+	if (this->running && !this->crouching)
 	{
-		velocity.x = Clamp(velocity.x, -maxRunSpeed, maxRunSpeed);
+		this->velocity.x
+			= Clamp(this->velocity.x, -this->maxRunSpeed, this->maxRunSpeed);
 	}
 	else
 	{
-		velocity.x = Clamp(velocity.x, -maxWalkSpeed, maxWalkSpeed);
+		this->velocity.x
+			= Clamp(this->velocity.x, -this->maxWalkSpeed, this->maxWalkSpeed);
 	}
 
 	// jumping
-	if (jumpPressed && canJump)
+	if (this->jumpPressed && this->canJump)
 	{
 		// initial launch from ground
-		if (Grounded())
+		if (this->Grounded())
 		{
-			velocity.y = -jumpForce;
-			timeJumping = 0;
-			cancelJump = false;
+			this->velocity.y = -this->jumpForce;
+			this->timeJumping = 0;
+			this->cancelJump = false;
 		}
 		// jump button held
-		else if (timeJumping < maxTimeJumping && !cancelJump)
+		else if (this->timeJumping < this->maxTimeJumping && !this->cancelJump)
 		{
-			velocity.y = -jumpForce;
-			timeJumping += GetFrameTime();
+			this->velocity.y = -this->jumpForce;
+			this->timeJumping += GetFrameTime();
 		}
 		// cancel jump holding
 		else
 		{
-			canJump = false;
+			this->canJump = false;
 		}
 	}
 	// prevent midair jumps
-	else if (!Grounded())
+	else if (!this->Grounded())
 	{
-		canJump = false;
+		this->canJump = false;
 	}
 	// prevent holding to jump multiple times
-	else if (!jumpPressed)
+	else if (!this->jumpPressed)
 	{
-		canJump = true;
+		this->canJump = true;
 	}
 
-	position = Vector2Add(position, velocity);
+	this->position = Vector2Add(this->position, this->velocity);
 
-	if (Grounded())
+	if (this->Grounded())
 	{
-		crouching = lastInput.y < 0;
+		this->crouching = this->lastInput.y < 0;
 
 		// apply ground friction
-		velocity.x *= groundFrictionFactor;
+		this->velocity.x *= this->groundFrictionFactor;
 	}
 
 	// reset acceleration
-	acceleration = {.x = 0, .y = 0};
+	this->acceleration = {.x = 0, .y = 0};
 
-	if (iframetimer > 0)
+	if (this->iframetimer > 0)
 	{
-		iframetimer -= GetFrameTime();
+		this->iframetimer -= GetFrameTime();
 	}
 
-	for (int i{0}; i < fireballs.size(); i++)
+	for (int i{0}; i < this->fireballs.size(); i++)
 	{
-		if (!fireballs[i]->IsActive())
+		if (!this->fireballs[i]->IsActive())
 		{
-			fireballs.erase(fireballs.begin() + i);
+			this->fireballs.erase(this->fireballs.begin() + i);
 		}
 	}
 
-	float xClamp =
-		Clamp(this->position.x, 0.0f + (GetCollisionRect().width / 2),
-			  level.GetLength() - (GetCollisionRect().width / 2));
+	float xClamp
+		= Clamp(this->position.x, 0.0f + (this->GetCollisionRect().width / 2),
+				this->level.GetLength() - (this->GetCollisionRect().width / 2));
 	if (this->position.x != xClamp)
 	{
 		this->position.x = xClamp;
 		this->velocity.x = 0;
 	}
 
-	if (this->position.y >= level.GetHeight() + GetCollisionRect().height)
+	if (this->position.y
+		>= this->level.GetHeight()
+		+ this->GetCollisionRect().height)
 	{
-		Die(false);
+		this->Die(false);
 	}
 
-	CheckCollisions();
+	this->CheckCollisions();
 }
 
 void Player::CheckCollisions()
@@ -136,7 +143,7 @@ void Player::CheckCollisions()
 
 	Rectangle playerCol{GetCollisionRect()};
 
-	for (Entity* e_ptr : level.GetEntities())
+	for (Entity* e_ptr : this->level.GetEntities())
 	{
 		Rectangle entityCol{e_ptr->GetCollider()};
 		if (CheckCollisionRecs(playerCol, entityCol))
@@ -148,11 +155,11 @@ void Player::CheckCollisions()
 	if (this->dead)
 		return;
 
-	vector<Rectangle> solidCols = level.GetSolidEntityColliders();
+	vector<Rectangle> solidCols = this->level.GetSolidEntityColliders();
 
 	// filter entity colliders by x-distance to mario
 
-	vector<Rectangle> levelCols = level.GetColliders();
+	vector<Rectangle> levelCols = this->level.GetColliders();
 
 	solidCols.reserve(solidCols.size() + levelCols.size());
 
@@ -162,7 +169,7 @@ void Player::CheckCollisions()
 
 	for (const Rectangle col : solidCols)
 	{
-		playerCol = GetCollisionRect();
+		playerCol = this->GetCollisionRect();
 
 		if (CheckCollisionRecs(playerCol, col))
 		{
@@ -185,22 +192,22 @@ void Player::CheckCollisions()
 		}
 	}
 
-	for (auto& fireball : fireballs)
+	for (auto& fireball : this->fireballs)
 	{
-		fireball->Update(level.GetEntities(), solidCols);
+		fireball->Update(this->level.GetEntities(), solidCols);
 	}
 }
 
 Rectangle Player::GetCollisionRect()
 {
-	float height;
+	float height{};
 	if (this->big)
 	{
-		height = crouching ? 1.0f : 1.6f;
+		height = this->crouching ? 1.0f : 1.6f;
 	}
 	else
 	{
-		height = crouching ? 0.6f : 1.0f;
+		height = this->crouching ? 0.6f : 1.0f;
 	}
 	return {.x = this->position.x - 0.3f,
 			.y = this->position.y - height,
@@ -210,57 +217,55 @@ Rectangle Player::GetCollisionRect()
 
 void Player::Draw()
 {
-	for (auto& fireball : fireballs)
+	for (auto& fireball : this->fireballs)
 	{
 		fireball->Draw();
 	}
 
 	// flip sprite
-	float recWidth = facingRight ? -32 : 32;
+	float recWidth = this->facingRight ? -32 : 32;
 
 	Rectangle frameRec{0, 0, recWidth, 32};
 
 	// anim update
-	if (accumulatedAnimTime >= timeBetweenFrames)
+	if (this->accumulatedAnimTime >= timeBetweenFrames)
 	{
-		accumulatedAnimTime = 0;
-		curFrame++;
-		showSprite = !showSprite;
+		this->accumulatedAnimTime = 0;
+		this->curFrame++;
+		this->showSprite = !showSprite;
 	}
-	if (curFrame > 2)
+	if (this->curFrame > 2)
 	{
-		curFrame = 0;
+		this->curFrame = 0;
 	}
 
-	if (dead)
+	if (this->dead)
 	{
-		//dead
 		frameRec = {.x = 160, .y = 32, .width = recWidth, .height = 32};
 	}
-	else if (crouching)
+	else if (this->crouching)
 	{
-		//crouching
 		frameRec = {.x = 64, .y = 0, .width = recWidth, .height = 32};
 	}
-	else if (Grounded())
+	else if (this->Grounded())
 	{
-		if (lastInput.y > 0 && (FloatEquals(lastInput.x, 0) != 0))
+		if (this->lastInput.y > 0 && (FloatEquals(this->lastInput.x, 0) != 0))
 		{
 			// look up
 			frameRec = {.x = 32, .y = 0, .width = recWidth, .height = 32};
 		}
-		else if ((velocity.x > 0 && lastInput.x < 0) ||
-				 (velocity.x < 0 && lastInput.x > 0))
+		else if ((this->velocity.x > 0 && this->lastInput.x < 0)
+				 || (this->velocity.x < 0 && this->lastInput.x > 0))
 		{
 			// skid
 			frameRec = {.x = 0, .y = 32, .width = recWidth, .height = 32};
 		}
-		else if (fabsf(velocity.x) > 0.05f)
+		else if (fabsf(this->velocity.x) > 0.05f)
 		{
-			if (fabsf(velocity.x) > 0.15f)
+			if (fabsf(this->velocity.x) > 0.15f)
 			{
 				//running
-				frameRec = {.x = 192.0f + (curFrame * 32),
+				frameRec = {.x = 192.0f + (this->curFrame * 32),
 							.y = 0,
 							.width = recWidth,
 							.height = 32};
@@ -268,7 +273,7 @@ void Player::Draw()
 			else
 			{
 				//walking
-				frameRec = {.x = 96.0f + (curFrame * 32),
+				frameRec = {.x = 96.0f + (this->curFrame * 32),
 							.y = 0,
 							.width = recWidth,
 							.height = 32};
@@ -277,7 +282,7 @@ void Player::Draw()
 	}
 	else
 	{
-		if (velocity.y < 0)
+		if (this->velocity.y < 0)
 		{
 			// jump up
 			frameRec = {.x = 32, .y = 32, .width = recWidth, .height = 32};
@@ -291,7 +296,7 @@ void Player::Draw()
 
 	if (this->luigi)
 	{
-		frameRec.y += assets.luigiOffset;
+		frameRec.y += this->assets.luigiOffset;
 	}
 
 	if (this->big)
@@ -301,18 +306,18 @@ void Player::Draw()
 
 	if (this->fire)
 	{
-		frameRec.x += assets.fireOffset;
+		frameRec.x += this->assets.fireOffset;
 	}
 
-	if (this->iframetimer <= 0 || showSprite)
+	if (this->iframetimer <= 0 || this->showSprite)
 	{
-		DrawTextureRec(
-			assets.sprites, frameRec,
-			{(position.x * 16.0f) - 16.0f, (position.y * 16.0f) - 32.0f},
-			WHITE);
+		DrawTextureRec(this->assets.sprites, frameRec,
+					   {(this->position.x * 16.0f) - 16.0f,
+						(this->position.y * 16.0f) - 32.0f},
+					   WHITE);
 	}
 
-	accumulatedAnimTime += GetFrameTime();
+	this->accumulatedAnimTime += GetFrameTime();
 
 #ifdef DRAW_COLS
 	Rectangle rec = this->GetCollisionRect();
@@ -337,7 +342,7 @@ void Player::HandleMovement(const bool running, const Vector2 input)
 	this->lastInput = input;
 	if (input.x != 0)
 	{
-		this->facingRight = lastInput.x > 0;
+		this->facingRight = this->lastInput.x > 0;
 	}
 }
 
@@ -345,6 +350,7 @@ void Player::HandleJump(const bool jump) { this->jumpPressed = jump; }
 
 void Player::Reset(const Vector2 startPosition)
 {
+	this->velocity = {.x = 0.0f, .y = 0.0f};
 	this->position = startPosition;
 	this->dead = false;
 	this->big = false;
@@ -362,25 +368,22 @@ bool Player::Grounded()
 		.height = 0.1f,
 	};
 
-	vector<Rectangle> solidCols = level.GetSolidEntityColliders();
-	vector<Rectangle> levelCols = level.GetColliders();
+	vector<Rectangle> solidCols = this->level.GetSolidEntityColliders();
+	vector<Rectangle> levelCols = this->level.GetColliders();
 
 	solidCols.reserve(solidCols.size() + levelCols.size());
 
 	solidCols.insert(solidCols.end(), levelCols.begin(), levelCols.end());
 
-	return std::ranges::any_of(solidCols, [groundedBox](Rectangle col)
-	{
-		return CheckCollisionRecs(groundedBox, col);
-	});
+	return std::ranges::any_of(
+		solidCols, [groundedBox](Rectangle col)
+		{ return CheckCollisionRecs(groundedBox, col); });
 }
 
 void Player::AddForce(const Vector2 force)
 {
-	acceleration = Vector2Add(acceleration, force);
+	this->acceleration = Vector2Add(this->acceleration, force);
 }
-
-void Player::TemporaryDeathTest() { this->Die(); }
 
 void Player::Die(bool jumpUp)
 {
@@ -389,6 +392,7 @@ void Player::Die(bool jumpUp)
 
 	this->dead = true;
 	this->lastInput = {.x = 0, .y = 0};
+	this->velocity.x = 0;
 	if (jumpUp)
 	{
 		this->velocity = {.x = 0, .y = -0.3f};
@@ -397,16 +401,16 @@ void Player::Die(bool jumpUp)
 
 void Player::TakeDamage()
 {
-	if (iframetimer > 0)
+	if (this->iframetimer > 0)
 		return;
 
 	if (!this->big)
 	{
-		Die();
+		this->Die();
 		return;
 	}
 
-	iframetimer = 1;
+	this->iframetimer = 1;
 
 	if (this->fire)
 	{
@@ -423,10 +427,10 @@ void Player::TryFireball()
 	if (!this->fire)
 		return;
 
-	if (fireballs.size() < 2)
+	if (this->fireballs.size() < 2)
 	{
-		fireballs.push_back(std::make_unique<Fireball>(
-			assets.staticEntities, this->facingRight,
+		this->fireballs.push_back(std::make_unique<Fireball>(
+			this->assets.staticEntities, this->facingRight,
 			Vector2{this->position.x, this->position.y - 1.0f}));
 	}
 }

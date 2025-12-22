@@ -28,8 +28,6 @@ class Player
 	}
 
 	void Reset(const Vector2 startPosition);
-	// HACK: remove when death is possible via hazards
-	void TemporaryDeathTest();
 
 	//getters
 	bool IsDead() const { return this->dead; }
