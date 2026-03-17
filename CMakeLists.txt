@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+# set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 # if("${CMAKE_GENERATOR}" STREQUAL "Visual Studio 17 2022")
 #     message("Visual Studio Generator")
@@ -17,7 +17,7 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 # Change this to match the name of the current folder
 project(MarioMaker-Demake LANGUAGES CXX C VERSION 0.0)
-option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 message("Build type: ${CMAKE_BUILD_TYPE}")
 
