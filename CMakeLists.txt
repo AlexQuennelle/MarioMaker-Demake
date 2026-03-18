@@ -2,42 +2,42 @@ cmake_minimum_required(VERSION 3.30.5)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
-# set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-
-if("${CMAKE_GENERATOR}" STREQUAL "Ninja")
-    set(WINDOWS TRUE)
-    message("Ninja")
-else() # set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-
+if(NOT EMSCRIPTEN)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+    set(BUILD_SHARED_LIBS ON)
+else()
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+    set(BUILD_SHARED_LIBS OFF)
 endif()
-# add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-O0;-g;-ffast-math>;-fsanitize=address;")
-# add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-O0;-g;-ffast-math;>")
 
-set(CMAKE_CXX_FLAGS
-    "-Wall -Wextra -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused\
-    -Woverloaded-virtual -Wpedantic -Wconversion -Wsign-conversion\
-    -Wnull-dereference -Wdouble-promotion -Wformat=2 -Wduplicated-cond\
-    -Wduplicated-branches -Wlogical-op -Wuseless-cast"
-)
-if(NOT WINDOWS)
+if(LINUX AND CONFIG_USE_UBSAN)
     add_compile_options("-fsanitize=undefined")
-    # add_compile_options("-fsanitize=address")
 endif()
+if(LINUX AND CONFIG_USE_ASAN)
+    add_compile_options("-fsanitize=address")
+endif()
+
+# set(CMAKE_CXX_FLAGS
+#     "-Wall -Wextra -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused\
+#     -Woverloaded-virtual -Wpedantic -Wconversion -Wsign-conversion\
+#     -Wnull-dereference -Wdouble-promotion -Wformat=2 -Wduplicated-cond\
+#     -Wduplicated-branches -Wlogical-op -Wuseless-cast"
+# )
 
 # Change this to match the name of the current folder
 project(MarioMaker-Demake LANGUAGES CXX C VERSION 0.0)
-option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-
-message("Build type: ${CMAKE_BUILD_TYPE}")
-
 add_executable("${CMAKE_PROJECT_NAME}")
 
-if(NOT WINDOWS)
+if(LINUX AND CONFIG_USE_UBSAN)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=undefined")
-    # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+endif()
+if(LINUX AND CONFIG_USE_ASAN)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 endif()
 
 set(RAYLIB_VERSION 5.5)
@@ -46,6 +46,7 @@ if(NOT raylib_FOUND)
     include(FetchContent)
     FetchContent_Declare(
         raylib
+        SYSTEM
         DOWNLOAD_EXTRACT_TIMESTAMP OFF
         URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
     )
@@ -58,6 +59,7 @@ if(NOT raylib_FOUND)
             CACHE BOOL "" FORCE
         )
     endif()
+    # target_compile_options(raylib PRIVATE "-w")
 endif()
 
 set(IMGUI_VERSION 1.92.4)
@@ -97,6 +99,15 @@ if(NOT EMSCRIPTEN)
     add_subdirectory(nativefiledialog-extended-1.2.1)
 endif()
 
+if(NOT EMSCRIPTEN)
+    set(CMAKE_CXX_FLAGS
+        "-Wall -Wextra -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused\
+        -Woverloaded-virtual -Wpedantic -Wconversion -Wsign-conversion\
+        -Wnull-dereference -Wdouble-promotion -Wformat=2 -Wduplicated-cond\
+        -Wduplicated-branches -Wlogical-op -Wuseless-cast"
+    )
+endif()
+
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS
      "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
@@ -109,6 +120,9 @@ if(EMSCRIPTEN)
     )
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}\
  --js-library ${CMAKE_CURRENT_SOURCE_DIR}/src/lib.js"
+    )
+    file(GLOB_RECURSE DATAFILES CONFIGURE_DEPENDS
+         "${CMAKE_CURRENT_SOURCE_DIR}/resources/*"
     )
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     set_target_properties(
@@ -163,7 +177,7 @@ target_include_directories(
     "${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/"
 )
 target_include_directories(
-    "${CMAKE_PROJECT_NAME}" PUBLIC "${PROJECT_BINARY_DIR}"
+    "${CMAKE_PROJECT_NAME}" PUBLIC SYSTEM "${PROJECT_BINARY_DIR}"
 )
 target_include_directories(
     "${CMAKE_PROJECT_NAME}"
