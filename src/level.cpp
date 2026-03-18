@@ -734,10 +734,12 @@ void Level::SpawnEntity(const uint32_t x, const uint32_t y, const Tile basis)
 	}
 	if (basis.ID == TileID::toggleBlock || basis.ID == TileID::toggleSwitch)
 	{
-		auto* block{dynamic_cast<ToggleBlock*>(
-			this->entities[this->entities.size() - 1].get())};
+		auto* block{dynamic_cast<IToggleable*>(
+				this->entities[this->entities.size() - 1].get())};
 		if (block != nullptr)
+		{
 			this->toggleBlocks.push_back(block);
+		}
 	}
 }
 
