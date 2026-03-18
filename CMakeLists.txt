@@ -5,13 +5,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+# option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 if(NOT EMSCRIPTEN)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
     set(BUILD_SHARED_LIBS ON)
 else()
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+    set(BUILD_SHARED_LIBS OFF)
+endif()
+
+if(WIN32)
     set(BUILD_SHARED_LIBS OFF)
 endif()
 
@@ -59,7 +63,7 @@ if(NOT raylib_FOUND)
             CACHE BOOL "" FORCE
         )
     endif()
-    # target_compile_options(raylib PRIVATE "-w")
+    target_compile_options(raylib PRIVATE "-w")
 endif()
 
 set(IMGUI_VERSION 1.92.4)
@@ -74,29 +78,48 @@ if(NOT ImGui_FOUND)
     FetchContent_MakeAvailable(ImGui)
     FetchContent_GetProperties(ImGui SOURCE_DIR IMGUI_DIR)
     add_library(
-        ImGui STATIC
+        ImGui
         ${imgui_SOURCE_DIR}/imgui.cpp ${imgui_SOURCE_DIR}/imgui_draw.cpp
         ${imgui_SOURCE_DIR}/imgui_widgets.cpp
         ${imgui_SOURCE_DIR}/imgui_tables.cpp
     )
-    target_include_directories(ImGui INTERFACE ${imgui_SOURCE_DIR})
+    target_include_directories(ImGui PUBLIC ${imgui_SOURCE_DIR})
 endif()
 
 include(FetchContent)
 FetchContent_Declare(
     rlImGui
+    SYSTEM
     GIT_REPOSITORY https://github.com/raylib-extras/rlImGui
     GIT_TAG 4d8a618
 )
 FetchContent_MakeAvailable(rlImGui)
 FetchContent_GetProperties(rlImGui SOURCE_DIR RLIMGUI_DIR)
 
-add_library(rlImGui STATIC ${rlimgui_SOURCE_DIR}/rlImGui.cpp)
-target_link_libraries(rlImGui PRIVATE ImGui raylib)
+add_library(rlImGui ${rlimgui_SOURCE_DIR}/rlImGui.cpp)
+target_link_libraries(rlImGui PUBLIC ImGui raylib)
 target_include_directories(rlImGui INTERFACE ${rlimgui_SOURCE_DIR})
+set_target_properties(
+    rlImGui
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY_DEBUG
+    "${CMAKE_CURRENT_SOURCE_DIR}/bin"
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE
+    "${CMAKE_CURRENT_SOURCE_DIR}/bin/\
+${CMAKE_PROJECT_NAME}_${CMAKE_PROJECT_VERSION}"
+)
 
 if(NOT EMSCRIPTEN)
     add_subdirectory(nativefiledialog-extended-1.2.1)
+    set_target_properties(
+        nfd
+        PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY_DEBUG
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin"
+        LIBRARY_OUTPUT_DIRECTORY_RELEASE
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin/\
+${CMAKE_PROJECT_NAME}_${CMAKE_PROJECT_VERSION}"
+    )
 endif()
 
 if(NOT EMSCRIPTEN)
@@ -106,6 +129,10 @@ if(NOT EMSCRIPTEN)
         -Wnull-dereference -Wdouble-promotion -Wformat=2 -Wduplicated-cond\
         -Wduplicated-branches -Wlogical-op -Wuseless-cast"
     )
+else()
+    # target_compile_options(
+    #     ${CMAKE_PROJECT_NAME} PRIVATE "-fexperimental-library"
+    # )
 endif()
 
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS

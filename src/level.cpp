@@ -469,12 +469,19 @@ void Level::ParseData(const vector<char>& data)
 		return block;
 	};
 	this->grid.reserve(this->length * this->height); // NOLINT
+#ifndef __EMSCRIPTEN__
 	this->grid
 		= rv::chunk(span, 8)
 		  | rv::transform(fuse) // NOLINTNEXTLINE
 		  | rv::transform([](auto blk) { return rv::repeat(blk.dat, blk.num); })
 		  | rv::join
 		  | r::to<vector<Tile>>();
+#else
+	this->grid = std::bit_cast<std::span<const DataBlock>>(span)
+		  | rv::transform([](auto blk) { return rv::repeat(blk.dat, blk.num); })
+		  | rv::join
+		  | r::to<vector<Tile>>();
+#endif // !__EMSCRIPTEN__
 }
 
 auto Level::GetRects(const byte mask) -> array<Rectangle, 4>
@@ -735,7 +742,7 @@ void Level::SpawnEntity(const uint32_t x, const uint32_t y, const Tile basis)
 	if (basis.ID == TileID::toggleBlock || basis.ID == TileID::toggleSwitch)
 	{
 		auto* block{dynamic_cast<IToggleable*>(
-				this->entities[this->entities.size() - 1].get())};
+			this->entities[this->entities.size() - 1].get())};
 		if (block != nullptr)
 		{
 			this->toggleBlocks.push_back(block);
