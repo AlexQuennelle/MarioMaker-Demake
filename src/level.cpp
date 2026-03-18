@@ -477,10 +477,14 @@ void Level::ParseData(const vector<char>& data)
 		  | rv::join
 		  | r::to<vector<Tile>>();
 #else
-	this->grid = std::bit_cast<std::span<const DataBlock>>(span)
-		  | rv::transform([](auto blk) { return rv::repeat(blk.dat, blk.num); })
-		  | rv::join
-		  | r::to<vector<Tile>>();
+	auto spanStart = std::bit_cast<const DataBlock*>(
+			(data.begin() + (24 + (((nameLen / 4) + 1) * 4))).base());
+	auto spanEnd = std::bit_cast<const DataBlock*>(data.end().base());
+	this->grid
+		= std::span<const DataBlock>(spanStart, spanEnd - spanStart)
+		| rv::transform([](auto blk) { return rv::repeat(blk.dat, blk.num); })
+		| rv::join
+		| r::to<vector<Tile>>();
 #endif // !__EMSCRIPTEN__
 }
 

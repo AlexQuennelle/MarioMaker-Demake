@@ -5,18 +5,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-# option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 if(NOT EMSCRIPTEN)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
-    set(BUILD_SHARED_LIBS ON)
 else()
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
-    set(BUILD_SHARED_LIBS OFF)
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 endif()
 
 if(WIN32)
-    set(BUILD_SHARED_LIBS OFF)
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 endif()
 
 if(LINUX AND CONFIG_USE_UBSAN)
@@ -26,14 +25,6 @@ if(LINUX AND CONFIG_USE_ASAN)
     add_compile_options("-fsanitize=address")
 endif()
 
-# set(CMAKE_CXX_FLAGS
-#     "-Wall -Wextra -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused\
-#     -Woverloaded-virtual -Wpedantic -Wconversion -Wsign-conversion\
-#     -Wnull-dereference -Wdouble-promotion -Wformat=2 -Wduplicated-cond\
-#     -Wduplicated-branches -Wlogical-op -Wuseless-cast"
-# )
-
-# Change this to match the name of the current folder
 project(MarioMaker-Demake LANGUAGES CXX C VERSION 0.0)
 add_executable("${CMAKE_PROJECT_NAME}")
 
@@ -58,10 +49,7 @@ if(NOT raylib_FOUND)
     if(NOT raylib_POPULATED)
         set(FETCHCONTENT_QUIET NO)
         FetchContent_MakeAvailable(raylib)
-        set(BUILD_EXAMPLES
-            OFF
-            CACHE BOOL "" FORCE
-        )
+        set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
     endif()
     target_compile_options(raylib PRIVATE "-w")
 endif()
@@ -184,10 +172,14 @@ set(RELEASE_RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin/\
 ${CMAKE_PROJECT_NAME}_${CMAKE_PROJECT_VERSION}/resources/"
 )
 set(DEBUG_RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/resources/")
+if(EMSCRIPTEN)
+    set(DEBUG_RESOURCE_DIR "./resources/")
+endif()
+
 target_compile_definitions(
     ${CMAKE_PROJECT_NAME}
     PUBLIC
-        RESOURCES_PATH=$<IF:$<CONFIG:Release>,"./resources/","${DEBUG_RESOURCE_DIR}">
+    RESOURCES_PATH=$<IF:$<CONFIG:Release>,"./resources/","${DEBUG_RESOURCE_DIR}">
 )
 
 target_compile_features("${CMAKE_PROJECT_NAME}" PRIVATE cxx_std_23)
@@ -209,7 +201,7 @@ target_include_directories(
 target_include_directories(
     "${CMAKE_PROJECT_NAME}"
     PUBLIC
-        "${CMAKE_CURRENT_SOURCE_DIR}/nativefiledialog-extended-1.2.1/src/include/"
+    "${CMAKE_CURRENT_SOURCE_DIR}/nativefiledialog-extended-1.2.1/src/include/"
 )
 
 if(NOT EMSCRIPTEN)
@@ -217,8 +209,8 @@ if(NOT EMSCRIPTEN)
         TARGET ${CMAKE_PROJECT_NAME}
         POST_BUILD
         COMMAND
-            ${CMAKE_COMMAND} -E copy_directory
-            "${CMAKE_CURRENT_SOURCE_DIR}/resources"
-            $<IF:$<CONFIG:Release>,"${RELEASE_RESOURCE_DIR}","${DEBUG_RESOURCE_DIR}">
+        ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/resources"
+        $<IF:$<CONFIG:Release>,"${RELEASE_RESOURCE_DIR}","${DEBUG_RESOURCE_DIR}">
     )
 endif()
