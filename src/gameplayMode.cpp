@@ -8,19 +8,18 @@ GameplayMode::GameplayMode(Level* lvl, AssetManager& am) :
 	GamemodeInstance(lvl, am),
 	player(*lvl, {this->assetManager.playerSprites,
 				  this->assetManager.staticEntities}),
+	uiDisplay(this->assetManager.smallFont),
 	inputHandler(this->player),
-	time(300),
-	uiDisplay(this->assetManager.smallFont)
+	time(300)
 {
-	this->camera = Camera2D{0};
-	this->camera.target = this->player.GetPosition();
-	// Change offset to adjust relative position
-	this->camera.offset = {.x = 192.0f, .y = 124.0f};
-	this->camera.rotation = 0.0f;
-	this->camera.zoom = 1.0f;
+	this->camera = Camera2D{
+		{.x = 192.0f, .y = 124.0f},
+		this->player.GetPosition(), // HACK: Change to read from level soon
+		0.0f,
+		1.0f,
+	};
 
-	// HACK: change to read from level soon
-
+	// HACK: Change to read from level soon
 	player.Reset(level->GetPlayerStartPos());
 }
 void GameplayMode::Update()
@@ -44,20 +43,23 @@ void GameplayMode::Update()
 	{
 		this->camera.offset.x = 192.0f - ((12 - player.GetPosition().x) * 16);
 	}
-	else if (player.GetPosition().x > level->GetLength() - 12)
+	else if (player.GetPosition().x
+			 > static_cast<float>(level->GetLength() - 12))
 	{
-		this->camera.offset.x
-			= 192.0f
-			  + ((player.GetPosition().x - level->GetLength() + 12) * 16);
+		this->camera.offset.x = 192.0f
+								+ ((player.GetPosition().x
+									- static_cast<float>(level->GetLength())
+									+ 12.0f)
+								   * 16.0f);
 	}
 	// TODO: Add top checking
-	if (player.GetPosition().y > level->GetHeight() - 6.0f)
+	if (player.GetPosition().y > static_cast<float>(level->GetHeight()) - 6.0f)
 	{
-		this->camera.offset.y
-			= 124.0f
-			  + ((6.75f
-				  - (level->GetHeight() - (player.GetPosition().y - 1.0f)))
-				 * 16.0f);
+		this->camera.offset.y = 124.0f
+								+ ((6.75f
+									- (static_cast<float>(level->GetHeight())
+									   - (player.GetPosition().y - 1.0f)))
+								   * 16.0f);
 	}
 	else
 	{

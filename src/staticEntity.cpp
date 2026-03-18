@@ -14,7 +14,7 @@ Block::Block(const int x, const int y, AssetManager& assetManager,
 {
 	this->solid = true;
 }
-EntityReq Block::Update(const vector<Rectangle>& /*colliders*/)
+auto Block::Update(const vector<Rectangle>& /*colliders*/) -> EntityReq
 {
 	if (this->bonkTimer > 0.0f)
 	{
@@ -52,7 +52,7 @@ void Block::Draw()
 #endif // DEBUG
 }
 void Block::EditDraw() { this->Draw(); }
-EntityReq Block::OnPlayerCollision(Player& player)
+auto Block::OnPlayerCollision(Player& player) -> EntityReq
 {
 	if (this->isVariant)
 		return {};
@@ -72,7 +72,7 @@ EntityReq Block::OnPlayerCollision(Player& player)
 	}
 	return {};
 }
-EntityReq Block::OnEntityCollision(Entity& /*entity*/) { return {}; }
+auto Block::OnEntityCollision(Entity& /*entity*/) -> EntityReq { return {}; }
 
 Spike::Spike(const int x, const int y, AssetManager& assetManager) :
 	Entity(x, y, assetManager), sprite(assetManager.staticEntities)
@@ -81,7 +81,10 @@ Spike::Spike(const int x, const int y, AssetManager& assetManager) :
 	this->collider
 		= {.x = 0.125f, .y = 0.125f, .width = 0.75f, .height = 0.75f};
 }
-EntityReq Spike::Update(const vector<Rectangle>& /*colliders*/) { return {}; }
+auto Spike::Update(const vector<Rectangle>& /*colliders*/) -> EntityReq
+{
+	return {};
+}
 void Spike::Draw()
 {
 	Rectangle sourceRect{16.0f, 0.0f, 16.0f, 16.0f};
@@ -98,12 +101,12 @@ void Spike::Draw()
 #endif // DEBUG
 }
 void Spike::EditDraw() { this->Draw(); }
-EntityReq Spike::OnPlayerCollision(Player& player)
+auto Spike::OnPlayerCollision(Player& player) -> EntityReq
 {
 	player.TakeDamage();
 	return {};
 }
-EntityReq Spike::OnEntityCollision(Entity& /*entity*/) { return {}; }
+auto Spike::OnEntityCollision(Entity& /*entity*/) -> EntityReq { return {}; }
 
 ItemBox::ItemBox(const int x, const int y, AssetManager& assetManager,
 				 const bool isBrick, const bool isHidden) :
@@ -115,7 +118,7 @@ ItemBox::ItemBox(const int x, const int y, AssetManager& assetManager,
 	if (!this->isHidden)
 		this->solid = true;
 }
-EntityReq ItemBox::Update(const vector<Rectangle>& /*colliders*/)
+auto ItemBox::Update(const vector<Rectangle>& /*colliders*/) -> EntityReq
 {
 	if (this->bonkTimer > 0.0f)
 	{
@@ -147,7 +150,7 @@ void ItemBox::Draw()
 
 		accumulatedAnimTime += GetFrameTime();
 		sourceRect = {
-			.x = 32.0f + (curFrame * 16.0f),
+			.x = 32.0f + static_cast<float>(curFrame * 16),
 			.y = 0.0f,
 			.width = 16.0f,
 			.height = 16.0f,
@@ -204,7 +207,7 @@ void ItemBox::EditDraw()
 	DrawTextureRec(this->sprite, sourceRect,
 				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
 }
-EntityReq ItemBox::OnPlayerCollision(Player& player)
+auto ItemBox::OnPlayerCollision(Player& player) -> EntityReq
 {
 	if (this->empty)
 		return {};
@@ -230,14 +233,17 @@ EntityReq ItemBox::OnPlayerCollision(Player& player)
 	}
 	return {};
 }
-EntityReq ItemBox::OnEntityCollision(Entity& /*entity*/) { return {}; }
+auto ItemBox::OnEntityCollision(Entity& /*entity*/) -> EntityReq { return {}; }
 
 Coin::Coin(const int x, const int y, AssetManager& assetManager) :
 	Entity(x, y, assetManager), sprite(assetManager.staticEntities)
 {
 	this->solid = false;
 }
-EntityReq Coin::Update(const vector<Rectangle>& /*colliders*/) { return {}; }
+auto Coin::Update(const vector<Rectangle>& /*colliders*/) -> EntityReq
+{
+	return {};
+}
 void Coin::Draw()
 {
 
@@ -253,7 +259,8 @@ void Coin::Draw()
 
 	accumulatedAnimTime += GetFrameTime();
 
-	Rectangle sourceRect{32.0f + (curFrame * 16.0f), 16.0f, 16.0f, 16.0f};
+	Rectangle sourceRect{32.0f + static_cast<float>(curFrame * 16), 16.0f,
+						 16.0f, 16.0f};
 
 	DrawTextureRec(this->sprite, sourceRect,
 				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
@@ -271,13 +278,13 @@ void Coin::EditDraw()
 	DrawTextureRec(this->sprite, sourceRect,
 				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
 }
-EntityReq Coin::OnPlayerCollision(Player& player)
+auto Coin::OnPlayerCollision(Player& player) -> EntityReq
 {
 	this->isActive = false;
 	player.GainCoin();
 	return {};
 }
-EntityReq Coin::OnEntityCollision(Entity& /*entity*/) { return {}; }
+auto Coin::OnEntityCollision(Entity& /*entity*/) -> EntityReq { return {}; }
 
 ToggleSwitch::ToggleSwitch(const int x, const int y,
 						   AssetManager& assetManager) :
@@ -285,7 +292,7 @@ ToggleSwitch::ToggleSwitch(const int x, const int y,
 {
 	this->solid = true;
 }
-EntityReq ToggleSwitch::Update(const vector<Rectangle>& /*colliders*/)
+auto ToggleSwitch::Update(const vector<Rectangle>& /*colliders*/) -> EntityReq
 {
 	if (this->bonkTimer > 0.0f)
 	{
@@ -323,7 +330,7 @@ void ToggleSwitch::Draw()
 #endif // DEBUG
 }
 void ToggleSwitch::EditDraw() { this->Draw(); }
-EntityReq ToggleSwitch::OnPlayerCollision(Player& player)
+auto ToggleSwitch::OnPlayerCollision(Player& player) -> EntityReq
 {
 	RecCollisionInfo info
 		= GetCollisionInfo(player.GetCollisionRect(), this->GetCollider());
@@ -339,7 +346,10 @@ EntityReq ToggleSwitch::OnPlayerCollision(Player& player)
 	}
 	return {};
 }
-EntityReq ToggleSwitch::OnEntityCollision(Entity& /*entity*/) { return {}; }
+auto ToggleSwitch::OnEntityCollision(Entity& /*entity*/) -> EntityReq
+{
+	return {};
+}
 
 ToggleBlock::ToggleBlock(const int x, const int y, AssetManager& assetManager,
 						 const bool startOn) :
@@ -351,7 +361,7 @@ ToggleBlock::ToggleBlock(const int x, const int y, AssetManager& assetManager,
 	if (!this->startOn)
 		this->solid = true;
 }
-EntityReq ToggleBlock::Update(const vector<Rectangle>& /*colliders*/)
+auto ToggleBlock::Update(const vector<Rectangle>& /*colliders*/) -> EntityReq
 {
 	this->solid = (!on) ^ this->startOn;
 	return {};
@@ -375,3 +385,11 @@ void ToggleBlock::Draw()
 #endif // DEBUG
 }
 void ToggleBlock::EditDraw() { this->Draw(); }
+auto ToggleBlock::OnEntityCollision(Entity& /*entity*/) -> EntityReq
+{
+	return {};
+};
+auto ToggleBlock::OnPlayerCollision(Player& /*player*/) -> EntityReq
+{
+	return {};
+};

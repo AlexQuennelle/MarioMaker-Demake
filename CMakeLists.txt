@@ -2,43 +2,56 @@ cmake_minimum_required(VERSION 3.30.5)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-
-# if("${CMAKE_GENERATOR}" STREQUAL "Visual Studio 17 2022")
-#     message("Visual Studio Generator")
-# else()
-#     set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-# endif()
-# add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-O0;-g;-ffast-math>;-fsanitize=address;")
-# add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-O0;-g;-ffast-math;>")
-
-# Change this to match the name of the current folder
-project(MarioMaker-Demake LANGUAGES CXX C VERSION 0.0)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
-message("Build type: ${CMAKE_BUILD_TYPE}")
+if(NOT EMSCRIPTEN)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+else()
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+endif()
 
-add_executable("${CMAKE_PROJECT_NAME}") 
+if(WIN32)
+    set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+endif()
+
+if(LINUX AND CONFIG_USE_UBSAN)
+    add_compile_options("-fsanitize=undefined")
+endif()
+if(LINUX AND CONFIG_USE_ASAN)
+    add_compile_options("-fsanitize=address")
+endif()
+
+project(MarioMaker-Demake LANGUAGES CXX C VERSION 0.0)
+add_executable("${CMAKE_PROJECT_NAME}")
+
+if(LINUX AND CONFIG_USE_UBSAN)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=undefined")
+endif()
+if(LINUX AND CONFIG_USE_ASAN)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+endif()
 
 set(RAYLIB_VERSION 5.5)
 find_package(raylib ${RAYLIB_VERSION} QUIET)
-if (NOT raylib_FOUND)
+if(NOT raylib_FOUND)
     include(FetchContent)
     FetchContent_Declare(
         raylib
+        SYSTEM
         DOWNLOAD_EXTRACT_TIMESTAMP OFF
-        URL
-        https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
+        URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
     )
     FetchContent_GetProperties(raylib)
-    if (NOT raylib_POPULATED)
+    if(NOT raylib_POPULATED)
         set(FETCHCONTENT_QUIET NO)
         FetchContent_MakeAvailable(raylib)
         set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
     endif()
+    target_compile_options(raylib PRIVATE "-w")
 endif()
 
 set(IMGUI_VERSION 1.92.4)
@@ -53,33 +66,65 @@ if(NOT ImGui_FOUND)
     FetchContent_MakeAvailable(ImGui)
     FetchContent_GetProperties(ImGui SOURCE_DIR IMGUI_DIR)
     add_library(
-        ImGui STATIC
+        ImGui
         ${imgui_SOURCE_DIR}/imgui.cpp ${imgui_SOURCE_DIR}/imgui_draw.cpp
         ${imgui_SOURCE_DIR}/imgui_widgets.cpp
         ${imgui_SOURCE_DIR}/imgui_tables.cpp
     )
-    target_include_directories(ImGui INTERFACE ${imgui_SOURCE_DIR})
+    target_include_directories(ImGui PUBLIC ${imgui_SOURCE_DIR})
 endif()
 
 include(FetchContent)
 FetchContent_Declare(
     rlImGui
+    SYSTEM
     GIT_REPOSITORY https://github.com/raylib-extras/rlImGui
     GIT_TAG 4d8a618
 )
 FetchContent_MakeAvailable(rlImGui)
 FetchContent_GetProperties(rlImGui SOURCE_DIR RLIMGUI_DIR)
 
-add_library(rlImGui STATIC ${rlimgui_SOURCE_DIR}/rlImGui.cpp)
-target_link_libraries(rlImGui PRIVATE ImGui raylib)
+add_library(rlImGui ${rlimgui_SOURCE_DIR}/rlImGui.cpp)
+target_link_libraries(rlImGui PUBLIC ImGui raylib)
 target_include_directories(rlImGui INTERFACE ${rlimgui_SOURCE_DIR})
+set_target_properties(
+    rlImGui
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY_DEBUG
+    "${CMAKE_CURRENT_SOURCE_DIR}/bin"
+    LIBRARY_OUTPUT_DIRECTORY_RELEASE
+    "${CMAKE_CURRENT_SOURCE_DIR}/bin/\
+${CMAKE_PROJECT_NAME}_${CMAKE_PROJECT_VERSION}"
+)
 
 if(NOT EMSCRIPTEN)
     add_subdirectory(nativefiledialog-extended-1.2.1)
+    set_target_properties(
+        nfd
+        PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY_DEBUG
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin"
+        LIBRARY_OUTPUT_DIRECTORY_RELEASE
+        "${CMAKE_CURRENT_SOURCE_DIR}/bin/\
+${CMAKE_PROJECT_NAME}_${CMAKE_PROJECT_VERSION}"
+    )
+endif()
+
+if(NOT EMSCRIPTEN)
+    set(CMAKE_CXX_FLAGS
+        "-Wall -Wextra -Wnon-virtual-dtor -Wold-style-cast -Wcast-align -Wunused\
+        -Woverloaded-virtual -Wpedantic -Wconversion -Wsign-conversion\
+        -Wnull-dereference -Wdouble-promotion -Wformat=2 -Wduplicated-cond\
+        -Wduplicated-branches -Wlogical-op -Wuseless-cast"
+    )
+else()
+    # target_compile_options(
+    #     ${CMAKE_PROJECT_NAME} PRIVATE "-fexperimental-library"
+    # )
 endif()
 
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
 
 # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
@@ -91,30 +136,34 @@ if(EMSCRIPTEN)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}\
  --js-library ${CMAKE_CURRENT_SOURCE_DIR}/src/lib.js"
     )
+    file(GLOB_RECURSE DATAFILES CONFIGURE_DEPENDS
+         "${CMAKE_CURRENT_SOURCE_DIR}/resources/*"
+    )
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     set_target_properties(
-        ${CMAKE_PROJECT_NAME} PROPERTIES LINK_FLAGS
-        "--preload-file ../resources@./resources -sALLOW_MEMORY_GROWTH"
+        ${CMAKE_PROJECT_NAME}
+        PROPERTIES
+            LINK_FLAGS
+            "--preload-file ../resources@./resources -sALLOW_MEMORY_GROWTH"
     )
 endif()
 target_compile_definitions(
     ${CMAKE_PROJECT_NAME} PUBLIC $<$<CONFIG:Release>:PRODUCTION_BUILD>
-    NAME="${CMAKE_PROJECT_NAME}"
+                                 NAME="${CMAKE_PROJECT_NAME}"
 )
 
 set_target_properties(
-    "${CMAKE_PROJECT_NAME}" PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG
-    "${CMAKE_CURRENT_SOURCE_DIR}/bin"
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE
-    "${CMAKE_CURRENT_SOURCE_DIR}/bin/\
+    "${CMAKE_PROJECT_NAME}"
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/bin"
+               RUNTIME_OUTPUT_DIRECTORY_RELEASE
+               "${CMAKE_CURRENT_SOURCE_DIR}/bin/\
 ${CMAKE_PROJECT_NAME}_${CMAKE_PROJECT_VERSION}"
 )
 if(EMSCRIPTEN)
     set_target_properties(
-        ${CMAKE_PROJECT_NAME} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE
-        "${CMAKE_CURRENT_SOURCE_DIR}/bin/\
+        ${CMAKE_PROJECT_NAME}
+        PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE
+                   "${CMAKE_CURRENT_SOURCE_DIR}/bin/\
 ${CMAKE_PROJECT_NAME}_${CMAKE_PROJECT_VERSION}_web"
     )
 endif()
@@ -123,6 +172,10 @@ set(RELEASE_RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin/\
 ${CMAKE_PROJECT_NAME}_${CMAKE_PROJECT_VERSION}/resources/"
 )
 set(DEBUG_RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/resources/")
+if(EMSCRIPTEN)
+    set(DEBUG_RESOURCE_DIR "./resources/")
+endif()
+
 target_compile_definitions(
     ${CMAKE_PROJECT_NAME}
     PUBLIC
@@ -131,7 +184,7 @@ target_compile_definitions(
 
 target_compile_features("${CMAKE_PROJECT_NAME}" PRIVATE cxx_std_23)
 
-target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES} )
+target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} raylib ImGui rlImGui)
 
@@ -143,10 +196,11 @@ target_include_directories(
     "${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/"
 )
 target_include_directories(
-    "${CMAKE_PROJECT_NAME}" PUBLIC "${PROJECT_BINARY_DIR}"
+    "${CMAKE_PROJECT_NAME}" PUBLIC SYSTEM "${PROJECT_BINARY_DIR}"
 )
 target_include_directories(
-    "${CMAKE_PROJECT_NAME}" PUBLIC
+    "${CMAKE_PROJECT_NAME}"
+    PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}/nativefiledialog-extended-1.2.1/src/include/"
 )
 
@@ -154,7 +208,8 @@ if(NOT EMSCRIPTEN)
     add_custom_command(
         TARGET ${CMAKE_PROJECT_NAME}
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        COMMAND
+        ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/resources"
         $<IF:$<CONFIG:Release>,"${RELEASE_RESOURCE_DIR}","${DEBUG_RESOURCE_DIR}">
     )

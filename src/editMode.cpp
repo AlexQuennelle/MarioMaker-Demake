@@ -21,18 +21,19 @@
 
 EditMode::EditMode(Level* lvl, AssetManager& am, const ImGuiIO& imgui) :
 	GamemodeInstance(lvl, am),
-	tex(LoadRenderTexture(this->level->GetLength() * 16,
-						  this->level->GetHeight() * 16)),
+	tex(LoadRenderTexture(static_cast<int32_t>(this->level->GetLength() * 16),
+						  static_cast<int32_t>(this->level->GetHeight() * 16))),
 	imGuiIO(imgui)
 {
-	this->camera = Camera2D{0};
-	this->camera.target = {.x = 0.0f, .y = 0.0f};
-	this->camera.offset = {
-		.x = 0.0f,
-		.y = 216 - (this->level->GetHeight() * 16.0f),
+	this->camera = Camera2D{
+		{
+			.x = 0.0f,
+			.y = 216 - (static_cast<float>(this->level->GetHeight()) * 16.0f),
+		},
+		{0.0f, 0.0f},
+		0.0f,
+		1.0f,
 	};
-	this->camera.rotation = 0.0f;
-	this->camera.zoom = 1.0f;
 
 	// this->tex = LoadRenderTexture(this->level->GetLength() * 16,
 	// 							  this->level->GetHeight() * 16);
@@ -88,9 +89,14 @@ void EditMode::DrawUI()
 	{
 		float cellSize{SCREEN_WIDTH / 24.0f};
 		DrawRectangle(
-			(this->selectedTile.x + (this->camera.offset.x / 16.0f)) * cellSize,
-			(this->selectedTile.y + (this->camera.offset.y / 16.0f)) * cellSize,
-			cellSize, cellSize, Fade(WHITE, 0.4f));
+			static_cast<int32_t>((static_cast<float>(this->selectedTile.x)
+								  + (this->camera.offset.x / 16.0f))
+								 * cellSize),
+			static_cast<int32_t>((static_cast<float>(this->selectedTile.y)
+								  + (this->camera.offset.y / 16.0f))
+								 * cellSize),
+			static_cast<int32_t>(cellSize), static_cast<int32_t>(cellSize),
+			Fade(WHITE, 0.4f));
 	}
 
 	Vector2 camOffset = {
@@ -98,8 +104,8 @@ void EditMode::DrawUI()
 		.y = -this->camera.offset.y / 16.0f,
 	};
 	Vector2Int lvlDims{
-		.x = this->level->GetLength(),
-		.y = this->level->GetHeight(),
+		.x = static_cast<int32_t>(this->level->GetLength()),
+		.y = static_cast<int32_t>(this->level->GetHeight()),
 	};
 
 	std::array<char, 256> nameBuf{};
@@ -118,10 +124,12 @@ void EditMode::DrawUI()
 		ImGui::Text("CameraPosition:"); // NOLINT
 		ImGui::SameLine();
 		ImGui::SliderFloat("##CamOffsetX", &camOffset.x, 0.0f,
-						   this->level->GetLength() - 24.0f);
+						   static_cast<float>(this->level->GetLength())
+							   - 24.0f);
 		ImGui::SameLine();
 		ImGui::SliderFloat("##CamOffsetY", &camOffset.y, 0.0f,
-						   this->level->GetHeight() - 14.0f);
+						   static_cast<float>(this->level->GetHeight())
+							   - 14.0f);
 
 		ImGui::Separator();
 		ImGuiTreeNodeFlags lvlInfo{ImGuiTreeNodeFlags_DefaultOpen};
@@ -225,17 +233,23 @@ void EditMode::DrawUI()
 		this->level->SetName(newName);
 	}
 
-	lvlDims.x = (lvlDims.x >= 24) ? lvlDims.x : this->level->GetLength();
-	lvlDims.y = (lvlDims.y >= 14) ? lvlDims.y : this->level->GetHeight();
-	if ((this->level->GetLength() != lvlDims.x)
-		|| (this->level->GetHeight() != lvlDims.y))
+	lvlDims.x = (lvlDims.x >= 24)
+					? lvlDims.x
+					: static_cast<int32_t>(this->level->GetLength());
+	lvlDims.y = (lvlDims.y >= 14)
+					? lvlDims.y
+					: static_cast<int32_t>(this->level->GetHeight());
+	if ((this->level->GetLength() != static_cast<uint32_t>(lvlDims.x))
+		|| (this->level->GetHeight() != static_cast<uint32_t>(lvlDims.y)))
 	{
-		this->level->SetLevelSize(lvlDims.x, lvlDims.y);
+		this->level->SetLevelSize(static_cast<uint32_t>(lvlDims.x),
+								  static_cast<uint32_t>(lvlDims.y));
 		// FIX: Potential problem here with texture loading
 		UnloadTexture(this->tex.texture);
 		UnloadRenderTexture(this->tex);
-		this->tex = LoadRenderTexture(this->level->GetLength() * 16,
-									  this->level->GetHeight() * 16);
+		this->tex = LoadRenderTexture(
+			static_cast<int32_t>(this->level->GetLength()) * 16,
+			static_cast<int32_t>(this->level->GetHeight()) * 16);
 		this->level->DrawGrid(this->tex);
 		this->camera.offset = {
 			.x = -camOffset.x * 16.0f,
@@ -328,8 +342,9 @@ void EditMode::DrawPallette()
 		ImGui::Checkbox("Brick Sprite", &brick);
 		ImGui::SameLine();
 		ImGui::Checkbox("Hidden", &hidden);
-		this->brush.flags = static_cast<uint16_t>(brick)
-							| (static_cast<uint16_t>(hidden) << 1);
+		this->brush.flags
+			= static_cast<uint16_t>(static_cast<uint32_t>(brick)
+									| (static_cast<uint32_t>(hidden) << 1));
 	}
 	else if (this->brush.ID == TileID::toggleBlock)
 	{
@@ -358,7 +373,11 @@ void EditMode::ProcessInput()
 	}
 	else if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))
 	{
-		if (this->camera.offset.x > -((this->level->GetLength() * 16.0f) - 384))
+		bool isCamOOB{
+			this->camera.offset.x
+				> -static_cast<float>((this->level->GetLength() * 16) - 384),
+		};
+		if (isCamOOB)
 			this->camera.offset.x -= cameraSpeed;
 	}
 	if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))
@@ -368,7 +387,11 @@ void EditMode::ProcessInput()
 	}
 	else if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))
 	{
-		if (this->camera.offset.y > -((this->level->GetHeight() * 16.0f) - 216))
+		bool isCamOOB{
+			this->camera.offset.y
+				> -static_cast<float>((this->level->GetHeight() * 16) - 216),
+		};
+		if (isCamOOB)
 			this->camera.offset.y -= cameraSpeed;
 	}
 }
@@ -424,7 +447,8 @@ void EditMode::SaveLevel()
 	{
 		const vector<byte> data{this->level->Serialize()};
 
-		outFile.write(std::bit_cast<const char*>(data.data()), data.size());
+		outFile.write(std::bit_cast<const char*>(data.data()),
+					  static_cast<int32_t>(data.size()));
 
 		outFile.close();
 		this->level->Save();

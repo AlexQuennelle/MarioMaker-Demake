@@ -7,6 +7,7 @@ class GameUIDisplay // NOLINT
 	public:
 	GameUIDisplay(Font& font);
 	~GameUIDisplay();
+
 	void Draw(const float, const int);
 
 	private:

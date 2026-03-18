@@ -13,6 +13,7 @@
 #include <iostream>
 #include <memory>
 #include <optional>
+#include <print>
 #include <raylib.h>
 #include <rlgl.h>
 #include <string>
@@ -87,7 +88,7 @@ void MainMenu::DrawUI() { }
 
 void MainMenu::InitTitleScreen()
 {
-	ButtonEvent switchToLevel = [this]
+	ButtonEvent switchToLevel = [this] -> ButtonResult
 	{
 		return this->SwitchScreens(MenuScreen::LevelSelect);
 	};
@@ -101,7 +102,7 @@ void MainMenu::InitLevelScreen()
 {
 	float widgetHeight{30};
 
-	ButtonEvent switchToTitle = [this]
+	ButtonEvent switchToTitle = [this] -> ButtonResult
 	{
 		return this->SwitchScreens(MenuScreen::Title);
 	};
@@ -111,8 +112,8 @@ void MainMenu::InitLevelScreen()
 		Rectangle{.x = -20.0f, .y = -7.0f, .width = 40.0f, .height = 14.0f},
 		switchToTitle));
 
-	auto loadFunc
-		= [this](const SwitchRequest mode, const std::string& filePath)
+	auto loadFunc = [this](const SwitchRequest mode,
+						   const std::string& filePath) -> ButtonResult
 	{
 		this->lvlPointer = std::make_unique<Level>(filePath, this->assetManager,
 												   GameplayMode::gravity);
@@ -120,7 +121,7 @@ void MainMenu::InitLevelScreen()
 		return std::nullopt;
 	};
 #if !defined(PLATFORM_WEB)
-	auto altLoad = [this, widgetHeight, loadFunc]
+	auto altLoad = [this, widgetHeight, loadFunc] -> ButtonResult
 	{
 		NFD::Guard nfdGuard;
 		NFD::UniquePath outPath;
@@ -129,7 +130,7 @@ void MainMenu::InitLevelScreen()
 			NFD::OpenDialog(outPath, &filter, 1, RESOURCES_PATH)};
 		if (result == NFD_OKAY)
 		{
-			auto pred = [&outPath](auto& widget)
+			auto pred = [&outPath](auto& widget) -> auto
 			{
 				return static_cast<LevelWidget&>(*widget) == outPath.get();
 			};
@@ -137,7 +138,8 @@ void MainMenu::InitLevelScreen()
 				return std::nullopt;
 
 			float levelsHeight{
-				(widgetHeight * this->levels.size()) + (this->levels.size()),
+				(widgetHeight * static_cast<float>(this->levels.size()))
+					+ static_cast<float>(this->levels.size()),
 			};
 			this->levels.push_back(std::make_unique<LevelWidget>(
 				std::string(outPath.get()),
@@ -164,7 +166,7 @@ void MainMenu::InitLevelScreen()
 		Rectangle{.x = -30.0f, .y = -7.0f, .width = 60.0f, .height = 14.0f},
 		altLoad));
 #endif
-	auto newLevel = [this]
+	auto newLevel = [this] -> ButtonResult
 	{
 		this->lvlPointer = std::make_unique<Level>(this->assetManager, "");
 		this->switchReq = SwitchRequest::EditMode;
@@ -185,22 +187,26 @@ void MainMenu::InitLevelScreen()
 			this->levels.push_back(std::make_unique<LevelWidget>(
 				path, Vector2Int{.x = 192, .y = 30 + offset},
 				Rectangle{-75.0f, 0.0f, 150.0f, widgetHeight}, loadFunc));
-			offset += widgetHeight + 1;
+			offset += static_cast<int32_t>(widgetHeight + 1);
 		}
 	}
 
 	float levelsHeight{
-		(widgetHeight * this->levels.size()) + (this->levels.size() - 1.0f),
+		(widgetHeight * static_cast<float>(this->levels.size()))
+			+ static_cast<float>(this->levels.size() - 1),
 	};
 	this->maxScrollOffset = -std::max(levelsHeight - 156.0f, 0.0f);
 }
 
 void MainMenu::DrawLevelList()
 {
-	DrawRectangleRec(
-		{114.0f, 0.0f, 156.0f,
-		 60.0f + (30.0f * this->levels.size() + this->levels.size() - 1.0f)},
-		{100, 110, 140, 255});
+	DrawRectangleRec({114.0f, 0.0f, 156.0f,
+					  60.0f
+						  + (30.0f
+							 * static_cast<float>(this->levels.size())
+							 + static_cast<float>(this->levels.size())
+							 - 1.0f)},
+					 {100, 110, 140, 255});
 	DrawRectangleRec({114.0f, 0.0f, 156.0f, 216.0f}, {100, 110, 140, 255});
 	BeginMode2D(this->camera);
 	for (auto& widget : this->levels)
@@ -219,7 +225,7 @@ void MainMenu::HandleButtonResult(ButtonResult result)
 	this->switchReq = result->first;
 }
 
-ButtonResult MainMenu::SwitchScreens(MenuScreen screen)
+auto MainMenu::SwitchScreens(MenuScreen screen) -> ButtonResult
 {
 	this->buttons.clear();
 	this->levels.clear();
@@ -248,9 +254,9 @@ MenuButton::MenuButton(std::string text, const Vector2Int pos,
 					   const Rectangle rect, ButtonEvent eventFunc,
 					   const int fontSize) :
 	ButtonBase(pos, rect),
+	fontSize(fontSize),
 	text(std::move(text)),
-	onClickEvent(std::move(eventFunc)),
-	fontSize(fontSize)
+	onClickEvent(std::move(eventFunc))
 { }
 void MenuButton::Update(const Vector2 mousePos)
 {
@@ -261,35 +267,39 @@ void MenuButton::Update(const Vector2 mousePos)
 void MenuButton::Draw()
 {
 	Vector2 center{
-		this->position.x
+		static_cast<float>(this->position.x)
 			+ this->clickableArea.x
 			+ (this->clickableArea.width / 2.0f),
-		this->position.y
+		static_cast<float>(this->position.y)
 			+ this->clickableArea.y
 			+ (this->clickableArea.height / 2.0f),
 	};
 	Vector2 topLeft{
-		this->position.x + this->clickableArea.x,
-		this->position.y + this->clickableArea.y,
+		static_cast<float>(this->position.x) + this->clickableArea.x,
+		static_cast<float>(this->position.y) + this->clickableArea.y,
 	};
 	Vector2 textSize{MeasureTextEx(GetFontDefault(), this->text.c_str(),
-								   this->fontSize, 1.0f)};
+								   static_cast<float>(this->fontSize), 1.0f)};
 
 	if (this->hovered)
 	{
-		DrawRectangle(topLeft.x, topLeft.y, this->clickableArea.width,
-					  this->clickableArea.height, WHITE);
+		DrawRectangle(static_cast<int32_t>(topLeft.x),
+					  static_cast<int32_t>(topLeft.y),
+					  static_cast<int32_t>(this->clickableArea.width),
+					  static_cast<int32_t>(this->clickableArea.height), WHITE);
 	}
 	else
 	{
-		DrawRectangle(topLeft.x, topLeft.y, this->clickableArea.width,
-					  this->clickableArea.height, GRAY);
+		DrawRectangle(static_cast<int32_t>(topLeft.x),
+					  static_cast<int32_t>(topLeft.y),
+					  static_cast<int32_t>(this->clickableArea.width),
+					  static_cast<int32_t>(this->clickableArea.height), GRAY);
 	}
 
 	DrawTextEx(GetFontDefault(), this->text.c_str(), center - (textSize / 2.0f),
-			   this->fontSize, 1.0f, BLACK);
+			   static_cast<float>(this->fontSize), 1.0f, BLACK);
 }
-std::optional<ButtonEvent> MenuButton::OnClick()
+auto MenuButton::OnClick() -> std::optional<ButtonEvent>
 {
 	if (this->hovered)
 		return onClickEvent;
@@ -301,11 +311,11 @@ LevelWidget::LevelWidget(const std::string& filePath, const Vector2Int pos,
 						 const Rectangle rect, const LoadFunc& func) :
 	ButtonBase(pos, rect), filePath(filePath), isValid(this->ParseHeader())
 {
-	auto play = [func, filePath]
+	auto play = [func, filePath] -> ButtonResult
 	{
 		return func(SwitchRequest::GameplayMode, filePath);
 	};
-	auto edit = [func, filePath]
+	auto edit = [func, filePath] -> ButtonResult
 	{
 		return func(SwitchRequest::EditMode, filePath);
 	};
@@ -319,8 +329,8 @@ LevelWidget::LevelWidget(const std::string& filePath, const Vector2Int pos,
 void LevelWidget::Update(const Vector2 mousePos)
 {
 	Vector2 adjustedPos{
-		mousePos.x - this->position.x,
-		mousePos.y - this->position.y,
+		mousePos.x - static_cast<float>(this->position.x),
+		mousePos.y - static_cast<float>(this->position.y),
 	};
 	this->editButton->Update(adjustedPos);
 	this->playButton->Update(adjustedPos);
@@ -328,7 +338,8 @@ void LevelWidget::Update(const Vector2 mousePos)
 void LevelWidget::Draw()
 {
 	rlPushMatrix();
-	rlTranslatef(this->position.x, this->position.y, 0.0f);
+	rlTranslatef(static_cast<float>(this->position.x),
+				 static_cast<float>(this->position.y), 0.0f);
 
 	if (this->isValid)
 	{
@@ -347,7 +358,7 @@ void LevelWidget::Draw()
 
 	rlPopMatrix();
 }
-std::optional<ButtonEvent> LevelWidget::OnClick()
+auto LevelWidget::OnClick() -> std::optional<ButtonEvent>
 {
 	if (!this->isValid)
 		return std::nullopt;
@@ -362,18 +373,18 @@ std::optional<ButtonEvent> LevelWidget::OnClick()
 	else
 		return std::nullopt;
 }
-bool LevelWidget::ParseHeader()
+auto LevelWidget::ParseHeader() -> bool
 {
 	namespace fs = std::filesystem;
 	using std::ios;
 	std::ifstream file{this->filePath.c_str(), ios::binary | ios::ate};
 	if (file.is_open())
 	{
-		std::streampos fSize = fs::file_size(this->filePath);
+		auto fSize = fs::file_size(this->filePath);
 		std::vector<char> data(fSize, 0);
 
 		file.seekg(0, ios::beg);
-		file.read(data.data(), fSize);
+		file.read(data.data(), static_cast<int64_t>(fSize));
 		file.close();
 
 		std::string fileID(3, 0);

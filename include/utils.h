@@ -14,10 +14,10 @@ using byte = uint8_t;
 
 struct Vector2Int
 {
-	int x{0};
-	int y{0};
+	int32_t x{0};
+	int32_t y{0};
 
-	bool operator==(const Vector2Int other)
+	auto operator==(const Vector2Int other) -> bool
 	{
 		return (this->x == other.x) && (this->y == other.y);
 	}

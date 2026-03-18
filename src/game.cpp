@@ -18,8 +18,8 @@
 #endif
 
 Game::Game() :
-	imguiIO(ImGui::GetIO()),
 	renderTex(LoadRenderTexture(384, 216)),
+	imguiIO(ImGui::GetIO()),
 	assetManager(std::make_unique<AssetManager>())
 {
 	SetTextColor(INFO);
@@ -70,7 +70,7 @@ void Game::Draw()
 					-static_cast<float>(this->renderTex.texture.height)},
 				   {0.0f, 0.0f, -static_cast<float>(SCREEN_WIDTH),
 					static_cast<float>(SCREEN_HEIGHT)},
-				   {0.0f}, 0.0f, WHITE);
+				   {0.0f, 0.0f}, 0.0f, WHITE);
 
 	this->gamemode->DrawUI();
 

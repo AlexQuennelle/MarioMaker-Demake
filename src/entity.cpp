@@ -4,7 +4,7 @@
 #include <raylib.h>
 #include <raymath.h>
 
-RecCollisionInfo GetCollisionInfo(Rectangle col1, Rectangle col2)
+auto GetCollisionInfo(Rectangle col1, Rectangle col2) -> RecCollisionInfo
 {
 	// Calculation of centers of rectangles
 	const Vector2 center1
@@ -29,5 +29,6 @@ RecCollisionInfo GetCollisionInfo(Rectangle col1, Rectangle col2)
 };
 
 Entity::Entity(const int x, const int y, AssetManager& assetManager) :
-	position(x, y), assetManager(assetManager)
+	assetManager(assetManager),
+	position(static_cast<float>(x), static_cast<float>(y))
 { }

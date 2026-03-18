@@ -31,7 +31,7 @@ struct RecCollisionInfo
 };
 
 // TODO: Add documentation comment
-RecCollisionInfo GetCollisionInfo(Rectangle, Rectangle);
+auto GetCollisionInfo(Rectangle, Rectangle) -> RecCollisionInfo;
 
 class Entity;
 struct SpawnEntityRequest
@@ -63,7 +63,7 @@ class Entity // NOLINT
 	 *  @returns A @link EntityReq @endlink containing information about actions
 	 *           the entity wants to happen in the @link Game @endlink
 	 */
-	virtual EntityReq Update(const vector<Rectangle>& colliders) = 0;
+	virtual auto Update(const vector<Rectangle>& colliders) -> EntityReq = 0;
 	/**
 	 * @brief The entity's main draw logic.
 	 */
@@ -82,7 +82,7 @@ class Entity // NOLINT
 	 *  @returns A @link EntityReq @endlink containing information about actions
 	 *           the entity wants to happen in the @link Game @endlink
 	 */
-	virtual EntityReq OnPlayerCollision(Player& player) = 0;
+	virtual auto OnPlayerCollision(Player& player) -> EntityReq = 0;
 	/** @brief This method should be called when a collision has been detected
 	 *         between this entity and another.
 	 *
@@ -92,18 +92,18 @@ class Entity // NOLINT
 	 *  @returns A @link EntityReq @endlink containing information about actions
 	 *           the entity wants to happen in the @link Game @endlink
 	 */
-	virtual EntityReq OnEntityCollision(Entity& entity) = 0;
+	virtual auto OnEntityCollision(Entity& entity) -> EntityReq = 0;
 
-	virtual bool TakeDamage() { return false; };
+	virtual auto TakeDamage() -> bool { return false; };
 
-	bool IsSolid() const { return this->solid; }
+	auto IsSolid() const -> bool { return this->solid; }
 	/** Should this entity be considered an active part of the game
 	 */
-	bool IsActive() const { return this->isActive; }
+	auto IsActive() const -> bool { return this->isActive; }
 	/** @returns A @link Rectangle @endlink representing the entity's collision
 	 *           box
 	 */
-	Rectangle GetCollider() const
+	auto GetCollider() const -> Rectangle
 	{
 		return {
 			.x = this->collider.x + this->position.x,
@@ -127,21 +127,16 @@ class Block : public Entity
 	Block(const int x, const int y, AssetManager& assetManager,
 		  const bool variant = false);
 
-	/** @copydoc Entity::Update()
-	 */
-	EntityReq Update(const vector<Rectangle>& colliders) override;
-	/** @copydoc Entity::Draw()
-	 */
+	/** @copydoc Entity::Update() */
+	auto Update(const vector<Rectangle>& colliders) -> EntityReq override;
+	/** @copydoc Entity::Draw() */
 	void Draw() override;
-	/** @copydoc Entity::EditDraw()
-	 */
+	/** @copydoc Entity::EditDraw() */
 	void EditDraw() override;
-	/** @copydoc Entity::OnPlayerCollision()
-	 */
-	EntityReq OnPlayerCollision(Player& player) override;
-	/** @copydoc Entity::OnEntityCollision()
-	 */
-	EntityReq OnEntityCollision(Entity& entity) override;
+	/** @copydoc Entity::OnPlayerCollision() */
+	auto OnPlayerCollision(Player& player) -> EntityReq override;
+	/** @copydoc Entity::OnEntityCollision() */
+	auto OnEntityCollision(Entity& entity) -> EntityReq override;
 
 	private:
 	float bonkTimer{0.0f};
@@ -155,21 +150,16 @@ class Spike : public Entity
 	public:
 	Spike(const int x, const int y, AssetManager& assetManager);
 
-	/** @copydoc Entity::Update()
-	 */
-	EntityReq Update(const vector<Rectangle>& colliders) override;
-	/** @copydoc Entity::Draw()
-	 */
+	/** @copydoc Entity::Update() */
+	auto Update(const vector<Rectangle>& colliders) -> EntityReq override;
+	/** @copydoc Entity::Draw() */
 	void Draw() override;
-	/** @copydoc Entity::EditDraw()
-	 */
+	/** @copydoc Entity::EditDraw() */
 	void EditDraw() override;
-	/** @copydoc Entity::OnPlayerCollision()
-	 */
-	EntityReq OnPlayerCollision(Player& player) override;
-	/** @copydoc Entity::OnEntityCollision()
-	 */
-	EntityReq OnEntityCollision(Entity& entity) override;
+	/** @copydoc Entity::OnPlayerCollision() */
+	auto OnPlayerCollision(Player& player) -> EntityReq override;
+	/** @copydoc Entity::OnEntityCollision() */
+	auto OnEntityCollision(Entity& entity) -> EntityReq override;
 
 	private:
 	Texture2D& sprite;
@@ -181,21 +171,16 @@ class ItemBox : public Entity
 	ItemBox(const int x, const int y, AssetManager& assetManager,
 			const bool isBrick, const bool isHidden);
 
-	/** @copydoc Entity::Update()
-	 */
-	EntityReq Update(const vector<Rectangle>& colliders) override;
-	/** @copydoc Entity::Draw()
-	 */
+	/** @copydoc Entity::Update() */
+	auto Update(const vector<Rectangle>& colliders) -> EntityReq override;
+	/** @copydoc Entity::Draw() */
 	void Draw() override;
-	/** @copydoc Entity::EditDraw()
-	 */
+	/** @copydoc Entity::EditDraw() */
 	void EditDraw() override;
-	/** @copydoc Entity::OnPlayerCollision()
-	 */
-	EntityReq OnPlayerCollision(Player& player) override;
-	/** @copydoc Entity::OnEntityCollision()
-	 */
-	EntityReq OnEntityCollision(Entity& entity) override;
+	/** @copydoc Entity::OnPlayerCollision() */
+	auto OnPlayerCollision(Player& player) -> EntityReq override;
+	/** @copydoc Entity::OnEntityCollision() */
+	auto OnEntityCollision(Entity& entity) -> EntityReq override;
 
 	private:
 	float accumulatedAnimTime{0.0f};
@@ -214,21 +199,16 @@ class Coin : public Entity
 	public:
 	Coin(const int x, const int y, AssetManager& assetmanager);
 
-	/** @copydoc Entity::Update()
-	 */
-	EntityReq Update(const vector<Rectangle>& colliders) override;
-	/** @copydoc Entity::Draw()
-	 */
+	/** @copydoc Entity::Update() */
+	auto Update(const vector<Rectangle>& colliders) -> EntityReq override;
+	/** @copydoc Entity::Draw() */
 	void Draw() override;
-	/** @copydoc Entity::EditDraw()
-	 */
+	/** @copydoc Entity::EditDraw() */
 	void EditDraw() override;
-	/** @copydoc Entity::OnPlayerCollision()
-	 */
-	EntityReq OnPlayerCollision(Player& player) override;
-	/** @copydoc Entity::OnEntityCollision()
-	 */
-	EntityReq OnEntityCollision(Entity& entity) override;
+	/** @copydoc Entity::OnPlayerCollision() */
+	auto OnPlayerCollision(Player& player) -> EntityReq override;
+	/** @copydoc Entity::OnEntityCollision() */
+	auto OnEntityCollision(Entity& entity) -> EntityReq override;
 
 	private:
 	Texture2D& sprite;
@@ -242,9 +222,10 @@ class IToggleable // NOLINT
 	public:
 	virtual ~IToggleable() = default;
 
-	/** @brief Sets the current state of the block. This should match some
-	 *         'global' state stored in @link Game @endlink to keep all toggle
-	 *         blocks synchronized
+	/**
+	 * @brief Sets the current state of the block. This should match some
+	 *        'global' state stored in @link Game @endlink to keep all toggle
+	 *        blocks synchronized
 	 */
 	virtual void SetState(const bool newState) = 0;
 };
@@ -253,24 +234,18 @@ class ToggleSwitch : public Entity, public IToggleable
 	public:
 	ToggleSwitch(const int x, const int y, AssetManager& assetManager);
 
-	/** @copydoc Entity::Update()
-	 */
-	EntityReq Update(const vector<Rectangle>& colliders) override;
-	/** @copydoc Entity::Draw()
-	 */
+	/** @copydoc Entity::Update() */
+	auto Update(const vector<Rectangle>& colliders) -> EntityReq override;
+	/** @copydoc Entity::Draw() */
 	void Draw() override;
-	/** @copydoc Entity::EditDraw()
-	 */
+	/** @copydoc Entity::EditDraw() */
 	void EditDraw() override;
-	/** @copydoc Entity::OnPlayerCollision()
-	 */
-	EntityReq OnPlayerCollision(Player& player) override;
-	/** @copydoc Entity::OnEntityCollision()
-	 */
-	EntityReq OnEntityCollision(Entity& entity) override;
+	/** @copydoc Entity::OnPlayerCollision() */
+	auto OnPlayerCollision(Player& player) -> EntityReq override;
+	/** @copydoc Entity::OnEntityCollision() */
+	auto OnEntityCollision(Entity& entity) -> EntityReq override;
 
-	/** @copydoc IToggleable::SetState()
-	 */
+	/** @copydoc IToggleable::SetState() */
 	void SetState(const bool newState) override { this->on = newState; };
 
 	private:
@@ -285,24 +260,18 @@ class ToggleBlock : public Entity, public IToggleable
 	ToggleBlock(const int x, const int y, AssetManager& assetManager,
 				const bool startOn);
 
-	/** @copydoc Entity::Update()
-	 */
-	EntityReq Update(const vector<Rectangle>& colliders) override;
-	/** @copydoc Entity::Draw()
-	 */
+	/** @copydoc Entity::Update() */
+	auto Update(const vector<Rectangle>& colliders) -> EntityReq override;
+	/** @copydoc Entity::Draw() */
 	void Draw() override;
-	/** @copydoc Entity::EditDraw()
-	 */
+	/** @copydoc Entity::EditDraw() */
 	void EditDraw() override;
-	/** @copydoc Entity::OnPlayerCollision()
-	 */
-	EntityReq OnPlayerCollision(Player& /*player*/) override { return {}; };
-	/** @copydoc Entity::OnEntityCollision()
-	 */
-	EntityReq OnEntityCollision(Entity& /*entity*/) override { return {}; };
+	/** @copydoc Entity::OnPlayerCollision() */
+	auto OnPlayerCollision(Player& /*player*/) -> EntityReq override;
+	/** @copydoc Entity::OnEntityCollision() */
+	auto OnEntityCollision(Entity& /*entity*/) -> EntityReq override;
 
-	/** @copydoc IToggleable::SetState()
-	 */
+	/** @copydoc IToggleable::SetState() */
 	void SetState(const bool newState) override { this->on = newState; };
 
 	private:

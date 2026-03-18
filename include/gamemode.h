@@ -16,6 +16,11 @@
 #include <raylib.h>
 #include <string>
 
+/**
+ * @brief Enum representing a request to switch to a new gamemode. This should
+ *        only really be used by classes derived from
+ *        @link GamemodeInstance @endlink .
+ */
 enum class SwitchRequest : uint8_t
 {
 	None,
@@ -28,16 +33,16 @@ class GamemodeInstance // NOLINT
 {
 	public:
 	GamemodeInstance(Level* lvl, AssetManager& am) :
-		level(lvl), assetManager(am) { };
+		assetManager(am), level(lvl) { };
 	virtual ~GamemodeInstance() = default;
 
 	virtual void Update() = 0;
 	virtual void Draw() = 0;
 	virtual void DrawUI() = 0;
 
-	SwitchRequest GetNextMode() { return this->switchReq; }
+	auto GetNextMode() -> SwitchRequest { return this->switchReq; }
 
-	Camera2D camera{0};
+	Camera2D camera{};
 
 	protected:
 	AssetManager& assetManager;
@@ -122,7 +127,7 @@ class MainMenu : public GamemodeInstance // NOLINT
 
 	void HandleButtonResult(ButtonResult result);
 
-	ButtonResult SwitchScreens(MenuScreen screen);
+	auto SwitchScreens(MenuScreen screen) -> ButtonResult;
 
 	// Member variables
 	vector<std::unique_ptr<ButtonBase>> buttons;

@@ -11,6 +11,8 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -38,12 +40,12 @@
 
 Level::Level(const std::string& filepath, AssetManager& am, float gravity) :
 	am(am),
+	filepath(filepath),
 	img(),
 	sprites(am.groundTiles),
 	entities(0),
 	tex(),
 	gravity(gravity),
-	filepath(filepath),
 	saved(true)
 {
 #ifndef NDEBUG
@@ -54,17 +56,15 @@ Level::Level(const std::string& filepath, AssetManager& am, float gravity) :
 	namespace fs = std::filesystem;
 	using std::ios;
 
-	std::srand(std::time({}));
-
 	std::ifstream file{filepath.c_str(), ios::binary | ios::ate};
 
 	if (file.is_open())
 	{
-		std::streampos fSize = fs::file_size(filepath);
+		auto fSize = static_cast<size_t>(fs::file_size(filepath));
 		std::vector<char> data(fSize, 0);
 
 		file.seekg(0, ios::beg);
-		file.read(data.data(), fSize);
+		file.read(data.data(), static_cast<int64_t>(fSize));
 		file.close();
 
 		std::string fileID(3, 0);
@@ -96,24 +96,21 @@ Level::Level(AssetManager& am, std::string name, float gravity) :
 	name(std::move(name)),
 	img(nullptr),
 	sprites(am.groundTiles),
-	grid(DEFAULT_LEVEL_LENGTH * DEFAULT_LEVEL_HEIGHT),
+	grid(static_cast<size_t>(DEFAULT_LEVEL_LENGTH * DEFAULT_LEVEL_HEIGHT)),
 	tex(0),
 	playerStartPos({.x = 2.0f, .y = DEFAULT_LEVEL_HEIGHT - 2.0f}),
-	length(DEFAULT_LEVEL_LENGTH),
+	gravity(gravity),
 	height(DEFAULT_LEVEL_HEIGHT),
-	gravity(gravity)
+	length(DEFAULT_LEVEL_LENGTH)
 {
 #ifndef NDEBUG
 	SetTextColor(INFO);
 	std::cout << "New level\n";
 	ClearStyles();
 #endif
-	std::srand(std::time({}));
-
-	// this->grid.resize(this->length * this->height);
-	for (int x{0}; x < this->length; x++)
+	for (uint32_t x{0}; x < this->length; x++)
 	{
-		for (int y{0}; y < this->height; y++)
+		for (uint32_t y{0}; y < this->height; y++)
 		{
 			if (y >= this->height - 2)
 				this->SetTileAt(TileID::ground, x, y);
@@ -137,7 +134,7 @@ Level::~Level()
 	this->tex.id = 0;
 }
 
-vector<byte> Level::Serialize() const
+auto Level::Serialize() const -> vector<byte>
 {
 	// Metadata/Header
 	vector<byte> bytes{'L', 'V', 'L', 0};
@@ -152,7 +149,7 @@ vector<byte> Level::Serialize() const
 	InsertAsBytes(bytes, static_cast<uint32_t>(this->name.length()));
 	for (auto character : this->name)
 	{
-		bytes.push_back(character);
+		bytes.push_back(static_cast<byte>(character));
 	}
 	// Pad bytes for alignment
 	int alignment{
@@ -165,7 +162,7 @@ vector<byte> Level::Serialize() const
 	// Run length encoding
 	Tile currTile{this->grid[0]};
 	uint32_t run{0};
-	for (int i{0}; i < this->grid.size(); i++)
+	for (uint64_t i{0}; i < this->grid.size(); i++)
 	{
 		if (currTile != this->grid[i])
 		{
@@ -253,12 +250,13 @@ void Level::DrawGrid(RenderTexture& tex)
 {
 	BeginTextureMode(tex);
 	ClearBackground(BLANK);
-	for (int x{0}; x < this->length; x++)
+	for (uint32_t x{0}; x < this->length; x++)
 	{
-		for (int y{0}; y < this->height; y++)
+		for (uint32_t y{0}; y < this->height; y++)
 		{
-			DrawRectangleLinesEx({x * 16.0f, y * 16.0f, 16.0f, 16.0f}, 0.5f,
-								 Fade(WHITE, 0.8f));
+			DrawRectangleLinesEx({static_cast<float>(x) * 16.0f,
+								  static_cast<float>(y) * 16.0f, 16.0f, 16.0f},
+								 0.5f, Fade(WHITE, 0.8f));
 		}
 	}
 	EndTextureMode();
@@ -267,13 +265,14 @@ void Level::DrawGrid(RenderTexture& tex)
 void Level::PopulateLevel()
 {
 	std::vector<bool> visited{};
-	visited.resize(this->height * this->length);
+	// HACK: Find a better way to deal with this warning
+	visited.resize(this->height * this->length); // NOLINT
 
-	for (int x{0}; x < this->length; x++)
+	for (uint32_t x{0}; x < this->length; x++)
 	{
-		for (int y{0}; y < this->height; y++)
+		for (uint32_t y{0}; y < this->height; y++)
 		{
-			int i = (y * this->length) + x;
+			auto i = (y * this->length) + x;
 			Tile currTile{this->TileAt(x, y)};
 			if (currTile.ID == TileID::ground)
 			{
@@ -290,13 +289,13 @@ void Level::PopulateLevel()
 		}
 	}
 }
-Rectangle Level::GenCollisionRect(const int x, const int y,
-								  vector<bool>& visited)
+auto Level::GenCollisionRect(const uint32_t x, const uint32_t y,
+							 vector<bool>& visited) -> Rectangle
 {
-	int rWidth{0};
-	for (int w{x}; w < this->length; w++)
+	uint32_t rWidth{0};
+	for (uint32_t w{x}; w < this->length; w++)
 	{
-		int i = (y * this->length) + w;
+		uint32_t i = (y * this->length) + w;
 		if ((TileAt(w, y).ID == TileID::ground) && !visited[i])
 		{
 			visited[i] = true;
@@ -306,21 +305,21 @@ Rectangle Level::GenCollisionRect(const int x, const int y,
 			break;
 	}
 
-	int rHeight{1};
-	for (int h{y + 1}; h < this->height; h++)
+	uint32_t rHeight{1};
+	for (uint32_t h{y + 1}; h < this->height; h++)
 	{
 		bool canExpand{true};
-		for (int w{x}; w < rWidth + x; w++)
+		for (uint32_t w{x}; w < rWidth + x; w++)
 		{
-			int i = (h * this->length) + w;
+			uint32_t i = (h * this->length) + w;
 			canExpand &= ((TileAt(w, h).ID == TileID::ground) && !visited[i]);
 		}
 
 		if (canExpand)
 		{
-			for (int w{x}; w < rWidth + x; w++)
+			for (uint32_t w{x}; w < rWidth + x; w++)
 			{
-				int i = (h * this->length) + w;
+				uint32_t i = (h * this->length) + w;
 				visited[i] = true;
 			}
 			rHeight++;
@@ -363,21 +362,23 @@ void Level::StitchTexture()
 {
 	this->img
 		= {.data = nullptr, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
-	this->img = GenImageColor(this->length * 16, this->height * 16, BLANK);
-	for (int y{0}; y < this->height; y++)
+	this->img = GenImageColor(static_cast<int32_t>(this->length * 16),
+							  static_cast<int32_t>(this->height * 16), BLANK);
+	for (uint32_t y{0}; y < this->height; y++)
 	{
-		for (int x{0}; x < this->length; x++)
+		for (uint32_t x{0}; x < this->length; x++)
 		{
 			if (TileAt(x, y).ID == TileID::ground)
 			{
 				byte tileMask{this->MarchSquares(x, y)};
 				array<Rectangle, 4> rects{this->GetRects(tileMask)};
 
-				for (int i{0}; i < 4; i++)
+				for (uint32_t i{0}; i < 4; i++)
 				{
 					Rectangle dest{
-						(x * 16.0f) + ((i % 2) * 8.0f),
-						(y * 16.0f) + (std::floor(i / 2.0f) * 8.0f),
+						static_cast<float>((x * 16) + ((i % 2) * 8)),
+						static_cast<float>(y * 16)
+							+ (std::floor(static_cast<float>(i) / 2.0f) * 8),
 						8.0f,
 						8.0f,
 					};
@@ -389,7 +390,7 @@ void Level::StitchTexture()
 	}
 	this->tex = LoadTextureFromImage(this->img);
 }
-byte Level::MarchSquares(const int x, const int y)
+auto Level::MarchSquares(const uint32_t x, const uint32_t y) -> byte
 {
 	byte mask{0};
 	int shift{0};
@@ -402,9 +403,9 @@ byte Level::MarchSquares(const int x, const int y)
 	 *
 	 * 87654321
 	 */
-	for (const int i : {-1, 0, 1})
+	for (const uint32_t i : {-1u, 0u, 1u})
 	{
-		for (const int j : {-1, 0, 1})
+		for (const uint32_t j : {-1u, 0u, 1u})
 		{
 			if (x + i == x && y + j == y)
 				continue;
@@ -467,16 +468,27 @@ void Level::ParseData(const vector<char>& data)
 		std::memcpy(&block, range.data(), 8);
 		return block;
 	};
-	this->grid.reserve(this->length * this->height);
+	this->grid.reserve(this->length * this->height); // NOLINT
+#ifndef __EMSCRIPTEN__
 	this->grid
 		= rv::chunk(span, 8)
-		  | rv::transform(fuse)
+		  | rv::transform(fuse) // NOLINTNEXTLINE
 		  | rv::transform([](auto blk) { return rv::repeat(blk.dat, blk.num); })
 		  | rv::join
 		  | r::to<vector<Tile>>();
+#else
+	auto spanStart = std::bit_cast<const DataBlock*>(
+			(data.begin() + (24 + (((nameLen / 4) + 1) * 4))).base());
+	auto spanEnd = std::bit_cast<const DataBlock*>(data.end().base());
+	this->grid
+		= std::span<const DataBlock>(spanStart, spanEnd - spanStart)
+		| rv::transform([](auto blk) { return rv::repeat(blk.dat, blk.num); })
+		| rv::join
+		| r::to<vector<Tile>>();
+#endif // !__EMSCRIPTEN__
 }
 
-array<Rectangle, 4> Level::GetRects(const byte mask)
+auto Level::GetRects(const byte mask) -> array<Rectangle, 4>
 {
 	std::random_device randomDev{};
 	std::seed_seq seeds({randomDev(), randomDev()});
@@ -639,8 +651,8 @@ array<Rectangle, 4> Level::GetRects(const byte mask)
 	return {topL, topR, botL, botR};
 }
 
-void Level::SetTileAt(const TileID tile, const int x, const int y,
-					  const uint8_t flags)
+void Level::SetTileAt(const TileID tile, const uint32_t x, const uint32_t y,
+					  const uint16_t flags)
 {
 	if (x >= 0 && x <= this->length - 1 && y >= 0 && y <= this->height - 1)
 	{
@@ -657,21 +669,23 @@ void Level::SetTileAt(const TileID tile, const int x, const int y,
 #endif // !LOG_LEVEL_DATA
 }
 void Level::SetTileAt(const TileID tile, const Vector2Int pos,
-					  const uint8_t flags)
+					  const uint16_t flags)
 {
-	this->SetTileAt(tile, pos.x, pos.y, flags);
+	this->SetTileAt(tile, static_cast<uint32_t>(pos.x),
+					static_cast<uint32_t>(pos.y), flags);
 }
 void Level::SetTileAtEditor(const TileID tile, const Vector2Int pos,
-							const uint8_t flags)
+							const uint16_t flags)
 {
-	auto prevTile{this->TileAt(pos.x, pos.y)};
+	auto prevTile{this->TileAt(static_cast<uint32_t>(pos.x),
+							   static_cast<uint32_t>(pos.y))};
 	if (prevTile.ID == tile && prevTile.flags == flags)
 		return;
 
 	this->SetTileAt(tile, pos, flags);
 	this->Reset();
 }
-Tile Level::TileAt(const int x, const int y)
+auto Level::TileAt(const uint32_t x, const uint32_t y) -> Tile
 {
 	if (x >= 0 && x <= this->length - 1 && y >= 0 && y <= this->height - 1)
 	{
@@ -682,7 +696,7 @@ Tile Level::TileAt(const int x, const int y)
 		return Tile{.ID = TileID::ground, .flags = 0};
 	}
 }
-void Level::SpawnEntity(const int x, const int y, const Tile basis)
+void Level::SpawnEntity(const uint32_t x, const uint32_t y, const Tile basis)
 {
 	switch (basis.ID)
 	{
@@ -731,39 +745,40 @@ void Level::SpawnEntity(const int x, const int y, const Tile basis)
 	}
 	if (basis.ID == TileID::toggleBlock || basis.ID == TileID::toggleSwitch)
 	{
-		if (auto* block{dynamic_cast<IToggleable*>(
-				this->entities[this->entities.size() - 1].get())})
+		auto* block{dynamic_cast<IToggleable*>(
+			this->entities[this->entities.size() - 1].get())};
+		if (block != nullptr)
 		{
 			this->toggleBlocks.push_back(block);
 		}
 	}
 }
 
-void Level::SetLevelSize(const int length, const int height)
+void Level::SetLevelSize(const uint32_t length, const uint32_t height)
 {
 	if ((this->length == length) && (this->height == height))
 		return;
 
 	this->saved = false;
 
-	int overlapX{std::min(this->length, length)};
-	int overlapY{std::min(this->height, height)};
+	uint32_t overlapX{std::min(this->length, length)};
+	uint32_t overlapY{std::min(this->height, height)};
 
 	vector<Tile> oldGrid(this->grid);
 	this->grid.clear();
-	this->grid.resize(length * height);
+	this->grid.resize(static_cast<size_t>(length) * height);
 
 #ifdef LOG_LEVEL_DATA
 	std::cout << length << " x " << height << '\n';
 	std::cout << oldGrid.size() << " -> " << this->grid.size() << '\n';
 #endif // !LOG_LEVEL_DATA
 
-	for (int x{0}; x < overlapX; x++)
+	for (uint32_t x{0}; x < overlapX; x++)
 	{
-		for (int y{0}; y <= overlapY; y++)
+		for (uint32_t y{0}; y <= overlapY; y++)
 		{
-			int i{((this->height - y) * this->length) + x};
-			int j{((height - y) * length) + x};
+			uint32_t i{((this->height - y) * this->length) + x};
+			uint32_t j{((height - y) * length) + x};
 
 			if (j < this->grid.size())
 				this->grid[j] = oldGrid[i];
@@ -788,4 +803,30 @@ void Level::Reset()
 	UnloadTexture(this->tex);
 	this->tex = {.id = 0, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
 	this->StitchTexture();
+}
+
+auto Level::GetEntities() -> vector<Entity*>
+{
+	vector<Entity*> entities;
+	for (Entity_ptr& entity : this->entities)
+	{
+		if (entity->IsActive())
+		{
+			entities.push_back(entity.get());
+		}
+	}
+	return entities;
+}
+
+auto Level::GetSolidEntityColliders() -> vector<Rectangle>
+{
+	vector<Rectangle> solids;
+	for (Entity_ptr& entity : this->entities)
+	{
+		if (entity->IsSolid() && entity->IsActive())
+		{
+			solids.push_back(entity->GetCollider());
+		}
+	}
+	return solids;
 }

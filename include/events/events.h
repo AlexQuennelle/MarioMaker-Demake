@@ -1,4 +1,5 @@
 #pragma once
+// NOLINTBEGIN
 
 // =============================================================================
 // Event Class for .NET Style Events
@@ -10,7 +11,6 @@
 #define EVENT_HPP
 
 #include "delegate.h"
-#include <algorithm>
 #include <vector>
 
 template <typename T> class Event
@@ -54,4 +54,5 @@ template <typename T> class Event
 	std::vector<Delegate<T>*> _delegates;
 };
 
+// NOLINTEND
 #endif

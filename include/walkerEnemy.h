@@ -8,13 +8,13 @@ class WalkerEnemy : public Entity
 	WalkerEnemy(const int x, const int y, AssetManager& assetManager,
 				const float gravity, const bool variant = false);
 
-	EntityReq Update(const vector<Rectangle>& colliders) override;
+	auto Update(const vector<Rectangle>& colliders) -> EntityReq override;
 	void Draw() override;
 	void EditDraw() override;
-	EntityReq OnPlayerCollision(Player& player) override;
-	EntityReq OnEntityCollision(Entity& entity) override;
+	auto OnPlayerCollision(Player& player) -> EntityReq override;
+	auto OnEntityCollision(Entity& entity) -> EntityReq override;
 
-	bool TakeDamage() override;
+	auto TakeDamage() -> bool override;
 
 	private:
 	Texture2D& sprite;

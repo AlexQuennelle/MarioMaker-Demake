@@ -14,7 +14,7 @@ Mushroom::Mushroom(const int x, const int y, AssetManager& assetManager,
 	this->velocity.x = this->speed;
 }
 
-EntityReq Mushroom::Update(const vector<Rectangle>& colliders)
+auto Mushroom::Update(const vector<Rectangle>& colliders) -> EntityReq
 {
 	this->velocity.y += gravity * GetFrameTime();
 
@@ -57,14 +57,14 @@ void Mushroom::Draw()
 }
 void Mushroom::EditDraw() { this->Draw(); }
 
-EntityReq Mushroom::OnPlayerCollision(Player& player)
+auto Mushroom::OnPlayerCollision(Player& player) -> EntityReq
 {
 	player.GetBig();
 	this->isActive = false;
 	return {};
 }
 
-EntityReq Mushroom::OnEntityCollision(Entity& /*entity*/) { return {}; }
+auto Mushroom::OnEntityCollision(Entity& /*entity*/) -> EntityReq { return {}; }
 
 FireFlower::FireFlower(const int x, const int y, AssetManager& assetManager,
 					   const float gravity) :
@@ -73,7 +73,7 @@ FireFlower::FireFlower(const int x, const int y, AssetManager& assetManager,
 	this->solid = false;
 }
 
-EntityReq FireFlower::Update(const vector<Rectangle>& colliders)
+auto FireFlower::Update(const vector<Rectangle>& colliders) -> EntityReq
 {
 	this->velocity.y += gravity * GetFrameTime();
 
@@ -112,7 +112,8 @@ void FireFlower::Draw()
 
 	accumulatedAnimTime += GetFrameTime();
 
-	Rectangle sourceRect{32.0f + (curFrame * 16.0f), 0.0f, 16.0f, 16.0f};
+	Rectangle sourceRect{32.0f + static_cast<float>(curFrame * 16), 0.0f, 16.0f,
+						 16.0f};
 	DrawTextureRec(this->sprite, sourceRect,
 				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
 #ifdef DRAW_COLS
@@ -133,11 +134,14 @@ void FireFlower::EditDraw()
 #endif // DEBUG
 }
 
-EntityReq FireFlower::OnPlayerCollision(Player& player)
+auto FireFlower::OnPlayerCollision(Player& player) -> EntityReq
 {
 	player.GetFire();
 	this->isActive = false;
 	return {};
 }
 
-EntityReq FireFlower::OnEntityCollision(Entity& /*entity*/) { return {}; }
+auto FireFlower::OnEntityCollision(Entity& /*entity*/) -> EntityReq
+{
+	return {};
+}

@@ -14,16 +14,8 @@ class Fireball
 	void Update(const vector<Entity*>& entities,
 				const vector<Rectangle>& solidCols);
 	void Draw();
-	bool IsActive() const { return this->isActive; }
-	Rectangle GetCollider() const
-	{
-		return {
-			.x = this->collider.x + this->position.x,
-			.y = this->collider.y + this->position.y,
-			.width = this->collider.width,
-			.height = this->collider.height,
-		};
-	};
+	auto IsActive() const -> bool;
+	auto GetCollider() const -> Rectangle;
 
 	private:
 	Rectangle collider{0.0f, 0.0f, 0.5f, 0.5f};

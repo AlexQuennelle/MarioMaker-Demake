@@ -55,7 +55,7 @@ class ButtonBase // NOLINT
 	 *           @link ButtonEvent @endlink. This should be handled and called
 	 *           by the caller to trigger the click function of the button.
 	 */
-	virtual std::optional<ButtonEvent> OnClick() = 0;
+	virtual auto OnClick() -> std::optional<ButtonEvent> = 0;
 
 	protected:
 	Rectangle clickableArea{};
@@ -80,7 +80,7 @@ class MenuButton : public ButtonBase // NOLINT
 	void Draw() override;
 	/** @copydoc ButtonBase::OnClick()
 	 */
-	std::optional<ButtonEvent> OnClick() override;
+	auto OnClick() -> std::optional<ButtonEvent> override;
 
 	private:
 	const int fontSize;
@@ -99,15 +99,18 @@ class LevelWidget : public ButtonBase // NOLINT
 	LevelWidget() = delete;
 	~LevelWidget() override = default;
 
-	bool operator==(const LevelWidget& other)
+	auto operator==(const LevelWidget& other) -> bool
 	{
 		return (this->filePath == other.filePath);
 	}
-	bool operator==(const std::string& other)
+	auto operator==(const std::string& other) -> bool
 	{
 		return (this->filePath == other);
 	}
-	bool operator==(const char* other) { return (this->filePath == other); }
+	auto operator==(const char* other) -> bool
+	{
+		return (this->filePath == other);
+	}
 
 	/** @copydoc ButtonBase::Update()
 	 *  @note Also calls Update() on @link LevelWidget::playButton @endlink and
@@ -129,13 +132,13 @@ class LevelWidget : public ButtonBase // NOLINT
 	 *           This should be handled and called by the caller to trigger the
 	 *           click function of the button.
 	 */
-	std::optional<ButtonEvent> OnClick() override;
+	auto OnClick() -> std::optional<ButtonEvent> override;
 
 	private:
 	/** @brief Parses the header of the file pointed to by
 	 *         @link LevelWidget::filePath @endlink to fetch some meta data.
 	 */
-	bool ParseHeader();
+	auto ParseHeader() -> bool;
 
 	const std::string filePath;
 	std::string levelName;

@@ -8,7 +8,7 @@ class PlayerInputHandler
 	PlayerInputHandler(Player& player);
 	void Update();
 
-	bool IsPaused() const { return this->paused; }
+	auto IsPaused() const -> bool { return this->paused; }
 
 	private:
 	Player& player;

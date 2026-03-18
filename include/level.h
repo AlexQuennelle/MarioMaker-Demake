@@ -28,10 +28,10 @@ class Level
 
 	~Level();
 
-	Level& operator=(const Level& other) = delete;
-	Level& operator=(Level&& other) = delete;
+	auto operator=(const Level& other) -> Level& = delete;
+	auto operator=(Level&& other) -> Level& = delete;
 
-	[[nodiscard]] vector<byte> Serialize() const;
+	[[nodiscard]] auto Serialize() const -> vector<byte>;
 
 	void Update();
 	void Draw();
@@ -53,12 +53,12 @@ class Level
 	 * @param y the y position to set the tile
 	 * @param flags any flags a tile should have
 	 */
-	void SetTileAt(const TileID tile, const int x, const int y,
-				   const uint8_t flags = 0);
+	void SetTileAt(const TileID tile, const uint32_t x, const uint32_t y,
+				   const uint16_t flags = 0);
 	void SetTileAt(const TileID tile, const Vector2Int pos,
-				   const uint8_t flags = 0);
+				   const uint16_t flags = 0);
 	void SetTileAtEditor(const TileID tile, const Vector2Int pos,
-						 const uint8_t flags = 0);
+						 const uint16_t flags = 0);
 	/**
 	 * @param x the x position to query
 	 * @param y the y position to query
@@ -67,49 +67,28 @@ class Level
 	 * @warning if (x, y) is outside the bounds of the level, this method
 	 *          returns a @link TileID::ground @endlink.
 	 */
-	Tile TileAt(const int x, const int y);
-	void SpawnEntity(const int x, const int y, const Tile basis);
-	void SpawnEntityEditor(const int x, const int y, const Tile basis);
+	auto TileAt(const uint32_t x, const uint32_t y) -> Tile;
+	void SpawnEntity(const uint32_t x, const uint32_t y, const Tile basis);
+	void SpawnEntityEditor(const uint32_t x, const uint32_t y,
+						   const Tile basis);
 
 	// Getters
-	Vector2 GetPlayerStartPos() const { return playerStartPos; }
-	const vector<Rectangle>& GetColliders() const { return colliders; }
-	bool HasFilepath() const { return !this->filepath.empty(); }
+	auto GetPlayerStartPos() const -> Vector2 { return playerStartPos; }
+	auto GetColliders() const -> const vector<Rectangle>& { return colliders; }
+	auto HasFilepath() const -> bool { return !this->filepath.empty(); }
 	void SetFilepath(const std::string& path) { this->filepath = path; }
-	const std::string& GetFilepath() const { return this->filepath; }
-	int GetLength() const { return this->length; }
-	int GetHeight() const { return this->height; }
-	void SetLevelSize(const int length, const int height);
-	const std::string& GetName() const { return this->name; }
+	auto GetFilepath() const -> const std::string& { return this->filepath; }
+	auto GetLength() const -> uint32_t { return this->length; }
+	auto GetHeight() const -> uint32_t { return this->height; }
+	void SetLevelSize(const uint32_t length, const uint32_t height);
+	auto GetName() const -> const std::string& { return this->name; }
 	void SetName(const std::string& newName) { this->name = newName; }
-	bool IsSaved() const { return this->saved; }
+	auto IsSaved() const -> bool { return this->saved; }
 	void Save() { this->saved = true; }
 
-	vector<Entity*> GetEntities()
-	{
-		vector<Entity*> entities;
-		for (Entity_ptr& entity : this->entities)
-		{
-			if (entity->IsActive())
-			{
-				entities.push_back(entity.get());
-			}
-		}
-		return entities;
-	}
+	auto GetEntities() -> vector<Entity*>;
 
-	vector<Rectangle> GetSolidEntityColliders()
-	{
-		vector<Rectangle> solids;
-		for (Entity_ptr& entity : this->entities)
-		{
-			if (entity->IsSolid() && entity->IsActive())
-			{
-				solids.push_back(entity->GetCollider());
-			}
-		}
-		return solids;
-	}
+	auto GetSolidEntityColliders() -> vector<Rectangle>;
 
 	private:
 	/**
@@ -134,7 +113,8 @@ class Level
 	 *
 	 * @returns a @link Rectangle @endlink
 	 */
-	Rectangle GenCollisionRect(const int x, const int y, vector<bool>& visited);
+	auto GenCollisionRect(const uint32_t x, const uint32_t y,
+						  vector<bool>& visited) -> Rectangle;
 	/**
 	 * @brief Stitches ground tile sprites into an image representing the
 	 *        entire level using the data in @link grid @endlink. This is done
@@ -153,7 +133,7 @@ class Level
 	 * @returns @link byte @endlink representing adjacency to tiles with the ID
 	 *          @link TileID::ground @endlink tiles encoded as bit flags
 	 */
-	byte MarchSquares(const int x, const int y);
+	auto MarchSquares(const uint32_t x, const uint32_t y) -> byte;
 	void ParseData(const vector<char>& data);
 
 	/**
@@ -163,7 +143,7 @@ class Level
 	 * @returns An array of 4 rectangles used to copy sprites from
 	 *          @link sprites @endlink into @link img @endlink
 	 */
-	static array<Rectangle, 4> GetRects(const byte mask);
+	static auto GetRects(const byte mask) -> array<Rectangle, 4>;
 	template <typename T>
 	static inline void InsertAsBytes(vector<byte>& vec, T data);
 
@@ -180,8 +160,8 @@ class Level
 	Texture tex;
 	Vector2 playerStartPos{0.0f, 0.0f};
 	float gravity;
-	int32_t height{0};
-	int32_t length{0};
+	uint32_t height{0};
+	uint32_t length{0};
 	bool toggleState{false};
 	bool toggledThisFrame{false};
 	bool saved{false};
