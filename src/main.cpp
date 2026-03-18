@@ -14,7 +14,7 @@ std::unique_ptr<Game> game{nullptr}; // NOLINT
 
 void Update();
 
-int main()
+auto main() -> int
 {
 #if defined(PLATFORM_WEB)
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT + EDIT_PANEL_HEIGHT, NAME);

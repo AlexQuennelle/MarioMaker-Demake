@@ -30,19 +30,19 @@ class Player
 	void Reset(const Vector2 startPosition);
 
 	//getters
-	bool IsDead() const { return this->dead; }
-	bool IsBig() const { return this->big; }
-	bool IsJumpPressed() const { return this->jumpPressed; }
-	int GetCoins() const { return this->coins; }
-	Vector2 GetPosition() const { return this->position; }
-	Vector2 GetVelocity() const { return this->velocity; }
-	Rectangle GetCollisionRect();
+	auto IsDead() const -> bool { return this->dead; }
+	auto IsBig() const -> bool { return this->big; }
+	auto IsJumpPressed() const -> bool { return this->jumpPressed; }
+	auto GetCoins() const -> int { return this->coins; }
+	auto GetPosition() const -> Vector2 { return this->position; }
+	auto GetVelocity() const -> Vector2 { return this->velocity; }
+	auto GetCollisionRect() -> Rectangle;
 
 	// EVIL SETTER AAAAAAA (i kinda need it)
 	void SetVelocity(const Vector2 velocity) { this->velocity = velocity; }
 
 	private:
-	bool Grounded();
+	auto Grounded() -> bool;
 	void CheckCollisions();
 	void TryFireball();
 

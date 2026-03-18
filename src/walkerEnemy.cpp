@@ -5,16 +5,18 @@
 #include <raymath.h>
 
 WalkerEnemy::WalkerEnemy(const int x, const int y, AssetManager& assetManager,
-						 const float gravity, const bool variant)
-	: Entity(x, y, assetManager), sprite(assetManager.enemies),
-	  gravity(gravity), isVariant(variant)
+						 const float gravity, const bool variant) :
+	Entity(x, y, assetManager),
+	sprite(assetManager.enemies),
+	gravity(gravity),
+	isVariant(variant)
 {
 	this->solid = false;
 	this->collider = {.x = 0.0f, .y = 0.3f, .width = 1.0f, .height = 0.7f};
 	this->velocity.x = -this->speed;
 }
 
-EntityReq WalkerEnemy::Update(const vector<Rectangle>& colliders)
+auto WalkerEnemy::Update(const vector<Rectangle>& colliders) -> EntityReq
 {
 	this->velocity.y += gravity * GetFrameTime();
 
@@ -28,11 +30,11 @@ EntityReq WalkerEnemy::Update(const vector<Rectangle>& colliders)
 			if (info.minDistX < info.minDistY)
 			{
 				this->position.x += copysignf(info.minDistX, info.delta.x);
-				if ((info.delta.x <= 0 || velocity.x <= 0) &&
-					(info.delta.x >= 0 || velocity.x >= 0))
+				if ((info.delta.x <= 0 || velocity.x <= 0)
+					&& (info.delta.x >= 0 || velocity.x >= 0))
 				{
-					this->velocity.x =
-						copysignf(this->speed, -this->velocity.x);
+					this->velocity.x
+						= copysignf(this->speed, -this->velocity.x);
 				}
 			}
 			else
@@ -60,7 +62,8 @@ void WalkerEnemy::Draw()
 
 	accumulatedAnimTime += GetFrameTime();
 
-	Rectangle sourceRect{0.0f + (curFrame * 16.0f), 0.0f, recWidth, 16.0f};
+	Rectangle sourceRect{0.0f + static_cast<float>(curFrame * 16), 0.0f,
+						 recWidth, 16.0f};
 
 	if (this->isVariant)
 	{
@@ -89,7 +92,7 @@ void WalkerEnemy::EditDraw()
 				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
 }
 
-EntityReq WalkerEnemy::OnPlayerCollision(Player& player)
+auto WalkerEnemy::OnPlayerCollision(Player& player) -> EntityReq
 {
 	//Vector2 toMario = Vector2Normalize(player.GetPosition() - this->position);
 
@@ -111,9 +114,12 @@ EntityReq WalkerEnemy::OnPlayerCollision(Player& player)
 	return {};
 }
 
-EntityReq WalkerEnemy::OnEntityCollision(Entity& /*entity*/) { return {}; }
+auto WalkerEnemy::OnEntityCollision(Entity& /*entity*/) -> EntityReq
+{
+	return {};
+}
 
-bool WalkerEnemy::TakeDamage()
+auto WalkerEnemy::TakeDamage() -> bool
 {
 	this->isActive = false;
 	return true;

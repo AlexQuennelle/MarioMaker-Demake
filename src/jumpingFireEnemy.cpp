@@ -17,7 +17,8 @@ JumpingFireEnemy::JumpingFireEnemy(const int x, const int y,
 	this->solid = false;
 }
 
-EntityReq JumpingFireEnemy::Update(const vector<Rectangle>& /*colliders*/)
+auto JumpingFireEnemy::Update(const vector<Rectangle>& /*colliders*/)
+	-> EntityReq
 {
 	if (this->position.y
 		>= levelBottom
@@ -40,13 +41,15 @@ EntityReq JumpingFireEnemy::Update(const vector<Rectangle>& /*colliders*/)
 		accumulatedJumpTime = Clamp(accumulatedJumpTime, 0, jumpDuration);
 		if (falling)
 		{
-			float t = pow(accumulatedJumpTime / jumpDuration, 2);
+			float t = std::pow(accumulatedJumpTime / jumpDuration, 2.0f);
 
 			this->position.y = std::lerp(jumpDestination, levelBottom, t);
 		}
 		else
 		{
-			float t = 1 - pow(1 - (accumulatedJumpTime / jumpDuration), 2);
+			float t = (1.0f
+					   - std::pow(1.0f - (accumulatedJumpTime / jumpDuration),
+								  2.0f));
 
 			this->position.y = std::lerp(levelBottom, jumpDestination, t);
 		}
@@ -74,7 +77,8 @@ void JumpingFireEnemy::Draw()
 
 	accumulatedAnimTime += GetFrameTime();
 
-	Rectangle sourceRect{0.0f + (curFrame * 16.0f), 112.0f, 16.0f, recHeight};
+	Rectangle sourceRect{0.0f + (static_cast<float>(curFrame) * 16.0f), 112.0f,
+						 16.0f, recHeight};
 
 	DrawTextureRec(this->sprite, sourceRect,
 				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
@@ -93,11 +97,14 @@ void JumpingFireEnemy::EditDraw()
 				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
 }
 
-EntityReq JumpingFireEnemy::OnPlayerCollision(Player& player)
+auto JumpingFireEnemy::OnPlayerCollision(Player& player) -> EntityReq
 {
 	player.TakeDamage();
 
 	return {};
 }
 
-EntityReq JumpingFireEnemy::OnEntityCollision(Entity& /*entity*/) { return {}; }
+auto JumpingFireEnemy::OnEntityCollision(Entity& /*entity*/) -> EntityReq
+{
+	return {};
+}

@@ -23,7 +23,7 @@ struct Tile
 	TileID ID;
 	uint16_t flags;
 
-	bool operator==(const Tile& other)
+	auto operator==(const Tile& other) -> bool
 	{
 		return (this->ID == other.ID) && (this->flags == other.flags);
 	}

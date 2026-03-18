@@ -29,5 +29,5 @@ void GameUIDisplay::Draw(const float time, const int coins)
 					-static_cast<float>(this->renderTex.texture.height)},
 				   {0.0f, 0.0f, -static_cast<float>(SCREEN_WIDTH),
 					static_cast<float>(SCREEN_HEIGHT)},
-				   {0.0f}, 0.0f, WHITE);
+				   {0.0f, 0.0f}, 0.0f, WHITE);
 }

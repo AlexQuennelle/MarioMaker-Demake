@@ -6,7 +6,7 @@
 using std::vector;
 
 Fireball::Fireball(Texture2D& sprite, bool facingRight, Vector2 startingPos) :
-	sprite(sprite), position(startingPos)
+	position(startingPos), sprite(sprite)
 {
 	this->velocity.x = facingRight ? speed : -speed;
 }
@@ -55,7 +55,6 @@ void Fireball::Update(const vector<Entity*>& entities,
 
 	this->isActive = this->lifetime > 0;
 }
-
 void Fireball::Draw()
 {
 	if (accumulatedAnimTime >= timeBetweenFrames)
@@ -70,8 +69,19 @@ void Fireball::Draw()
 
 	accumulatedAnimTime += GetFrameTime();
 
-	Rectangle sourceRect{48.0f + (curFrame * 16.0f), 32.0f, 16.0f, 16.0f};
+	Rectangle sourceRect{48.0f + static_cast<float>(curFrame * 16), 32.0f,
+						 16.0f, 16.0f};
 
 	DrawTextureRec(this->sprite, sourceRect,
 				   {this->position.x * 16.0f, this->position.y * 16.0f}, WHITE);
 }
+auto Fireball::IsActive() const -> bool { return this->isActive; }
+auto Fireball::GetCollider() const -> Rectangle
+{
+	return {
+		.x = this->collider.x + this->position.x,
+		.y = this->collider.y + this->position.y,
+		.width = this->collider.width,
+		.height = this->collider.height,
+	};
+};

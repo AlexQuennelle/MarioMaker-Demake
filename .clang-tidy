@@ -2,17 +2,12 @@
 Checks: "-*,
         bugprone-*,
         -bugprone-easily-swappable-parameters,
-        -bugprone-implicit-widening-of-multiplication-result,
-        -bugprone-narrowing-conversions,
 
         cert-*,
         -cert-dcl16-c,
-        -cert-msc32-c,
-        -cert-msc51-cpp,
 
         modernize-*,
         -modernize-use-nodiscard,
-        -modernize-use-trailing-return-type,
 
         readability-*,
         -readability-make-member-function-const,
@@ -31,7 +26,6 @@ Checks: "-*,
         -cppcoreguidelines-non-private-member-variables-in-classes,
         -cppcoreguidelines-avoid-magic-numbers,
         -cppcoreguidelines-avoid-const-or-ref-data-members,
-        -cppcoreguidelines-narrowing-conversions,
 
         misc-*,
         -misc-use-internal-linkage,

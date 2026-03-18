@@ -5,7 +5,7 @@
 #include <raylib.h>
 #include <raymath.h>
 
-Player::Player(Level& level, PlayerAssets assets) : level(level), assets(assets)
+Player::Player(Level& level, PlayerAssets assets) : assets(assets), level(level)
 { }
 
 void Player::Update()
@@ -108,17 +108,19 @@ void Player::Update()
 		this->iframetimer -= GetFrameTime();
 	}
 
-	for (int i{0}; i < this->fireballs.size(); i++)
+	for (size_t i{0}; i < this->fireballs.size(); i++)
 	{
 		if (!this->fireballs[i]->IsActive())
 		{
-			this->fireballs.erase(this->fireballs.begin() + i);
+			this->fireballs.erase(this->fireballs.begin()
+								  + static_cast<int32_t>(i));
 		}
 	}
 
 	float xClamp
 		= Clamp(this->position.x, 0.0f + (this->GetCollisionRect().width / 2),
-				this->level.GetLength() - (this->GetCollisionRect().width / 2));
+				static_cast<float>(this->level.GetLength())
+					- (this->GetCollisionRect().width / 2));
 	if (this->position.x != xClamp)
 	{
 		this->position.x = xClamp;
@@ -126,7 +128,7 @@ void Player::Update()
 	}
 
 	if (this->position.y
-		>= this->level.GetHeight()
+		>= static_cast<float>(this->level.GetHeight())
 		+ this->GetCollisionRect().height)
 	{
 		this->Die(false);
@@ -198,7 +200,7 @@ void Player::CheckCollisions()
 	}
 }
 
-Rectangle Player::GetCollisionRect()
+auto Player::GetCollisionRect() -> Rectangle
 {
 	float height{};
 	if (this->big)
@@ -241,56 +243,65 @@ void Player::Draw()
 
 	if (this->dead)
 	{
-		frameRec = {.x = 160, .y = 32, .width = recWidth, .height = 32};
+		frameRec
+			= {.x = 160.0f, .y = 32.0f, .width = recWidth, .height = 32.0f};
 	}
 	else if (this->crouching)
 	{
-		frameRec = {.x = 64, .y = 0, .width = recWidth, .height = 32};
+		frameRec = {.x = 64.0f, .y = 0.0f, .width = recWidth, .height = 32.0f};
 	}
 	else if (this->Grounded())
 	{
-		if (this->lastInput.y > 0 && (FloatEquals(this->lastInput.x, 0) != 0))
+		if (this->lastInput.y
+			> 0.0f
+			&& (FloatEquals(this->lastInput.x, 0.0f) != 0))
 		{
 			// look up
-			frameRec = {.x = 32, .y = 0, .width = recWidth, .height = 32};
+			frameRec
+				= {.x = 32.0f, .y = 0.0f, .width = recWidth, .height = 32.0f};
 		}
-		else if ((this->velocity.x > 0 && this->lastInput.x < 0)
-				 || (this->velocity.x < 0 && this->lastInput.x > 0))
+		else if ((this->velocity.x > 0.0f && this->lastInput.x < 0.0f)
+				 || (this->velocity.x < 0.0f && this->lastInput.x > 0.0f))
 		{
 			// skid
-			frameRec = {.x = 0, .y = 32, .width = recWidth, .height = 32};
+			frameRec
+				= {.x = 0.0f, .y = 32.0f, .width = recWidth, .height = 32.0f};
 		}
 		else if (fabsf(this->velocity.x) > 0.05f)
 		{
 			if (fabsf(this->velocity.x) > 0.15f)
 			{
 				//running
-				frameRec = {.x = 192.0f + (this->curFrame * 32),
-							.y = 0,
+				frameRec = {.x = 192.0f
+								 + (static_cast<float>(this->curFrame) * 32.0f),
+							.y = 0.0f,
 							.width = recWidth,
-							.height = 32};
+							.height = 32.0f};
 			}
 			else
 			{
 				//walking
-				frameRec = {.x = 96.0f + (this->curFrame * 32),
-							.y = 0,
+				frameRec = {.x = 96.0f
+								 + (static_cast<float>(this->curFrame) * 32.0f),
+							.y = 0.0f,
 							.width = recWidth,
-							.height = 32};
+							.height = 32.0f};
 			}
 		}
 	}
 	else
 	{
-		if (this->velocity.y < 0)
+		if (this->velocity.y < 0.0f)
 		{
 			// jump up
-			frameRec = {.x = 32, .y = 32, .width = recWidth, .height = 32};
+			frameRec
+				= {.x = 32.0f, .y = 32.0f, .width = recWidth, .height = 32.0f};
 		}
 		else
 		{
 			// falling
-			frameRec = {.x = 64, .y = 32, .width = recWidth, .height = 32};
+			frameRec
+				= {.x = 64.0f, .y = 32.0f, .width = recWidth, .height = 32.0f};
 		}
 	}
 
@@ -301,7 +312,7 @@ void Player::Draw()
 
 	if (this->big)
 	{
-		frameRec.y += 64;
+		frameRec.y += 64.0f;
 	}
 
 	if (this->fire)
@@ -309,7 +320,7 @@ void Player::Draw()
 		frameRec.x += this->assets.fireOffset;
 	}
 
-	if (this->iframetimer <= 0 || this->showSprite)
+	if (this->iframetimer <= 0.0f || this->showSprite)
 	{
 		DrawTextureRec(this->assets.sprites, frameRec,
 					   {(this->position.x * 16.0f) - 16.0f,
@@ -340,9 +351,9 @@ void Player::HandleMovement(const bool running, const Vector2 input)
 
 	this->running = running;
 	this->lastInput = input;
-	if (input.x != 0)
+	if (input.x != 0.0f)
 	{
-		this->facingRight = this->lastInput.x > 0;
+		this->facingRight = this->lastInput.x > 0.0f;
 	}
 }
 
@@ -355,10 +366,10 @@ void Player::Reset(const Vector2 startPosition)
 	this->dead = false;
 	this->big = false;
 	this->fire = false;
-	this->iframetimer = 0;
+	this->iframetimer = 0.0f;
 }
 
-bool Player::Grounded()
+auto Player::Grounded() -> bool
 {
 	// box cast underneath player
 	Rectangle groundedBox{
@@ -376,7 +387,7 @@ bool Player::Grounded()
 	solidCols.insert(solidCols.end(), levelCols.begin(), levelCols.end());
 
 	return std::ranges::any_of(
-		solidCols, [groundedBox](Rectangle col)
+		solidCols, [groundedBox](Rectangle col) -> bool
 		{ return CheckCollisionRecs(groundedBox, col); });
 }
 
@@ -391,17 +402,17 @@ void Player::Die(bool jumpUp)
 		return;
 
 	this->dead = true;
-	this->lastInput = {.x = 0, .y = 0};
+	this->lastInput = {.x = 0.0f, .y = 0.0f};
 	this->velocity.x = 0;
 	if (jumpUp)
 	{
-		this->velocity = {.x = 0, .y = -0.3f};
+		this->velocity = {.x = 0.0f, .y = -0.3f};
 	}
 }
 
 void Player::TakeDamage()
 {
-	if (this->iframetimer > 0)
+	if (this->iframetimer > 0.0f)
 		return;
 
 	if (!this->big)
@@ -410,7 +421,7 @@ void Player::TakeDamage()
 		return;
 	}
 
-	this->iframetimer = 1;
+	this->iframetimer = 1.0f;
 
 	if (this->fire)
 	{

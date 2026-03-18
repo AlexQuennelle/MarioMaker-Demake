@@ -8,11 +8,11 @@ class JumpingFireEnemy : public Entity
 	JumpingFireEnemy(const int x, const int y, AssetManager& assetManager,
 					 const float levelBottom);
 
-	EntityReq Update(const vector<Rectangle>& colliders) override;
+	auto Update(const vector<Rectangle>& colliders) -> EntityReq override;
 	void Draw() override;
 	void EditDraw() override;
-	EntityReq OnPlayerCollision(Player& player) override;
-	EntityReq OnEntityCollision(Entity& entity) override;
+	auto OnPlayerCollision(Player& player) -> EntityReq override;
+	auto OnEntityCollision(Entity& entity) -> EntityReq override;
 
 	private:
 	Texture2D& sprite;
