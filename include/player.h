@@ -49,10 +49,10 @@ class Player
 	PlayerAssets assets;
 	Level& level;
 	std::vector<std::unique_ptr<Fireball>> fireballs;
-	Vector2 position{0, 0};
-	Vector2 velocity{0, 0};
-	Vector2 acceleration{0, 0};
-	Vector2 lastInput{0, 0};
+	Vector2 position{.x = 0, .y = 0};
+	Vector2 velocity{.x = 0, .y = 0};
+	Vector2 acceleration{.x = 0, .y = 0};
+	Vector2 lastInput{.x = 0, .y = 0};
 	const float maxWalkSpeed{0.1f};
 	const float maxRunSpeed{0.17f};
 	const float baseAcceleration{0.4f};

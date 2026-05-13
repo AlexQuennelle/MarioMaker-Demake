@@ -1,5 +1,6 @@
 #include "player.h"
 #include "assetmanager.h"
+#include "physics.h"
 
 #include <algorithm>
 #include <raylib.h>
@@ -144,10 +145,13 @@ void Player::CheckCollisions()
 		return;
 
 	Rectangle playerCol{GetCollisionRect()};
+	Collider newPlayerCol{GetCollisionRect()};
 
 	for (Entity* e_ptr : this->level.GetEntities())
 	{
 		Rectangle entityCol{e_ptr->GetCollider()};
+		Collider newEntityCol{e_ptr->GetCollider()};
+		auto test{CheckColliderOverlap(newPlayerCol, newEntityCol)};
 		if (CheckCollisionRecs(playerCol, entityCol))
 		{
 			this->level.HandleRequest(e_ptr->OnPlayerCollision(*this));
@@ -211,10 +215,12 @@ auto Player::GetCollisionRect() -> Rectangle
 	{
 		height = this->crouching ? 0.6f : 1.0f;
 	}
-	return {.x = this->position.x - 0.3f,
-			.y = this->position.y - height,
-			.width = 0.6f,
-			.height = height};
+	return {
+		.x = this->position.x - 0.3f,
+		.y = this->position.y - height,
+		.width = 0.6f,
+		.height = height,
+	};
 }
 
 void Player::Draw()
